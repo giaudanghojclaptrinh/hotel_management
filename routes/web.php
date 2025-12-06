@@ -8,6 +8,7 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\LoaiPhongController;
 use App\Http\Controllers\PhongController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\KhuyenMaiController;
 
 Auth::routes();
 
@@ -54,6 +55,14 @@ route::post('/hoa-don/them', [HoaDonController::class, 'postThem'])->name('hoa-d
 route::get('/hoa-don/sua/{id}', [HoaDonController::class, 'getSua'])->name('hoa-don.sua');
 route::post('/hoa-don/sua/{id}', [HoaDonController::class, 'postSua'])->name('hoa-don.sua');
 route::get('/hoa-don/xoa/{id}', [HoaDonController::class, 'getXoa'])->name('hoa-don.xoa');
+
+// quản lý khuyến mãi
+Route::get('/khuyen-mai', [KhuyenMaiController::class, 'getDanhSach'])->name('khuyen-mai');
+route::get('/khuyen-mai/them', [KhuyenMaiController::class, 'getThem'])->name('khuyen-mai.them');
+route::post('/khuyen-mai/them', [KhuyenMaiController::class, 'postThem'])->name('khuyen-mai.them');
+route::get('/khuyen-mai/sua/{id}', [KhuyenMaiController::class, 'getSua'])->name('khuyen-mai.sua');
+route::post('/khuyen-mai/sua/{id}', [KhuyenMaiController::class, 'postSua'])->name('khuyen-mai.sua');
+route::get('/khuyen-mai/xoa/{id}', [KhuyenMaiController::class, 'getXoa'])->name('khuyen-mai.xoa');
 
 // quản lý người dùng
 route::get('/user', [UserController::class, 'getDanhSach'])->name('user');

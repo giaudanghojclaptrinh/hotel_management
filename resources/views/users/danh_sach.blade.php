@@ -24,6 +24,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">số điện thoại</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CCCD</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quyền hạn</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
                     </tr>
                 </thead>
@@ -36,7 +37,12 @@
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $user->phone }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $user->cccd }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $user->username }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700">{{ $user->password }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">{{ $user->role }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                            <div class="w-32 truncate font-mono text-xs text-gray-500 bg-gray-100 p-1 rounded border border-gray-200 cursor-help" title="{{ $user->password }}">
+                                {{ $user->password }}
+                            </div>
+                        </td>
                         </td>
                         <td class="px-6 py-4 text-sm text-center">
                             <a href="{{ route('user.sua', ['id' => $user->id]) }}" class="text-blue-600 hover:text-blue-800 mr-3" title="Sửa"><i class="fa fa-edit"></i></a>

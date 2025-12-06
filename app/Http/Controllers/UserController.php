@@ -20,7 +20,8 @@ class UserController extends Controller
 
     public function getThem()
     {
-        return view('user.them');
+        // No data required to show the create form
+        return view('users.them');
     }
 
     public function postThem(Request $request)
@@ -32,7 +33,7 @@ class UserController extends Controller
             'cccd' => 'required|string|max:20|unique:users,cccd',
             'username' => 'required|string|max:100|unique:users,username',
             'role' => 'required|string|max:50',
-            'password' => Hash::make($request->password), 'required|string|min:6',
+            'password' => 'required|string|min:6',
         ]);
 
         $orm = new User();
@@ -42,15 +43,16 @@ class UserController extends Controller
         $orm->cccd = $data['cccd'];
         $orm->username = $data['username'];
         $orm->role = $data['role'];
-        $orm->password = bcrypt($data['password']);
+        // set raw password; model mutator will hash it
+        $orm->password = $data['password'];
         $orm->save();
         return redirect()->route('user');
     }
 
     public function getSua($id)
     {
-        $users = User::findOrFail($id);
-        return view('user.sua', compact('users'));
+        $user = User::findOrFail($id);
+        return view('users.sua', compact('user'));
     }
 
     public function postSua(Request $request, $id)
@@ -87,8 +89,13 @@ class UserController extends Controller
         $orm = User::findOrFail($id);
         $orm->name = $data['name'];
         $orm->email = $data['email'];
+        $orm->phone = $data['phone'];
+        $orm->cccd = $data['cccd'];
+        $orm->username = $data['username'];
+        $orm->role = $data['role'];
         if (!empty($data['password'])) {
-            $orm->password = bcrypt($data['password']);
+            // model mutator will hash
+            $orm->password = $data['password'];
         }
         $orm->save();
         return redirect()->route('user');

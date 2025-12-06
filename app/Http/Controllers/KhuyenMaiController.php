@@ -22,14 +22,18 @@ class KhuyenMaiController extends Controller
     {
         $data = $request->validate([
             'ten_khuyen_mai' => 'required|string|max:150',
-            'phan_tram_giam' => 'required|numeric',
+            'ma_khuyen_mai' => 'required|string|max:50',
+            'chiet_khau_phan_tram' => 'nullable|numeric',
+            'so_tien_giam_gia' => 'nullable|numeric',
             'ngay_bat_dau' => 'nullable|date',
             'ngay_ket_thuc' => 'nullable|date',
         ]);
 
         $orm = new KhuyenMai();
         $orm->ten_khuyen_mai = $data['ten_khuyen_mai'];
-        $orm->phan_tram_giam = $data['phan_tram_giam'];
+        $orm->ma_khuyen_mai = $data['ma_khuyen_mai'];
+        $orm->chiet_khau_phan_tram = $data['chiet_khau_phan_tram'] ?? null;
+        $orm->so_tien_giam_gia = $data['so_tien_giam_gia'] ?? null;
         $orm->ngay_bat_dau = $data['ngay_bat_dau'] ?? null;
         $orm->ngay_ket_thuc = $data['ngay_ket_thuc'] ?? null;
         $orm->save();
@@ -38,22 +42,26 @@ class KhuyenMaiController extends Controller
 
     public function getSua($id)
     {
-        $khuyenMais = KhuyenMai::findOrFail($id);
-        return view('khuyen_mai.sua', compact('khuyenMais'));
+        $khuyenMai = KhuyenMai::findOrFail($id);
+        return view('khuyen_mai.sua', compact('khuyenMai'));
     }
 
     public function postSua(Request $request, $id)
     {
         $data = $request->validate([
             'ten_khuyen_mai' => 'required|string|max:150',
-            'phan_tram_giam' => 'required|numeric',
+            'ma_khuyen_mai' => 'required|string|max:50',
+            'chiet_khau_phan_tram' => 'nullable|numeric',
+            'so_tien_giam_gia' => 'nullable|numeric',
             'ngay_bat_dau' => 'nullable|date',
             'ngay_ket_thuc' => 'nullable|date',
         ]);
 
         $orm = KhuyenMai::findOrFail($id);
         $orm->ten_khuyen_mai = $data['ten_khuyen_mai'];
-        $orm->phan_tram_giam = $data['phan_tram_giam'];
+        $orm->ma_khuyen_mai = $data['ma_khuyen_mai'];
+        $orm->chiet_khau_phan_tram = $data['chiet_khau_phan_tram'] ?? null;
+        $orm->so_tien_giam_gia = $data['so_tien_giam_gia'] ?? null;
         $orm->ngay_bat_dau = $data['ngay_bat_dau'] ?? null;
         $orm->ngay_ket_thuc = $data['ngay_ket_thuc'] ?? null;
         $orm->save();

@@ -88,13 +88,12 @@
                     <a href="{{ route('user') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
                         Người dùng
                     </a> 
-                    
-                    <!-- Link tới Khuyến mãi (khuyen_mais) -->
-                    {{-- Khuyến mãi (nếu cần mở sau)
-                    <a href="{{ route('promotions.index') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
-                        Ưu đãi
+
+                    <!-- link tới khuyến mãi -->
+                    <a href="{{ route('khuyen-mai') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
+                        Khuyến mãi
                     </a>
-                    --}}
+
                     <a href="#" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
                         Giới thiệu
                     </a>
@@ -124,13 +123,18 @@
                                     </a>
                                 @endif
 
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                    <i class="fa-solid fa-id-card mr-2 text-gray-400"></i> Hồ sơ cá nhân
-                                </a>
+                                {{-- Render profile link only if route exists to avoid RouteNotFoundException --}}
+                                @if (Route::has('profile.edit'))
+                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        <i class="fa-solid fa-id-card mr-2 text-gray-400"></i> Hồ sơ cá nhân
+                                    </a>
+                                @endif
                                 <!-- Link tới lịch sử đặt phòng (Dựa trên table dat_phongs) -->
-                                <a href="{{ route('bookings.history') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                    <i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i> Lịch sử đặt phòng
-                                </a>
+                                @if (Route::has('bookings.history'))
+                                    <a href="{{ route('bookings.history') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        <i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i> Lịch sử đặt phòng
+                                    </a>
+                                @endif
                                 
                                 <form method="POST" action="{{ route('logout') }}" class="block border-t border-gray-100 mt-1">
                                     @csrf
@@ -174,7 +178,9 @@
                 --}}
                 
                 @auth
-                     <a href="{{ route('bookings.history') }}" class="block px-3 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 rounded-md">Lịch sử đặt phòng</a>
+                    @if (Route::has('bookings.history'))
+                        <a href="{{ route('bookings.history') }}" class="block px-3 py-3 text-base font-medium text-blue-600 hover:bg-blue-50 rounded-md">Lịch sử đặt phòng</a>
+                    @endif
                      <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button class="w-full text-left block px-3 py-3 text-base font-medium text-red-600 hover:bg-red-50 rounded-md">Đăng xuất</button>

@@ -14,6 +14,7 @@ return new class extends Migration
     {
         Schema::create('khuyen_mais', function (Blueprint $table) {
             $table->id();
+            $table->string('ten_khuyen_mai', 100);
             $table->string('ma_khuyen_mai', 50)->unique();
             $table->decimal('chiet_khau_phan_tram', 5, 2);
             $table->decimal('so_tien_giam_gia',10,2);
