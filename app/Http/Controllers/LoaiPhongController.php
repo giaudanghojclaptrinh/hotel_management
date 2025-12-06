@@ -32,10 +32,7 @@ class LoaiPhongController extends Controller
         $orm->ten_loai_phong = $data['ten_loai_phong'];
         $orm->gia = $data['gia'] ?? 0;
         $orm->so_nguoi = $data['so_nguoi'] ?? 1;
-        // store tien_nghi as JSON string if array provided
-        if (isset($data['tien_nghi'])) {
-            $orm->tien_nghi = is_array($data['tien_nghi']) ? json_encode($data['tien_nghi']) : $data['tien_nghi'];
-        }
+        $orm->tien_nghi = $data['tien_nghi'] ?? '';
         $orm->save();
 
         return redirect()->route('loai-phong');
@@ -63,7 +60,7 @@ class LoaiPhongController extends Controller
             'ten_loai_phong' => 'required|string|max:100',
             'gia' => 'nullable|numeric',
             'so_nguoi' => 'nullable|integer',
-            'tien_nghi' => 'nullable',
+            'tien_nghi' => 'nullable|string',
         ]);
 
         $orm = LoaiPhong::findOrFail($id);
@@ -75,7 +72,7 @@ class LoaiPhongController extends Controller
             $orm->so_nguoi = $data['so_nguoi'];
         }
         if (isset($data['tien_nghi'])) {
-            $orm->tien_nghi = is_array($data['tien_nghi']) ? json_encode($data['tien_nghi']) : $data['tien_nghi'];
+            $orm->tien_nghi = $data['tien_nghi'];
         }
         $orm->save();
 

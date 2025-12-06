@@ -4,14 +4,12 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Dashboard') }}</div>
+            <div class="card-common">
+                <div class="px-6 py-4 border-b font-semibold">{{ __('Dashboard') }}</div>
 
-                <div class="card-body">
+                <div class="p-6">
                     @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
+                        <div class="bg-green-50 border-l-4 border-green-500 p-4 text-green-800">{{ session('status') }}</div>
                     @endif
 
                     {{ __('You are logged in!') }}

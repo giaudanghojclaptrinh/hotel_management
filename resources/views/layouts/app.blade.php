@@ -78,6 +78,17 @@
                     <a href="{{ route('loai-phong') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
                         Các hạng phòng
                     </a>
+
+                    <!--link tới danh sách phòng-->
+                    <a href="{{ route('phong') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
+                        Các phòng
+                    </a>
+
+                    <!--link tới danh sách người dùng -->
+                    <a href="{{ route('user') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
+                        Người dùng
+                    </a> 
+                    
                     <!-- Link tới Khuyến mãi (khuyen_mais) -->
                     {{-- Khuyến mãi (nếu cần mở sau)
                     <a href="{{ route('promotions.index') }}" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
@@ -85,7 +96,7 @@
                     </a>
                     --}}
                     <a href="#" class="text-sm font-medium uppercase tracking-wider text-gray-600 hover:text-brand-gold transition py-2 border-b-2 border-transparent hover:border-brand-gold">
-                        Liên hệ
+                        Giới thiệu
                     </a>
                 </nav>
 

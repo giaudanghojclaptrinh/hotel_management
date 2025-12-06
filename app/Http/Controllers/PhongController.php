@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Phong;
+use App\Models\LoaiPhong;
 use Illuminate\Http\Request;
 
 class PhongController extends Controller
@@ -16,43 +17,45 @@ class PhongController extends Controller
 
     public function getThem()
     {
-        return view('phong.them');
+        $loaiPhongs = LoaiPhong::all();
+        return view('phong.them', compact('loaiPhongs'));
     }
 
     public function postThem(Request $request)
     {
         $data = $request->validate([
-            'ten_phong' => 'required|string|max:150',
+            'so_phong' => 'required|string|max:150',
             'loai_phong_id' => 'required|exists:loai_phongs,id',
-            'trang_thai' => 'nullable|string|max:50',
+            'tinh_trang' => 'nullable|string|max:50',
         ]);
 
         $orm = new Phong();
-        $orm->ten_phong = $data['ten_phong'];
+        $orm->so_phong = $data['so_phong'];
         $orm->loai_phong_id = $data['loai_phong_id'];
-        $orm->trang_thai = $data['trang_thai'] ?? null;
+        $orm->tinh_trang = $data['tinh_trang'] ?? null;
         $orm->save();
         return redirect()->route('phong');
     }
 
     public function getSua($id)
     {
-        $phongs = Phong::findOrFail($id);
-        return view('phong.sua', compact('phongs'));
+        $phong = Phong::findOrFail($id);
+        $loaiPhongs = LoaiPhong::all();
+        return view('phong.sua', compact('phong', 'loaiPhongs'));
     }
     
     public function postSua(Request $request, $id)
     {
         $data = $request->validate([
-            'ten_phong' => 'required|string|max:150',
+            'so_phong' => 'required|string|max:150',
             'loai_phong_id' => 'required|exists:loai_phongs,id',
-            'trang_thai' => 'nullable|string|max:50',
+            'tinh_trang' => 'nullable|string|max:50',
         ]);
 
         $orm = Phong::findOrFail($id);
-        $orm->ten_phong = $data['ten_phong'];
+        $orm->so_phong = $data['so_phong'];
         $orm->loai_phong_id = $data['loai_phong_id'];
-        $orm->trang_thai = $data['trang_thai'] ?? $orm->trang_thai;
+        $orm->tinh_trang = $data['tinh_trang'] ?? $orm->tinh_trang;
         $orm->save();
         return redirect()->route('phong');
     }
