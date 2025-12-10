@@ -21,7 +21,7 @@
     <!-- GỌI ASSETS QUA VITE -->
     <!-- Đã bao gồm config màu, css tùy chỉnh và js logic -->
     @vite([
-        'resources/js/tailwind-config.js', 
+        'resources/js/tailwind-config.js',
         'resources/css/client.css', 
         'resources/js/client.js'
     ])

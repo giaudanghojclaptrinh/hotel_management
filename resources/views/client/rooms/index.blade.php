@@ -5,7 +5,7 @@
 
 <div class="page-banner">
     <div class="banner-bg">
-        <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" 
+        <img src="{{ asset('uploads/home/home.png') }}" 
              alt="Luxury Hotel Background">
         <div class="banner-overlay"></div>
     </div>
@@ -134,7 +134,7 @@
                 <div class="room-card group {{ $isSoldOut ? 'sold-out' : '' }}">
                     
                     <div class="room-img-wrap">
-                        <img src="{{ $room->hinh_anh ?? 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=800&q=80' }}" 
+                        <img src="{{ $room->hinh_anh ? asset($room->hinh_anh) : asset('uploads/home/phongdefault.png') }}" 
                             alt="{{ $room->ten_loai_phong }}"
                             class="w-full h-full object-cover">
                         

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\LoaiPhongController;
 use App\Http\Controllers\Admin\PhongController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\KhuyenMaiController;
+use App\Http\Controllers\Admin\TienNghiController;
 
 // --- 2. IMPORT CLIENT CONTROLLERS ---
 use App\Http\Controllers\Client\PageController;
@@ -38,6 +39,9 @@ Route::get('/chi-tiet-phong/{id}', [PageController::class, 'roomDetail'])->name(
 
 // Trang ưu đãi
 Route::get('/uu-dai', [PageController::class, 'promotions'])->name('khuyen-mai');
+
+// [MỚI] API kiểm tra mã khuyến mãi
+Route::post('/api/check-promo', [BookingController::class, 'checkPromotion'])->name('api.check.promo');
 
 
 /*
@@ -95,12 +99,29 @@ Route::prefix('admin')
     });
 
     // Quản lý Đặt phòng
-    Route::prefix('dat-phong')->group(function() {
-        Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong');
-        Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');
-        Route::post('/sua/{id}', [DatPhongController::class, 'postSua'])->name('admin.dat-phong.update');
-        Route::get('/xoa/{id}', [DatPhongController::class, 'getXoa'])->name('admin.dat-phong.xoa');
-    });
+Route::prefix('dat-phong')->group(function() {
+    Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong');
+    
+
+    Route::delete('/xoa-hang-loat', [DatPhongController::class, 'xoaHangLoat'])->name('admin.dat-phong.xoa-hang-loat');
+
+    // [MỚI] Xem chi tiết hóa đơn/Thanh toán
+    Route::get('/hoa-don/{id}', [DatPhongController::class, 'getHoaDon'])->name('admin.dat-phong.hoa-don'); 
+    
+    // [MỚI] Xử lý cập nhật trạng thái thanh toán
+    Route::post('/thanh-toan/{id}', [DatPhongController::class, 'postThanhToan'])->name('admin.dat-phong.thanh-toan');  
+
+    // [MỚI] Route DUYỆT ĐƠN (Khóa phòng)
+    Route::get('/duyet/{id}', [DatPhongController::class, 'duyetDon'])->name('admin.dat-phong.duyet'); 
+    
+    // [MỚI] Route HỦY ĐƠN (Mở lại phòng)
+    Route::get('/huy/{id}', [DatPhongController::class, 'huyDon'])->name('admin.dat-phong.huy'); 
+    
+    // (Các route cũ giữ nguyên)
+    Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');
+    Route::post('/sua/{id}', [DatPhongController::class, 'postSua'])->name('admin.dat-phong.update');
+    Route::get('/xoa/{id}', [DatPhongController::class, 'getXoa'])->name('admin.dat-phong.xoa');
+});
 
     // Quản lý Khuyến mãi
     Route::prefix('khuyen-mai')->group(function() {
@@ -130,4 +151,13 @@ Route::prefix('admin')
         Route::get('/xoa/{id}', [UserController::class, 'getXoa'])->name('admin.user.xoa');
     });
 
+    // Quản lý Tiện nghi
+    Route::prefix('tien-nghi')->group(function() {
+        Route::get('/', [TienNghiController::class, 'getDanhSach'])->name('admin.tien-nghi');
+        Route::get('/them', [TienNghiController::class, 'getThem'])->name('admin.tien-nghi.them');
+        Route::post('/them', [TienNghiController::class, 'postThem'])->name('admin.tien-nghi.store');
+        Route::get('/sua/{id}', [TienNghiController::class, 'getSua'])->name('admin.tien-nghi.sua');
+        Route::post('/sua/{id}', [TienNghiController::class, 'postSua'])->name('admin.tien-nghi.update');
+        Route::get('/xoa/{id}', [TienNghiController::class, 'getXoa'])->name('admin.tien-nghi.xoa');
+    });
 });

@@ -4,7 +4,7 @@
 @section('content')
 
 <div class="hero">
-    <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop" 
+    <img src="{{ asset('uploads/home/home.png') }}" 
          alt="Luxury Hotel" class="hero-bg">
     <div class="hero-overlay"></div>
 
@@ -35,8 +35,9 @@
                 @foreach($loaiPhongs as $phong)
                 <div class="room-card group">
                     <div class="room-img-wrap">
-                        <img src="{{ $phong->hinh_anh ?? 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=800&q=80' }}" 
-                             alt="{{ $phong->ten_loai_phong }}">
+                        <img src="{{ $phong->hinh_anh ? asset($phong->hinh_anh) : asset('uploads/home/phongdefault.png') }}" 
+                            alt="{{ $phong->ten_loai_phong }}"
+                            class="w-full h-full object-cover">
                         
                         <div class="room-price-tag">
                             <span class="room-price-amount">{{ number_format($phong->gia, 0, ',', '.') }}đ</span>

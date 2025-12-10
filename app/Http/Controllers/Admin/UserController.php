@@ -43,7 +43,6 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string|max:15|unique:users,phone',
             'cccd' => 'required|string|max:20|unique:users,cccd',
-            'username' => 'required|string|max:100|unique:users,username',
             'password' => 'required|string|min:6',
         ]);
 
@@ -52,7 +51,6 @@ class UserController extends Controller
         $orm->email = $data['email'];
         $orm->phone = $data['phone'];
         $orm->cccd = $data['cccd'];
-        $orm->username = $data['username'];
         $orm->role = 'user'; // Gán cứng là user
         $orm->password = Hash::make($data['password']);
         $orm->save();
@@ -79,7 +77,6 @@ class UserController extends Controller
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($id)],
             'phone' => ['required', 'string', 'max:15', Rule::unique('users', 'phone')->ignore($id)],
             'cccd' => ['required', 'string', 'max:20', Rule::unique('users', 'cccd')->ignore($id)],
-            'username' => ['required', 'string', 'max:100', Rule::unique('users', 'username')->ignore($id)],
             'password' => 'nullable|string|min:6',
         ]);
 
@@ -88,7 +85,6 @@ class UserController extends Controller
         $orm->email = $data['email'];
         $orm->phone = $data['phone'];
         $orm->cccd = $data['cccd'];
-        $orm->username = $data['username'];
         
         if (!empty($data['password'])) {
             $orm->password = Hash::make($data['password']);

@@ -44,6 +44,12 @@
                 </div>
             </div>
 
+             <a href="{{ route('admin.tien-nghi') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-brand-gold transition">
+                <i class="fa-solid fa-ticket w-6 text-lg"></i>
+                <span class="ml-3">Tiện nghi</span>
+            </a>
+            
+
             <!-- Quản lý Khuyến mãi (Table: khuyen_mais) -->
             <a href="{{ route('admin.khuyen-mai') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-300 hover:bg-gray-800 hover:text-brand-gold transition">
                 <i class="fa-solid fa-ticket w-6 text-lg"></i>

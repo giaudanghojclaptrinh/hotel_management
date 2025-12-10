@@ -35,12 +35,6 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700" for="username">Username</label>
-                    <input type="text" id="username" name="username" value="{{ old('username') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-900 focus:border-brand-900" />
-                    @error('username') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
                     <label class="block text-sm font-medium text-gray-700" for="role">Vai trò</label>
                     <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-900 focus:border-brand-900">
                         <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>

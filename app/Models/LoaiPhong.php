@@ -13,10 +13,18 @@ class LoaiPhong extends Model
         'ten_loai_phong', 
         'gia', 
         'suc_chua', 
-        'mo_ta', 
         'dien_tich',
 		'hinh_anh',
     ];
+
+	public function tienNghis() {
+    	return $this->belongsToMany(
+            TienNghi::class, 
+            'loai_phong_tien_nghi', // 1. Tên bảng trung gian ĐÚNG (theo database)
+            'loai_phong_id',        // 2. Khóa ngoại của bảng hiện tại (loai_phongs)
+            'tien_nghi_id'          // 3. Khóa ngoại của bảng kia (tien_nghis)
+		);
+	}
 
 	public function phongs(): HasMany
 	{
@@ -29,8 +37,5 @@ class LoaiPhong extends Model
 	public function chiTietDatPhongs(): HasMany
 	{
 		return $this->hasMany(ChiTietDatPhong::class, 'loai_phong_id');
-	}
-	public function tienNghis() {
-    	return $this->belongsToMany(TienNghi::class, 'chi_tiet_tien_nghi', 'ma_loai_phong', 'ma_tien_nghi');
 	}
 }
