@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('loai_phong_id')->constrained('loai_phongs');
             $table->foreignId('phong_id')->constrained('phongs');
             $table->integer('so_luong');
-            $table->decimal('gia', 12, 2);
             $table->timestamps();
         });
     }

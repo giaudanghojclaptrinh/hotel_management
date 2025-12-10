@@ -1,0 +1,116 @@
+<?php
+
+namespace App\Http\Controllers\Admin; // Namespace chuẩn
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+
+class UserController extends Controller
+{
+    /**
+     * 1. HÀM INDEX (Sửa lỗi Method not exist)
+     * Hiển thị danh sách khách hàng (Chỉ lấy Role = user)
+     */
+    public function getDanhSach()
+    {
+        // Thêm ->paginate(10) để thực thi câu lệnh và phân trang
+        // Nếu thiếu ->paginate() hoặc ->get(), biến $users chỉ là câu lệnh SQL chưa chạy -> Lỗi View
+        $users = User::where('role', 'user')
+                     ->orderBy('created_at', 'desc')
+                     ->paginate(10);
+
+        return view('admin.users.danh_sach', compact('users'));
+    }
+
+    /**
+     * Hiển thị form thêm mới
+     */
+    public function getThem()
+    {
+        return view('admin.users.them');
+    }
+
+    /**
+     * Xử lý lưu khách hàng mới
+     */
+    public function postThem(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:15|unique:users,phone',
+            'cccd' => 'required|string|max:20|unique:users,cccd',
+            'username' => 'required|string|max:100|unique:users,username',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $orm = new User();
+        $orm->name = $data['name'];
+        $orm->email = $data['email'];
+        $orm->phone = $data['phone'];
+        $orm->cccd = $data['cccd'];
+        $orm->username = $data['username'];
+        $orm->role = 'user'; // Gán cứng là user
+        $orm->password = Hash::make($data['password']);
+        $orm->save();
+
+        return redirect()->route('admin.users')->with('success', 'Thêm khách hàng thành công!');
+    }
+
+    /**
+     * Hiển thị form sửa
+     */
+    public function getSua($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.users.sua', compact('user'));
+    }
+
+    /**
+     * Xử lý cập nhật
+     */
+    public function postSua(Request $request, $id)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:150',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($id)],
+            'phone' => ['required', 'string', 'max:15', Rule::unique('users', 'phone')->ignore($id)],
+            'cccd' => ['required', 'string', 'max:20', Rule::unique('users', 'cccd')->ignore($id)],
+            'username' => ['required', 'string', 'max:100', Rule::unique('users', 'username')->ignore($id)],
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $orm = User::findOrFail($id);
+        $orm->name = $data['name'];
+        $orm->email = $data['email'];
+        $orm->phone = $data['phone'];
+        $orm->cccd = $data['cccd'];
+        $orm->username = $data['username'];
+        
+        if (!empty($data['password'])) {
+            $orm->password = Hash::make($data['password']);
+        }
+        
+        $orm->save();
+        
+        return redirect()->route('admin.users')->with('success', 'Cập nhật thành công!');
+    }
+
+    /**
+     * Xóa tài khoản
+     */
+    public function getXoa($id)
+    {
+        $orm = User::findOrFail($id);
+        
+        if ($orm->role === 'admin') {
+            return redirect()->route('admin.users')->with('error', 'Không thể xóa Admin!');
+        }
+
+        $orm->delete();
+        return redirect()->route('admin.users')->with('success', 'Đã xóa khách hàng.');
+    }
+}

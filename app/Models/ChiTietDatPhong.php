@@ -2,43 +2,49 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 
 class ChiTietDatPhong extends Model
 {
+    use HasFactory;
 
+    // Định nghĩa tên bảng cho chắc chắn
     protected $table = 'chi_tiet_dat_phongs';
+
+    // QUAN TRỌNG: Khai báo các cột được phép lưu (Mass Assignment)
+    // Phải khớp với các trường trong BookingController@store
+    // Trong App\Models\ChiTietDatPhong.php
     protected $fillable = [
         'dat_phong_id',
         'loai_phong_id',
         'phong_id',
         'so_luong',
-        'gia_tien',
+        'don_gia',    // <--- Phải có
+        'thanh_tien', // <--- Phải có
     ];
 
     /**
-     * The booking this detail belongs to.
+     * Quan hệ ngược lại với bảng Đặt phòng
      */
-    public function datPhong(): BelongsTo
+    public function datPhong()
     {
-        return $this->belongsTo(DatPhong::class);
+        return $this->belongsTo(DatPhong::class, 'dat_phong_id');
     }
 
     /**
-     * The LoaiPhong referenced by this detail.
+     * Quan hệ với bảng Loại phòng
      */
-    public function loaiPhong(): BelongsTo
+    public function loaiPhong()
     {
-        return $this->belongsTo(LoaiPhong::class);
+        return $this->belongsTo(LoaiPhong::class, 'loai_phong_id');
     }
 
     /**
-     * The Phong referenced by this detail.
+     * Quan hệ với bảng Phòng cụ thể
      */
-    public function phong(): BelongsTo
+    public function phong()
     {
-        return $this->belongsTo(Phong::class);
+        return $this->belongsTo(Phong::class, 'phong_id');
     }
 }

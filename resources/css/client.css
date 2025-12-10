@@ -1,0 +1,638 @@
+/* --- GIAO DIỆN KHÁCH HÀNG (CLIENT) --- */
+
+
+/* 1. Cấu hình cơ bản */
+
+[x-cloak] {
+    display: none !important;
+}
+
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    color: #374151;
+    background-color: #f9fafb;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.font-serif {
+    font-family: 'Playfair Display', serif;
+}
+
+
+/* 2. Scrollbar */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c5a47e;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b08d55;
+}
+
+
+/* 3. Layout Main Content */
+
+.main-content {
+    flex-grow: 1;
+    padding-top: 5rem;
+}
+
+
+/* 4. Flash Messages */
+
+.flash-container {
+    max-width: 80rem;
+    margin: 1.5rem auto 0;
+    padding: 0 1rem;
+}
+
+.flash-success {
+    background-color: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    color: #15803d;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.flash-error {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.flash-icon-success {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    color: #22c55e;
+}
+
+.flash-icon-error {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    color: #ef4444;
+}
+
+.btn-close-success {
+    color: #16a34a;
+    cursor: pointer;
+}
+
+.btn-close-error {
+    color: #dc2626;
+    cursor: pointer;
+}
+
+
+/* 5. Footer Styles (Giữ nguyên như cũ) */
+
+.footer-wrapper {
+    background-color: #111827;
+    color: white;
+    margin-top: 5rem;
+    border-top: 4px solid #c5a47e;
+}
+
+.footer-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 4rem 1rem 2rem;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 3rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-logo-icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #c5a47e;
+    color: #111827;
+    border-radius: 9999px;
+}
+
+.footer-logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+}
+
+.footer-desc {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    line-height: 1.625;
+}
+
+.footer-social-link {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background-color: #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.footer-social-link:hover {
+    background-color: #c5a47e;
+    color: #111827;
+}
+
+.footer-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #c5a47e;
+    margin-bottom: 1.5rem;
+}
+
+.footer-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    color: #9ca3af;
+}
+
+.footer-link {
+    display: flex;
+    align-items: center;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: white;
+}
+
+.footer-link i {
+    margin-right: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.footer-contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.footer-contact-icon {
+    color: #c5a47e;
+    margin-top: 0.25rem;
+}
+
+.footer-input {
+    background-color: #1f2937;
+    border: none;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    outline: none;
+}
+
+.footer-input:focus {
+    box-shadow: 0 0 0 1px #c5a47e;
+}
+
+.footer-btn-submit {
+    background-color: #c5a47e;
+    color: #111827;
+    font-weight: 700;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    transition: background-color 0.3s;
+    margin-top: 0.5rem;
+}
+
+.footer-btn-submit:hover {
+    background-color: white;
+}
+
+.footer-bottom {
+    border-top: 1px solid #1f2937;
+    padding-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+    .footer-bottom {
+        flex-direction: row;
+    }
+}
+
+
+/* --- 6. HEADER STYLES --- */
+
+
+/* Khung bao ngoài Header */
+
+.header-wrapper {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+    transition: all 0.3s ease-in-out;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid #f3f4f6;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.header-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+    .header-container {
+        padding: 0 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .header-container {
+        padding: 0 2rem;
+    }
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 5rem;
+}
+
+
+/* Logo */
+
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #111827;
+    color: #c5a47e;
+    border-radius: 9999px;
+    border: 1px solid #c5a47e;
+    font-size: 1.25rem;
+    transition: all 0.5s;
+}
+
+.logo-link:hover .logo-icon {
+    background-color: #c5a47e;
+    color: #111827;
+}
+
+.logo-text-wrapper {
+    margin-left: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+}
+
+.logo-text span {
+    color: #c5a47e;
+}
+
+
+/* Menu Desktop */
+
+.nav-menu {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .nav-menu {
+        display: flex;
+        gap: 2rem;
+    }
+}
+
+.nav-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    color: #4b5563;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #c5a47e;
+    border-color: #c5a47e;
+}
+
+
+/* Actions */
+
+.header-actions {
+    display: none;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .header-actions {
+        display: flex;
+    }
+}
+
+
+/* User Button */
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #374151;
+    font-weight: 500;
+    outline: none;
+    transition: color 0.15s;
+}
+
+.user-btn:hover {
+    color: #c5a47e;
+}
+
+.user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d1d5db;
+    overflow: hidden;
+    color: #6b7280;
+}
+
+
+/* Dropdown */
+
+.dropdown-menu {
+    position: absolute;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 14rem;
+    background-color: white;
+    border-radius: 0.375rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 0.25rem 0;
+    border: 1px solid #f3f4f6;
+    z-index: 50;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: background-color 0.15s;
+}
+
+.dropdown-item:hover {
+    background-color: #f9fafb;
+}
+
+.dropdown-item-danger {
+    color: #dc2626;
+    font-weight: 700;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+
+/* Cho link Admin */
+
+
+/* Guest Buttons */
+
+.btn-login {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #111827;
+    transition: color 0.15s;
+}
+
+.btn-login:hover {
+    color: #c5a47e;
+}
+
+.btn-register {
+    padding: 0.625rem 1.25rem;
+    background-color: #111827;
+    color: #c5a47e;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border-radius: 0.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.15s;
+}
+
+.btn-register:hover {
+    background-color: #1f2937;
+}
+
+
+/* Mobile Toggle */
+
+.mobile-toggle {
+    display: flex;
+    color: #111827;
+    padding: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.mobile-toggle:hover {
+    color: #c5a47e;
+}
+
+@media (min-width: 768px) {
+    .mobile-toggle {
+        display: none;
+    }
+}
+
+
+/* Mobile Menu */
+
+.mobile-menu-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    z-index: 40;
+    background-color: white;
+    border-top: 1px solid #f3f4f6;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+    .mobile-menu-wrapper {
+        display: none !important;
+    }
+}
+
+.mobile-menu-container {
+    padding: 1rem 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mobile-link {
+    display: block;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111827;
+    border-radius: 0.375rem;
+    transition: background-color 0.15s;
+}
+
+.mobile-link:hover {
+    background-color: #f9fafb;
+}
+
+.mobile-user-section {
+    border-top: 1px solid #f3f4f6;
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+.mobile-greeting {
+    padding: 0 0.75rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.mobile-user-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    color: #374151;
+    border-radius: 0.25rem;
+}
+
+.mobile-user-link:hover {
+    background-color: #f9fafb;
+}
+
+.mobile-logout-btn {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.mobile-auth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 0 0.75rem;
+}
+
+.mobile-btn-login {
+    text-align: center;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    color: #374151;
+    font-weight: 700;
+}
+
+.mobile-btn-register {
+    text-align: center;
+    padding: 0.75rem;
+    background-color: #111827;
+    border-radius: 0.5rem;
+    color: #c5a47e;
+    font-weight: 700;
+}

@@ -28,7 +28,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    // protected $redirectTo = '/home';
 
     /**
      * Create a new controller instance.
@@ -39,7 +39,13 @@ class RegisterController extends Controller
     {
         $this->middleware('guest');
     }
-
+     public function redirectTo()
+    {
+        if (auth()->user()->role === 'admin') {
+            return route('admin.dashboard');
+        }
+        return route('home'); 
+    }
     /**
      * Get a validator for an incoming registration request.
      *
@@ -67,6 +73,7 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => 'user',
         ]);
     }
 }

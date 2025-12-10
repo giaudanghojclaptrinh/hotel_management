@@ -7,6 +7,9 @@ export default defineConfig({
             input: [
                 'resources/sass/app.scss',
                 'resources/js/app.js',
+                'resources/js/tailwind-config.js',
+                'resources/js/client.css',
+                'resources/js/client.js',
             ],
             refresh: true,
         }),

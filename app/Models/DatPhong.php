@@ -10,14 +10,20 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class DatPhong extends Model
 {
+    use HasFactory;
 
+    protected $table = 'dat_phongs'; // Định nghĩa rõ tên bảng
+
+    // SỬA LẠI FILLABLE CHO KHỚP VỚI CONTROLLER VÀ DATABASE
     protected $fillable = [
         'user_id',
-        'ngay_dat',
-        'ngay_nhan_phong',
-        'ngay_tra_phong',
+        'ngay_den',      
+        'ngay_di',        
+        'tong_tien',      
         'trang_thai',
+        'payment_status', 
     ];
+
     /**
      * The user who made the booking.
      */
@@ -31,7 +37,7 @@ class DatPhong extends Model
      */
     public function chiTietDatPhongs(): HasMany
     {
-        return $this->hasMany(ChiTietDatPhong::class);
+        return $this->hasMany(ChiTietDatPhong::class, 'dat_phong_id');
     }
 
     /**
@@ -39,6 +45,6 @@ class DatPhong extends Model
      */
     public function hoaDon(): HasOne
     {
-        return $this->hasOne(HoaDon::class);
+        return $this->hasOne(HoaDon::class, 'dat_phong_id');
     }
 }
