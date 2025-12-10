@@ -32,7 +32,6 @@
 <body>
 
     @include('layouts.header')
-
     <!-- MAIN CONTENT -->
     <!-- Sử dụng class 'main-content' thay vì các class Tailwind trực tiếp -->
     <main class="main-content">

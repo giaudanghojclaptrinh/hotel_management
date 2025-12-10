@@ -22,15 +22,21 @@ Auth::routes();
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC ROUTES (KHÁCH HÀNG - AI CŨNG XEM ĐƯỢC)
+| PUBLIC ROUTES (KHÁCH HÀNG)
 |--------------------------------------------------------------------------
 */
-Route::get('/', [PageController::class, 'home'])->name('trang_chu');
-Route::get('/home', [PageController::class, 'home'])->name('home'); // Alias tránh lỗi cũ
 
-// Danh sách & Chi tiết (Client View)
-Route::get('/danh-sach-phong', [PageController::class, 'rooms'])->name('phong');
+// Trang chủ
+Route::get('/', [PageController::class, 'home'])->name('trang_chu');
+Route::get('/home', [PageController::class, 'home'])->name('home');
+
+// === QUAN TRỌNG: Route này tên là 'phong.danh-sach' ===
+Route::get('/danh-sach-phong', [PageController::class, 'rooms'])->name('phong.danh-sach');
+
+// Chi tiết phòng
 Route::get('/chi-tiet-phong/{id}', [PageController::class, 'roomDetail'])->name('phong.chi-tiet');
+
+// Trang ưu đãi
 Route::get('/uu-dai', [PageController::class, 'promotions'])->name('khuyen-mai');
 
 
@@ -45,11 +51,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/ho-so', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/ho-so', [ProfileController::class, 'update'])->name('profile.update');
 
-    // 2. Lịch sử đặt phòng (User xem của chính mình)
-    // Lưu ý: Cần đảm bảo hàm getDanhSach trong DatPhongController có logic lọc theo Auth::id() nếu user gọi
+    // 2. Lịch sử đặt phòng
     Route::get('/lich-su-dat-phong', [DatPhongController::class, 'getDanhSach'])->name('bookings.history');
 
-    // 3. Quy trình đặt phòng (Yêu cầu đủ hồ sơ)
+    // 3. Quy trình đặt phòng (Yêu cầu có Profile)
     Route::middleware(['check.profile'])->group(function () {
         Route::get('/dat-phong/xac-nhan', [BookingController::class, 'create'])->name('booking.create');
         Route::post('/dat-phong/luu', [BookingController::class, 'store'])->name('booking.store');
@@ -62,28 +67,24 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 | ADMIN ROUTES (QUẢN TRỊ VIÊN)
 |--------------------------------------------------------------------------
-| Tất cả route trong này đều có tiền tố '/admin'
 */
 Route::prefix('admin')
-    ->middleware(['auth', \App\Http\Middleware\AdminMiddleware::class]) // Chặn User thường
+    ->middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])
     ->group(function () {
     
-    // Dashboard: domain.com/admin/dashboard
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
-    // --- NHÓM 1: QUẢN LÝ LOẠI PHÒNG ---
-    // URL bắt đầu bằng: /admin/loai-phong
+    // Quản lý Loại phòng
     Route::prefix('loai-phong')->group(function() {
-        Route::get('/', [LoaiPhongController::class, 'getDanhSach'])->name('admin.loai-phong');       // Danh sách
-        Route::get('/them', [LoaiPhongController::class, 'getThem'])->name('admin.loai-phong.them');   // Form thêm
-        Route::post('/them', [LoaiPhongController::class, 'postThem'])->name('admin.loai-phong.store'); // Xử lý thêm
-        Route::get('/sua/{id}', [LoaiPhongController::class, 'getSua'])->name('admin.loai-phong.sua'); // Form sửa
-        Route::post('/sua/{id}', [LoaiPhongController::class, 'postSua'])->name('admin.loai-phong.update'); // Xử lý sửa
-        Route::get('/xoa/{id}', [LoaiPhongController::class, 'getXoa'])->name('admin.loai-phong.xoa'); // Xóa
+        Route::get('/', [LoaiPhongController::class, 'getDanhSach'])->name('admin.loai-phong');
+        Route::get('/them', [LoaiPhongController::class, 'getThem'])->name('admin.loai-phong.them');
+        Route::post('/them', [LoaiPhongController::class, 'postThem'])->name('admin.loai-phong.store');
+        Route::get('/sua/{id}', [LoaiPhongController::class, 'getSua'])->name('admin.loai-phong.sua');
+        Route::post('/sua/{id}', [LoaiPhongController::class, 'postSua'])->name('admin.loai-phong.update');
+        Route::get('/xoa/{id}', [LoaiPhongController::class, 'getXoa'])->name('admin.loai-phong.xoa');
     });
 
-    // --- NHÓM 2: QUẢN LÝ PHÒNG ---
-    // URL bắt đầu bằng: /admin/phong
+    // Quản lý Phòng
     Route::prefix('phong')->group(function() {
         Route::get('/', [PhongController::class, 'getDanhSach'])->name('admin.phong');
         Route::get('/them', [PhongController::class, 'getThem'])->name('admin.phong.them');
@@ -93,8 +94,7 @@ Route::prefix('admin')
         Route::get('/xoa/{id}', [PhongController::class, 'getXoa'])->name('admin.phong.xoa');
     });
 
-    // --- NHÓM 3: QUẢN LÝ ĐẶT PHÒNG ---
-    // URL bắt đầu bằng: /admin/dat-phong
+    // Quản lý Đặt phòng
     Route::prefix('dat-phong')->group(function() {
         Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong');
         Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');
@@ -102,7 +102,7 @@ Route::prefix('admin')
         Route::get('/xoa/{id}', [DatPhongController::class, 'getXoa'])->name('admin.dat-phong.xoa');
     });
 
-    // --- NHÓM 4: QUẢN LÝ KHUYẾN MÃI ---
+    // Quản lý Khuyến mãi
     Route::prefix('khuyen-mai')->group(function() {
         Route::get('/', [KhuyenMaiController::class, 'getDanhSach'])->name('admin.khuyen-mai');
         Route::get('/them', [KhuyenMaiController::class, 'getThem'])->name('admin.khuyen-mai.them');
@@ -112,7 +112,7 @@ Route::prefix('admin')
         Route::get('/xoa/{id}', [KhuyenMaiController::class, 'getXoa'])->name('admin.khuyen-mai.xoa');
     });
 
-    // --- NHÓM 5: QUẢN LÝ HÓA ĐƠN ---
+    // Quản lý Hóa đơn
     Route::prefix('hoa-don')->group(function() {
         Route::get('/', [HoaDonController::class, 'getDanhSach'])->name('admin.hoa-don');
         Route::get('/sua/{id}', [HoaDonController::class, 'getSua'])->name('admin.hoa-don.sua');
@@ -120,15 +120,14 @@ Route::prefix('admin')
         Route::get('/xoa/{id}', [HoaDonController::class, 'getXoa'])->name('admin.hoa-don.xoa');
     });
     
-    // --- NHÓM 6: QUẢN LÝ NGƯỜI DÙNG (USERS) ---
-    // URL bắt đầu bằng: /admin/users (số nhiều cho chuẩn)
+    // Quản lý Users
     Route::prefix('users')->group(function() {
-        Route::get('/', [UserController::class, 'getDanhSach'])->name('admin.users'); // Danh sách
-        Route::get('/them', [UserController::class, 'getThem'])->name('admin.user.them'); // Form thêm
-        Route::post('/them', [UserController::class, 'postThem'])->name('admin.user.store'); // Xử lý thêm
-        Route::get('/sua/{id}', [UserController::class, 'getSua'])->name('admin.user.sua'); // Form sửa
-        Route::post('/sua/{id}', [UserController::class, 'postSua'])->name('admin.user.update'); // Xử lý sửa
-        Route::get('/xoa/{id}', [UserController::class, 'getXoa'])->name('admin.user.xoa'); // Xóa
+        Route::get('/', [UserController::class, 'getDanhSach'])->name('admin.users');
+        Route::get('/them', [UserController::class, 'getThem'])->name('admin.user.them');
+        Route::post('/them', [UserController::class, 'postThem'])->name('admin.user.store');
+        Route::get('/sua/{id}', [UserController::class, 'getSua'])->name('admin.user.sua');
+        Route::post('/sua/{id}', [UserController::class, 'postSua'])->name('admin.user.update');
+        Route::get('/xoa/{id}', [UserController::class, 'getXoa'])->name('admin.user.xoa');
     });
 
 });

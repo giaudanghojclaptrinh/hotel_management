@@ -9,9 +9,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class LoaiPhong extends Model
 {
 
-	/**
-	 * Get the rooms for this LoaiPhong.
-	 */
+	protected $fillable = [
+        'ten_loai_phong', 
+        'gia', 
+        'suc_chua', 
+        'mo_ta', 
+        'dien_tich',
+		'hinh_anh',
+    ];
+
 	public function phongs(): HasMany
 	{
 		return $this->hasMany(Phong::class);
@@ -23,5 +29,8 @@ class LoaiPhong extends Model
 	public function chiTietDatPhongs(): HasMany
 	{
 		return $this->hasMany(ChiTietDatPhong::class, 'loai_phong_id');
+	}
+	public function tienNghis() {
+    	return $this->belongsToMany(TienNghi::class, 'chi_tiet_tien_nghi', 'ma_loai_phong', 'ma_tien_nghi');
 	}
 }

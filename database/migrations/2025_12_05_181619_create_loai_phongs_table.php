@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('ten_loai_phong', 100);
             $table->decimal('gia', 10, 2);
             $table->integer('so_nguoi');
+            $table->integer('dien_tich');
+            $table->string('hinh_anh')->nullable();
             $table->string(('tien_nghi'))->nullable();
             $table->timestamps();
         });

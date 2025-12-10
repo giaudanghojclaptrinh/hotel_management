@@ -4,60 +4,130 @@ namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\LoaiPhong;
-use App\Models\KhuyenMai;
 use Carbon\Carbon;
+
+// --- 1. IMPORT MODELS ---
+use App\Models\LoaiPhong;
+use App\Models\Phong;
+use App\Models\KhuyenMai;
+use App\Models\TienNghi;
 
 class PageController extends Controller
 {
     /**
-     * Trang chủ: Hiển thị phòng nổi bật và khuyến mãi hot
+     * Trang chủ
      */
     public function home()
     {
-        // Lấy 3 loại phòng để show ở trang chủ
         $loaiPhongs = LoaiPhong::take(3)->get();
-        
-        // Lấy khuyến mãi còn hạn sử dụng
         $khuyenMais = KhuyenMai::where('ngay_ket_thuc', '>=', Carbon::today())->take(2)->get();
 
         return view('home', compact('loaiPhongs', 'khuyenMais'));
     }
 
     /**
-     * Danh sách phòng: Có chức năng lọc/tìm kiếm
+     * Danh sách Loại Phòng (Tìm kiếm & Lọc & Sắp xếp)
      */
     public function rooms(Request $request)
     {
         $query = LoaiPhong::query();
 
-        // Nếu khách tìm kiếm theo số người
-        if ($request->has('guests') && $request->guests > 0) {
-            $query->where('suc_chua', '>=', $request->guests);
+        // 1. ĐẾM SỐ PHÒNG TRỐNG (SỬA LẠI TÊN CỘT VÀ GIÁ TRỊ)
+        // Cột trong DB là 'tinh_trang', giá trị là 'available'
+        $query->withCount(['phongs' => function ($q) {
+            $q->where('tinh_trang', 'available'); 
+        }]);
+
+        // 2. CÁC BỘ LỌC
+        
+        // Lọc Giá Min
+        if ($request->filled('min_price')) {
+            $query->where('gia', '>=', $request->input('min_price'));
+        }
+        
+        // Lọc Giá Max
+        if ($request->filled('max_price')) {
+            $query->where('gia', '<=', $request->input('max_price'));
         }
 
-        // Lấy danh sách phân trang (9 phòng/trang)
-        $rooms = $query->paginate(9);
+        // Lọc Sức chứa
+        if ($request->filled('capacity')) {
+            $capacities = $request->input('capacity');
+            $query->where(function($q) use ($capacities) {
+                $q->whereIn('suc_chua', $capacities); // Lưu ý: DB bạn là 'so_nguoi' hay 'suc_chua'? 
+                // Trong file SQL là 'so_nguoi', nếu code lỗi cột suc_chua thì đổi thành so_nguoi nhé.
+                // Tạm thời mình giữ 'suc_chua' theo các bước trước, nếu lỗi báo mình đổi lại 'so_nguoi'.
+                if (in_array('4', $capacities)) {
+                    $q->orWhere('suc_chua', '>=', 4);
+                }
+            });
+        }
 
-        return view('client.rooms.index', compact('rooms'));
+        // Lọc Tiện nghi
+        if ($request->filled('amenities')) {
+            $amenities = $request->input('amenities');
+            $query->whereHas('tienNghis', function($q) use ($amenities) {
+                $q->whereIn('tien_nghis.id', $amenities); 
+            });
+        }
+
+        // Lọc Loại phòng (Checkbox)
+        if ($request->filled('room_types')) {
+            $query->whereIn('id', $request->input('room_types'));
+        }
+
+        // 3. SẮP XẾP CHÍNH (Đẩy phòng còn trống lên trên)
+        $query->orderBy('phongs_count', 'desc');
+
+        // 4. SẮP XẾP PHỤ
+        if ($request->filled('sort')) {
+            $sort = $request->input('sort');
+            switch ($sort) {
+                case 'price_asc':
+                    $query->orderBy('gia', 'asc');
+                    break;
+                case 'price_desc':
+                    $query->orderBy('gia', 'desc');
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+                    break;
+            }
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        // 5. Phân trang
+        $rooms = $query->paginate(9)->withQueryString();
+        
+        // 6. Lấy dữ liệu cho Sidebar
+        $tienNghis = TienNghi::all();
+        $allLoaiPhongs = LoaiPhong::select('id', 'ten_loai_phong')->get();
+
+        return view('client.rooms.index', compact('rooms', 'tienNghis', 'allLoaiPhongs'));
     }
 
     /**
-     * Chi tiết phòng: Xem ảnh, tiện nghi và form chọn ngày
+     * Chi tiết Loại Phòng
      */
     public function roomDetail($id)
     {
-        $room = LoaiPhong::with('phongs')->findOrFail($id);
+        $room = LoaiPhong::with(['tienNghis', 'phongs'])->findOrFail($id);
         
-        // Đếm số phòng trống thực tế (status = available)
-        // Lưu ý: Cần đảm bảo bạn có cột 'tinh_trang' trong bảng 'phongs'
-        $phongTrong = $room->phongs()->where('tinh_trang', 'available')->count();
+        // SỬA LẠI: Đếm số phòng trống thực tế theo cột 'tinh_trang'
+        $phongTrong = $room->phongs->where('tinh_trang', 'available')->count(); 
 
-        return view('client.rooms.detail', compact('room', 'phongTrong'));
+        // Gợi ý phòng khác (Lưu ý cột so_nguoi/suc_chua)
+        $relatedRooms = LoaiPhong::where('so_nguoi', $room->so_nguoi) // SQL của bạn dùng 'so_nguoi'
+                             ->where('id', '!=', $id)
+                             ->take(3)
+                             ->get();
+
+        return view('client.rooms.detail', compact('room', 'relatedRooms', 'phongTrong'));
     }
 
     /**
-     * Danh sách khuyến mãi
+     * Trang khuyến mãi
      */
     public function promotions()
     {

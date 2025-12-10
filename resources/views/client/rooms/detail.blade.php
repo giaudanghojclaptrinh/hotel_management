@@ -55,7 +55,7 @@
                         <div>
                             <span class="block text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Giá tốt nhất</span>
                             <div class="flex items-baseline">
-                                <span class="text-3xl font-serif font-bold text-brand-900">{{ number_format($room->gia_dem, 0, ',', '.') }}đ</span>
+                                <span class="text-3xl font-serif font-bold text-brand-900">{{ number_format($room->gia, 0, ',', '.') }}đ</span>
                                 <span class="text-gray-500 ml-1">/đêm</span>
                             </div>
                         </div>

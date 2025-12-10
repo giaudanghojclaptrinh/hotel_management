@@ -13,19 +13,7 @@
             </a>
 
             <!-- 2. Desktop Menu -->
-            <nav class="nav-menu">
-                <a href="{{ route('trang_chu') }}" class="nav-link {{ request()->routeIs('trang_chu') ? 'active' : '' }}">
-                    Trang chủ
-                </a>
-                <a href="{{ route('phong') }}" class="nav-link {{ request()->routeIs('phong*') ? 'active' : '' }}">
-                    Phòng & Suites
-                </a>
-                <a href="{{ route('khuyen-mai') }}" class="nav-link {{ request()->routeIs('khuyen-mai*') ? 'active' : '' }}">
-                    Ưu đãi
-                </a>
-                <a href="#" class="nav-link">Về chúng tôi</a>
-                <a href="#" class="nav-link">Liên hệ</a>
-            </nav>
+            @include('layouts.nav')
 
             <!-- 3. Actions (Login/User) -->
             <div class="header-actions">
@@ -81,7 +69,7 @@
     <div x-show="mobileMenuOpen" x-transition x-cloak class="mobile-menu-wrapper">
         <div class="mobile-menu-container">
             <a href="{{ route('trang_chu') }}" class="mobile-link">Trang chủ</a>
-            <a href="{{ route('phong') }}" class="mobile-link">Phòng & Suites</a>
+            <a href="{{ route('phong.danh-sach') }}" class="mobile-link">Phòng & Suites</a>
             <a href="{{ route('khuyen-mai') }}" class="mobile-link">Ưu đãi</a>
             
             @auth
