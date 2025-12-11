@@ -8,7 +8,6 @@ export default defineConfig({
                 'resources/sass/app.scss',
                 'resources/js/app.js',
                 'resources/js/tailwind-config.js',
-                'resources/js/client.js',
                 'resources/css/login.css',
                 'resources/js/login.js',
                 'resources/css/register.css',

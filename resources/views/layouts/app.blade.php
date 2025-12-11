@@ -26,7 +26,10 @@
         'resources/css/client/rooms.css', 
         'resources/css/client/profile.css',
         'resources/css/client/booking.css',
-        'resources/js/client.js'
+        'resources/js/client/js/home.js',
+        'resources/js/client/js/rooms.js',
+        'resources/js/client/js/profile.js',
+        'resources/js/client/js/booking.js'
     ])
 
     <!-- Alpine.js -->

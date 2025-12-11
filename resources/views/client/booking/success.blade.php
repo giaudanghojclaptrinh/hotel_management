@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Đặt phòng thành công')
 
-@vite(['resources/css/client/home.css', 'resources/css/client/booking.css'])
 
 @section('content')
 <div class="success-wrapper">

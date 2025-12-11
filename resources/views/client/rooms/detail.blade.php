@@ -144,46 +144,6 @@
     </div>
 </div>
 
-{{-- SCRIPT XỬ LÝ DATEPICKER --}}
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkinInput = document.getElementById('checkin_date');
-        const checkoutInput = document.getElementById('checkout_date');
-        const bookingForm = document.getElementById('booking-date-form');
 
-        // 1. Tự động cập nhật min date cho Checkout
-        checkinInput.addEventListener('change', function() {
-            if (this.value) {
-                const checkinDate = new Date(this.value);
-                checkinDate.setDate(checkinDate.getDate() + 1);
-                const minCheckout = checkinDate.toISOString().split('T')[0];
-                
-                checkoutInput.min = minCheckout;
-                if (checkoutInput.value && checkoutInput.value <= this.value) {
-                    checkoutInput.value = minCheckout;
-                }
-            }
-        });
-
-        // 2. Validate khi submit
-        bookingForm.addEventListener('submit', function(e) {
-            const checkin = checkinInput.value;
-            const checkout = checkoutInput.value;
-
-            if (!checkin || !checkout) {
-                e.preventDefault();
-                alert('Vui lòng chọn đầy đủ ngày nhận và trả phòng!');
-                return;
-            }
-
-            if (new Date(checkin) >= new Date(checkout)) {
-                e.preventDefault();
-                alert('Ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày!');
-            }
-        });
-    });
-</script>
-@endpush
 
 @endsection

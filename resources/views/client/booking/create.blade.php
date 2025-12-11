@@ -1,8 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Xác nhận đặt phòng')
 
-<!-- Gọi CSS -->
-@vite(['resources/css/client/home.css', 'resources/css/client/booking.css'])
 
 @section('content')
 <div class="booking-page-wrapper" x-data="{ onlinePaymentSelected: false, showVnpayModal: false, finalTotalText: '{{ number_format($totalPrice, 0, ',', '.') }}đ' }">
@@ -206,75 +204,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    if (typeof axios === 'undefined') { console.error('Axios is not loaded.'); }
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const promoInput = document.getElementById('promotion-code-input');
-        const applyBtn = document.getElementById('apply-promo-btn');
-        const originalTotalSpan = document.getElementById('original-total');
-        const discountDisplay = document.getElementById('discount-display');
-        const finalTotalDisplay = document.getElementById('final-total-display');
-        const discountAmountInput = document.getElementById('discount-amount-input');
-        const promoMessage = document.getElementById('promo-message');
-        const promoCodeDisplay = document.getElementById('promo-code-display');
-        const promoCodeHidden = document.getElementById('promotion-code-hidden');
-        
-        const alpineElement = document.querySelector('[x-data]');
-        let alpineData = (alpineElement && alpineElement.__x) ? alpineElement.__x.$data : null;
-
-        const originalTotal = parseFloat(originalTotalSpan.dataset.originalPrice);
-
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 }).format(amount);
-        }
-
-        function updateSummary(discount, finalTotal, message, code = '—') {
-            discountDisplay.textContent = '- ' + formatCurrency(discount);
-            discountAmountInput.value = discount;
-            finalTotalDisplay.textContent = formatCurrency(finalTotal);
-            promoCodeDisplay.textContent = code;
-            promoCodeHidden.value = code !== '—' ? code : '';
-            
-            if (alpineData) { alpineData.finalTotalText = formatCurrency(finalTotal); }
-
-            if (message) {
-                promoMessage.textContent = message;
-                promoMessage.className = `promo-msg ${discount > 0 ? 'success' : 'error'}`;
-            } else {
-                promoMessage.textContent = '';
-            }
-        }
-
-        applyBtn.addEventListener('click', async function() {
-            const code = promoInput.value.trim().toUpperCase();
-            if (!code) { updateSummary(0, originalTotal, 'Vui lòng nhập mã khuyến mãi.', '—'); return; }
-
-            applyBtn.disabled = true;
-            promoMessage.textContent = 'Đang kiểm tra mã...'; promoMessage.className = 'promo-msg';
-
-            try {
-                const response = await axios.post('{{ route('api.check.promo') }}', { code: code, original_total: originalTotal });
-                const data = response.data;
-                if (data.success) {
-                    updateSummary(data.discount_amount, data.final_total, data.message, code);
-                } else {
-                    updateSummary(0, originalTotal, data.message, '—');
-                }
-            } catch (error) {
-                updateSummary(0, originalTotal, 'Lỗi hệ thống khi kiểm tra mã.', '—');
-            } finally {
-                applyBtn.disabled = false;
-            }
-        });
-        
-        promoInput.addEventListener('input', function() {
-            if (promoMessage.textContent !== '' || discountAmountInput.value !== '0') {
-                updateSummary(0, originalTotal, null, '—');
-            }
-        });
-    });
-</script>
-@endpush
