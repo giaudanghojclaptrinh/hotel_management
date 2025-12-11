@@ -22,7 +22,10 @@
     <!-- Đã bao gồm config màu, css tùy chỉnh và js logic -->
     @vite([
         'resources/js/tailwind-config.js',
-        'resources/css/client.css', 
+        'resources/css/client/home.css',
+        'resources/css/client/rooms.css', 
+        'resources/css/client/profile.css',
+        'resources/css/client/booking.css',
         'resources/js/client.js'
     ])
 

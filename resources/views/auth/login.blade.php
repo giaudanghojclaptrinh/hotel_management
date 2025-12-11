@@ -1,43 +1,124 @@
 @extends('layouts.app')
+@section('title', 'Đăng nhập hệ thống')
+
+@vite(['resources/css/login.css'])
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card-common">
-                <div class="px-6 py-4 border-b font-semibold">{{ __('Login') }}</div>
+<div class="login-wrapper">
+    
+    <!-- Background (Hình nền & Lớp phủ) -->
+    <div class="login-bg-container">
+        {{-- Đảm bảo bạn có hình ảnh này, hoặc thay bằng link ảnh mạng để test --}}
+        <img src="{{ asset('uploads/home/home.png') }}" 
+             onerror="this.src='https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop'" 
+             alt="Background" 
+             class="login-bg-image">
+        <div class="login-bg-overlay"></div>
+    </div>
 
-                <div class="p-6">
-                    <form method="POST" action="{{ route('login') }}">
-                        @csrf
+    <!-- Form Container (Khung đăng nhập) -->
+    <div class="login-container animate-fade-in-up">
+        
+        <!-- Header -->
+        <div class="login-header">
+            <div class="login-icon-wrapper">
+                <i class="fa-solid fa-right-to-bracket"></i>
+            </div>
+            <h2 class="login-title">Chào mừng trở lại</h2>
+            <p class="login-subtitle">
+                Chưa có tài khoản?
+                <a href="{{ route('register') }}" class="login-link">Đăng ký thành viên mới</a>
+            </p>
+        </div>
 
-                        <div class="mb-4">
-                            <label for="email" class="block text-sm font-medium text-gray-700">{{ __('Email Address') }}</label>
-                            <input id="email" type="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('email') border-red-500 @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-                            @error('email') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+        <!-- Form Box -->
+        <div class="login-card">
+            <form class="login-form-content" action="{{ route('login') }}" method="POST" id="login-form">
+                @csrf
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email" class="form-label">Địa chỉ Email</label>
+                    <div class="input-group">
+                        <div class="input-icon"><i class="fa-regular fa-envelope"></i></div>
+                        <input id="email" name="email" type="email" autocomplete="email" required 
+                               class="form-input @error('email') is-invalid @enderror"
+                               value="{{ old('email') }}" placeholder="vidu@gmail.com">
+                    </div>
+                    @error('email')
+                        <p class="error-msg"><i class="fa-solid fa-circle-exclamation mr-1"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password" class="form-label">Mật khẩu</label>
+                    <div class="input-group">
+                        <div class="input-icon"><i class="fa-solid fa-lock"></i></div>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required 
+                               class="form-input @error('password') is-invalid @enderror"
+                               placeholder="••••••••">
+                    </div>
+                    @error('password')
+                        <p class="error-msg"><i class="fa-solid fa-circle-exclamation mr-1"></i> {{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Options (Remember me & Forgot pass) -->
+                <div class="form-options">
+                    <div class="checkbox-wrapper">
+                        <input id="remember" name="remember" type="checkbox" {{ old('remember') ? 'checked' : '' }} class="checkbox-custom">
+                        <label for="remember" class="checkbox-label">Ghi nhớ đăng nhập</label>
+                    </div>
+
+                    @if (Route::has('password.request'))
+                        <div class="forgot-wrapper">
+                            <a href="{{ route('password.request') }}" class="forgot-link">Quên mật khẩu?</a>
                         </div>
+                    @endif
+                </div>
 
-                        <div class="mb-4">
-                            <label for="password" class="block text-sm font-medium text-gray-700">{{ __('Password') }}</label>
-                            <input id="password" type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('password') border-red-500 @enderror" name="password" required autocomplete="current-password">
-                            @error('password') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                        </div>
+                <!-- Submit Button -->
+                <div class="form-action">
+                    <button type="submit" class="btn-submit group" id="btn-login">
+                        <span class="btn-text">ĐĂNG NHẬP NGAY</span>
+                        <span class="btn-icon-wrapper">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        </span>
+                        <!-- Loading Spinner (Ẩn mặc định) -->
+                        <span class="btn-loader hidden">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        </span>
+                    </button>
+                </div>
+            </form>
 
-                        <div class="mb-4 flex items-center">
-                            <input class="form-checkbox h-4 w-4 text-brand-900" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <label class="ml-2 text-sm text-gray-700" for="remember">{{ __('Remember Me') }}</label>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <button type="submit" class="btn-primary">{{ __('Login') }}</button>
-                            @if (Route::has('password.request'))
-                                <a class="text-sm text-blue-600 hover:underline" href="{{ route('password.request') }}">{{ __('Forgot Your Password?') }}</a>
-                            @endif
-                        </div>
-                    </form>
+            <!-- Divider -->
+            <div class="divider-wrapper">
+                <div class="divider-line"></div>
+                <div class="divider-text-wrapper">
+                    <span class="divider-text">Hoặc tiếp tục với</span>
                 </div>
             </div>
+
+            <!-- Social Login -->
+            <div class="social-grid">
+                <a href="#" class="btn-social google">
+                    <i class="fa-brands fa-google"></i> Google
+                </a>
+                <a href="#" class="btn-social facebook">
+                    <i class="fa-brands fa-facebook"></i> Facebook
+                </a>
+            </div>
         </div>
+        
+        <p class="footer-text">
+            &copy; {{ date('Y') }} Luxury Stay. Bảo mật tuyệt đối thông tin khách hàng.
+        </p>
     </div>
 </div>
+
+@push('scripts')
+    @vite(['resources/js/login.js'])
+@endpush
 @endsection

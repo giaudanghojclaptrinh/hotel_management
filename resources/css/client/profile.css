@@ -1,0 +1,371 @@
+/* =========================================
+   USER PROFILE STYLES (Luxury Dark Theme)
+   ========================================= */
+
+
+/* --- 1. LAYOUT & CONTAINER --- */
+
+.profile-page-wrapper {
+    padding-top: 3rem;
+    padding-bottom: 6rem;
+    min-height: 80vh;
+}
+
+
+/* Breadcrumb (Sao chép style chuẩn từ rooms.css để đồng bộ) */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.breadcrumb a:hover {
+    color: var(--primary-gold);
+}
+
+.breadcrumb span.separator {
+    color: var(--border-light);
+}
+
+.breadcrumb .active {
+    color: var(--primary-gold);
+    font-weight: 600;
+    border-bottom: 1px solid var(--primary-gold);
+}
+
+
+/* Grid Layout */
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .profile-layout {
+        grid-template-columns: 280px 1fr;
+        /* Sidebar cố định - Content co giãn */
+        gap: 3rem;
+    }
+}
+
+
+/* --- 2. SIDEBAR --- */
+
+.profile-sidebar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-header {
+    background: #111;
+    /* Đen đậm hơn cho header sidebar */
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.user-avatar-circle {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background: var(--primary-gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: #000;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(205, 164, 94, 0.3);
+}
+
+.sidebar-user-name {
+    color: var(--white);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.sidebar-user-role {
+    color: var(--primary-gold);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.sidebar-menu {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all 0.3s;
+    font-size: 0.95rem;
+}
+
+.sidebar-link i {
+    width: 20px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--white);
+}
+
+.sidebar-link:hover i {
+    color: var(--primary-gold);
+}
+
+.sidebar-link.active {
+    background: rgba(205, 164, 94, 0.1);
+    color: var(--primary-gold);
+    border: 1px solid var(--border-gold);
+}
+
+.btn-logout {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    color: #ef4444;
+    /* Màu đỏ cho nút đăng xuất */
+}
+
+.btn-logout:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+
+/* --- 3. MAIN CONTENT CARD --- */
+
+.profile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.profile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.profile-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    color: var(--white);
+    margin: 0 0 0.5rem 0;
+}
+
+.profile-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.header-icon {
+    font-size: 2.5rem;
+    color: var(--border-light);
+}
+
+
+/* --- 4. FORM STYLES (Dark Theme Inputs) --- */
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .profile-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .col-span-2 {
+        grid-column: span 2;
+    }
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
+
+.form-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.form-label span.required {
+    color: #ef4444;
+    margin-left: 0.25rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+.form-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-light);
+    color: var(--white);
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    /* Padding trái chừa chỗ cho icon */
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.form-input:focus {
+    border-color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(205, 164, 94, 0.1);
+}
+
+.form-input:focus+.input-icon,
+.input-wrapper:focus-within .input-icon {
+    color: var(--primary-gold);
+}
+
+.form-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    opacity: 0.8;
+}
+
+.error-msg {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+}
+
+
+/* Alert Box (Error/Success) */
+
+.alert-box {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    animation: fadeInUp 0.5s ease;
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-left: 4px solid #ef4444;
+}
+
+.alert-icon {
+    font-size: 1.2rem;
+    margin-top: 0.1rem;
+}
+
+.alert-error .alert-icon {
+    color: #ef4444;
+}
+
+.alert-content p {
+    margin: 0;
+    color: var(--white);
+    font-size: 0.9rem;
+}
+
+.alert-content .alert-title {
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+
+/* Submit Button Area */
+
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-save {
+    background: var(--primary-gold);
+    color: #000;
+    font-weight: 700;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: 0.3s;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.btn-save:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(205, 164, 94, 0.4);
+}
