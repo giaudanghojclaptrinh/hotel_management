@@ -140,12 +140,22 @@
                                         </a>
                                         
                                     @elseif($dp->trang_thai == 'confirmed')
-                                        <a href="{{ route('admin.dat-phong.huy', $dp->id) }}" 
-                                           class="text-blue-600 hover:text-blue-800" 
-                                           onclick="return confirm('Xác nhận khách đã TRẢ PHÒNG và MỞ lại phòng?')" 
-                                           title="Trả phòng">
-                                            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Trả phòng
-                                        </a>
+                                        @if($dp->payment_status == 'paid')
+                                            {{-- Cho phép trả phòng vì đã PAID --}}
+                                            <a href="{{ route('admin.dat-phong.huy', $dp->id) }}" 
+                                               class="text-blue-600 hover:text-blue-800 font-medium" 
+                                               onclick="return confirm('Xác nhận khách đã TRẢ PHÒNG và MỞ lại phòng?')" 
+                                               title="Trả phòng">
+                                                <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Trả phòng
+                                            </a>
+                                        @else
+                                            {{-- Chặn trả phòng vì chưa PAID --}}
+                                            <span class="text-yellow-600 font-bold cursor-help" 
+                                                  title="Phải vào mục Hóa đơn để xác nhận thanh toán trước!">
+                                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Chờ TT
+                                            </span>
+                                        @endif
+                                        
                                     @else
                                         <span class="text-gray-400 italic">—</span>
                                     @endif

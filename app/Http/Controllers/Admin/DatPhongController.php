@@ -5,11 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DatPhong;
 use App\Models\User;
-use App\Models\Phong; // <-- Import Model Phong
-use App\Models\HoaDon; // <-- ĐÃ THÊM LOGIC CHO HÓA ĐƠN
-use App\Models\ChiTietDatPhong; // <-- Đã có
+use App\Models\Phong;
+use App\Models\HoaDon;
+use App\Models\ChiTietDatPhong;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // <-- Import DB
+use Illuminate\Support\Facades\DB; 
 
 class DatPhongController extends Controller
 {
@@ -18,7 +18,6 @@ class DatPhongController extends Controller
      */
     public function getDanhSach()
     {
-        // Eager loading user, chi tiết, và loại phòng để hiển thị thông tin đầy đủ
         $datPhongs = DatPhong::with(['user', 'chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong'])
                              ->orderBy('created_at', 'desc')
                              ->get();
@@ -26,7 +25,7 @@ class DatPhongController extends Controller
         return view('admin.dat_phong.danh_sach', compact('datPhongs'));
     }
 
-    // Các hàm getThem, postThem, getSua, postSua giữ nguyên...
+    // Các hàm getThem, postThem giữ nguyên...
     public function getThem()
     {
         $users = User::all();
@@ -78,15 +77,13 @@ class DatPhongController extends Controller
         return redirect()->route('admin.dat-phong')->with('success', 'Cập nhật đơn đặt phòng thành công!');
     }
 
-    // --- HÀM XỬ LÝ HÓA ĐƠN & THANH TOÁN (FIXED) ---
+    // --- HÀM XỬ LÝ HÓA ĐƠN & THANH TOÁN (FIXED QueryException) ---
     
     /**
      * Hiển thị chi tiết hóa đơn / Trang xử lý thanh toán.
-     * @param int $dat_phong_id ID của đơn đặt phòng
      */
     public function getHoaDon($dat_phong_id)
     {
-        // Lấy thông tin đơn đặt phòng chi tiết
         $datPhong = DatPhong::with(['user', 'chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong'])
                              ->findOrFail($dat_phong_id);
 
@@ -97,7 +94,8 @@ class DatPhongController extends Controller
                 'ma_hoa_don' => 'HD' . time() . rand(100, 999), 
                 'ngay_lap' => now(),
                 'tong_tien' => $datPhong->tong_tien, 
-                'phuong_thuc_thanh_toan' => $datPhong->payment_method ?? 'cash',
+                // [FIXED] Khắc phục lỗi 1364: Truyền phương thức thanh toán
+                'phuong_thuc_thanh_toan' => $datPhong->payment_method ?? 'cash', 
                 'trang_thai' => $datPhong->payment_status,
             ]
         );
@@ -107,7 +105,6 @@ class DatPhongController extends Controller
     
     /**
      * Xử lý cập nhật trạng thái thanh toán của Hóa đơn và Đơn đặt phòng.
-     * @param int $dat_phong_id ID của đơn đặt phòng
      */
     public function postThanhToan(Request $request, $dat_phong_id)
     {
@@ -140,12 +137,13 @@ class DatPhongController extends Controller
     }
 
 
-    // --- HÀM XÓA ĐƠN ĐẶT PHÒNG ĐƠN LẺ ---
+    // --- HÀM XÓA ĐƠN ĐẶT PHÒNG ĐƠN LẺ (FIXED Foreign Key) ---
     public function getXoa($id)
     {
         DB::beginTransaction();
         try {
-            $datPhong = DatPhong::with('chiTietDatPhongs')->findOrFail($id);
+            // Cần eager load hoaDon và chiTietDatPhongs để xóa bản ghi con trước
+            $datPhong = DatPhong::with('chiTietDatPhongs', 'hoaDon')->findOrFail($id);
             $chiTiet = $datPhong->chiTietDatPhongs->first();
             
             // 1. Nhả phòng (nếu phòng đang bị khóa)
@@ -156,7 +154,11 @@ class DatPhongController extends Controller
                 }
             }
             
-            // 2. Xóa đơn và các chi tiết/hóa đơn liên quan
+            // [FIXED] 2. Xóa bản ghi con trước: HoaDon và ChiTietDatPhong
+            $datPhong->hoaDon()->delete(); 
+            $datPhong->chiTietDatPhongs()->delete();
+
+            // 3. Xóa đơn đặt phòng cha
             $datPhong->delete();
 
             DB::commit();
@@ -169,7 +171,7 @@ class DatPhongController extends Controller
     }
 
     /**
-     * Xử lý Xóa Hàng Loạt đơn đặt phòng (Mass Delete).
+     * Xử lý Xóa Hàng Loạt đơn đặt phòng (Mass Delete). (FIXED Foreign Key)
      */
     public function xoaHangLoat(Request $request)
     {
@@ -183,7 +185,7 @@ class DatPhongController extends Controller
 
         DB::beginTransaction();
         try {
-            $datPhongs = DatPhong::with('chiTietDatPhongs')->whereIn('id', $ids)->get();
+            $datPhongs = DatPhong::with('chiTietDatPhongs', 'hoaDon')->whereIn('id', $ids)->get();
 
             foreach ($datPhongs as $datPhong) {
                 // 1. NHẢ PHÒNG (NẾU ĐÃ KHÓA)
@@ -195,7 +197,11 @@ class DatPhongController extends Controller
                     }
                 }
 
-                // 2. XÓA BẢN GHI
+                // [FIXED] 2. XÓA BẢN GHI CON TRƯỚC
+                $datPhong->hoaDon()->delete();
+                $datPhong->chiTietDatPhongs()->delete();
+
+                // 3. XÓA BẢN GHI CHA
                 $datPhong->delete();
                 $deletedCount++;
             }
@@ -210,7 +216,7 @@ class DatPhongController extends Controller
         }
     }
     
-    // --- LOGIC DUYỆT ĐƠN VÀ KHÓA PHÒNG (Giữ nguyên) ---
+    // --- LOGIC DUYỆT ĐƠN VÀ KHÓA PHÒNG ---
     public function duyetDon($id)
     {
         DB::beginTransaction();
@@ -232,6 +238,7 @@ class DatPhongController extends Controller
             $phong->update(['tinh_trang' => 'booked']);
             $datPhong->update([
                 'trang_thai' => 'confirmed',
+                // Chuyển sang awaiting_payment nếu là online, giữ nguyên payment_status nếu là cash
                 'payment_status' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : $datPhong->payment_status, 
             ]);
 
@@ -244,6 +251,10 @@ class DatPhongController extends Controller
         }
     }
 
+    /**
+     * Xử lý Hủy Đơn / Trả phòng (Cancel/Complete) - Nhả phòng.
+     * [FIXED] Chỉ cho phép hủy/trả phòng nếu trạng thái thanh toán là PAID.
+     */
     public function huyDon($id)
     {
         DB::beginTransaction();
@@ -251,6 +262,14 @@ class DatPhongController extends Controller
             $datPhong = DatPhong::with('chiTietDatPhongs')->findOrFail($id);
             $chiTiet = $datPhong->chiTietDatPhongs->first();
             
+            // [BỔ SUNG KIỂM TRA] Chặn nếu đơn đang confirmed nhưng chưa paid
+            if ($datPhong->trang_thai === 'confirmed' && $datPhong->payment_status !== 'paid') {
+                DB::rollBack();
+                return back()->with('error', 'Lỗi: Khách hàng chưa thanh toán! Vui lòng vào mục Hóa đơn để xác nhận thanh toán trước khi trả phòng.');
+            }
+
+
+            // 1. Nhả phòng (Nếu phòng đang giữ trạng thái booked)
             if ($chiTiet && $chiTiet->phong_id) {
                 $phong = Phong::find($chiTiet->phong_id);
                 if ($phong && $phong->tinh_trang === 'booked') {
@@ -258,14 +277,17 @@ class DatPhongController extends Controller
                 }
             }
 
+            // Nếu đang pending -> cancelled. Nếu đang confirmed -> completed (tôi dùng cancelled)
             $datPhong->update(['trang_thai' => 'cancelled']);
 
             DB::commit();
-            return back()->with('success', 'Đã hủy đơn và mở lại phòng thành công!');
+            
+            $msg = ($datPhong->trang_thai === 'confirmed') ? 'Đã xử lý Trả phòng thành công và mở lại phòng!' : 'Đã hủy đơn và mở lại phòng thành công!';
+            return back()->with('success', $msg);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Lỗi hệ thống khi hủy đơn: ' . $e->getMessage());
+            return back()->with('error', 'Lỗi hệ thống khi hủy/trả phòng: ' . $e->getMessage());
         }
     }
 }

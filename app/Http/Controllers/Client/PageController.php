@@ -11,6 +11,7 @@ use App\Models\LoaiPhong;
 use App\Models\Phong;
 use App\Models\KhuyenMai;
 use App\Models\TienNghi;
+use App\Models\ChiTietDatPhong; // <--- Cần thêm model này để check lịch
 
 class PageController extends Controller
 {
@@ -26,19 +27,46 @@ class PageController extends Controller
     }
 
     /**
-     * Danh sách Loại Phòng (Tìm kiếm & Lọc & Sắp xếp)
+     * Danh sách Loại Phòng (Tìm kiếm & Lọc & Sắp xếp & Check Lịch)
      */
     public function rooms(Request $request)
     {
         $query = LoaiPhong::query();
 
-        // 1. ĐẾM SỐ PHÒNG TRỐNG (SỬA LẠI TÊN CỘT VÀ GIÁ TRỊ)
-        // Cột trong DB là 'tinh_trang', giá trị là 'available'
-        $query->withCount(['phongs' => function ($q) {
-            $q->where('tinh_trang', 'available'); 
+        // --- 1. LOGIC TÌM PHÒNG TRỐNG THEO NGÀY (NÂNG CAO) ---
+        $busyRoomIds = [];
+
+        // Nếu khách hàng có chọn ngày checkin/checkout trên bộ lọc
+        if ($request->filled('checkin') && $request->filled('checkout')) {
+            $checkIn = Carbon::parse($request->checkin);
+            $checkOut = Carbon::parse($request->checkout);
+
+            // Tìm các phòng đã có đơn đặt trong khoảng thời gian này
+            // Logic trùng: (Ngày Đến Cũ < Ngày Đi Mới) VÀ (Ngày Đi Cũ > Ngày Đến Mới)
+            $busyRoomIds = ChiTietDatPhong::whereHas('datPhong', function ($q) use ($checkIn, $checkOut) {
+                // Chỉ xét các đơn đang hoạt động (chưa hủy)
+                // Kể cả 'pending' (chưa duyệt) cũng phải chặn để tránh khách khác đặt chồng lên
+                $q->whereIn('trang_thai', ['pending', 'confirmed', 'awaiting_payment']) 
+                  ->where(function ($sub) use ($checkIn, $checkOut) {
+                      $sub->where('ngay_den', '<', $checkOut)
+                          ->where('ngay_di', '>', $checkIn);
+                  });
+            })->pluck('phong_id')->toArray();
+        }
+
+        // Đếm số phòng trống thực tế cho từng loại phòng
+        // (Trừ đi các phòng đang bảo trì HOẶC đã có người đặt trong ngày đó)
+        $query->withCount(['phongs' => function ($q) use ($busyRoomIds) {
+            // Phòng vật lý phải không bảo trì
+            $q->where('tinh_trang', '!=', 'maintenance'); 
+            
+            // Nếu có danh sách phòng bận theo ngày, loại bỏ chúng ra
+            if (!empty($busyRoomIds)) {
+                $q->whereNotIn('id', $busyRoomIds);
+            }
         }]);
 
-        // 2. CÁC BỘ LỌC
+        // --- 2. CÁC BỘ LỌC CƠ BẢN ---
         
         // Lọc Giá Min
         if ($request->filled('min_price')) {
@@ -50,15 +78,15 @@ class PageController extends Controller
             $query->where('gia', '<=', $request->input('max_price'));
         }
 
-        // Lọc Sức chứa
+        // Lọc Sức chứa (Sửa 'suc_chua' -> 'so_nguoi')
         if ($request->filled('capacity')) {
             $capacities = $request->input('capacity');
             $query->where(function($q) use ($capacities) {
-                $q->whereIn('suc_chua', $capacities); // Lưu ý: DB bạn là 'so_nguoi' hay 'suc_chua'? 
-                // Trong file SQL là 'so_nguoi', nếu code lỗi cột suc_chua thì đổi thành so_nguoi nhé.
-                // Tạm thời mình giữ 'suc_chua' theo các bước trước, nếu lỗi báo mình đổi lại 'so_nguoi'.
+                // Sửa tên cột cho khớp với database
+                $q->whereIn('so_nguoi', $capacities); 
+                
                 if (in_array('4', $capacities)) {
-                    $q->orWhere('suc_chua', '>=', 4);
+                    $q->orWhere('so_nguoi', '>=', 4);
                 }
             });
         }
@@ -76,10 +104,10 @@ class PageController extends Controller
             $query->whereIn('id', $request->input('room_types'));
         }
 
-        // 3. SẮP XẾP CHÍNH (Đẩy phòng còn trống lên trên)
+        // --- 3. SẮP XẾP CHÍNH (Đẩy phòng còn trống lên trên) ---
         $query->orderBy('phongs_count', 'desc');
 
-        // 4. SẮP XẾP PHỤ
+        // --- 4. SẮP XẾP PHỤ ---
         if ($request->filled('sort')) {
             $sort = $request->input('sort');
             switch ($sort) {
@@ -97,10 +125,9 @@ class PageController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        // 5. Phân trang
         $rooms = $query->paginate(9)->withQueryString();
         
-        // 6. Lấy dữ liệu cho Sidebar
+        // Dữ liệu Sidebar
         $tienNghis = TienNghi::all();
         $allLoaiPhongs = LoaiPhong::select('id', 'ten_loai_phong')->get();
 
@@ -110,15 +137,35 @@ class PageController extends Controller
     /**
      * Chi tiết Loại Phòng
      */
-    public function roomDetail($id)
+    public function roomDetail($id, Request $request)
     {
         $room = LoaiPhong::with(['tienNghis', 'phongs'])->findOrFail($id);
         
-        // SỬA LẠI: Đếm số phòng trống thực tế theo cột 'tinh_trang'
-        $phongTrong = $room->phongs->where('tinh_trang', 'available')->count(); 
+        // Logic đếm phòng trống tương tự cho trang chi tiết
+        $busyRoomIds = [];
+        if ($request->filled('checkin') && $request->filled('checkout')) {
+            $checkIn = Carbon::parse($request->checkin);
+            $checkOut = Carbon::parse($request->checkout);
+            
+            $busyRoomIds = ChiTietDatPhong::whereHas('datPhong', function ($q) use ($checkIn, $checkOut) {
+                $q->whereIn('trang_thai', ['pending', 'confirmed', 'awaiting_payment']) 
+                  ->where(function ($sub) use ($checkIn, $checkOut) {
+                      $sub->where('ngay_den', '<', $checkOut)
+                          ->where('ngay_di', '>', $checkIn);
+                  });
+            })->pluck('phong_id')->toArray();
+        }
 
-        // Gợi ý phòng khác (Lưu ý cột so_nguoi/suc_chua)
-        $relatedRooms = LoaiPhong::where('so_nguoi', $room->so_nguoi) // SQL của bạn dùng 'so_nguoi'
+        // Đếm số phòng trống cụ thể của loại này trong khoảng thời gian đó
+        $phongTrong = $room->phongs()
+            ->where('tinh_trang', '!=', 'maintenance')
+            ->when(!empty($busyRoomIds), function($q) use ($busyRoomIds) {
+                $q->whereNotIn('id', $busyRoomIds);
+            })
+            ->count();
+
+        // Gợi ý phòng khác (Sửa 'suc_chua' -> 'so_nguoi')
+        $relatedRooms = LoaiPhong::where('so_nguoi', $room->so_nguoi)
                              ->where('id', '!=', $id)
                              ->take(3)
                              ->get();

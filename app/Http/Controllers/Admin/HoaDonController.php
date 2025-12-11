@@ -5,29 +5,36 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\HoaDon;
 use Illuminate\Http\Request;
+use App\Models\DatPhong; // Import Model DatPhong để lấy dữ liệu nếu cần
 
 class HoaDonController extends Controller
 {
     
     public function getDanhSach()
     {
-        $hoaDons = HoaDon::all();
+        // Sử dụng eager loading để lấy thông tin đơn đặt phòng liên quan
+        $hoaDons = HoaDon::with('datPhong.user')->get();
         return view('admin.hoa_don.danh_sach', compact('hoaDons'));
     }
 
     public function getThem()
     {
-        return view('admin.hoa_don.them');
+        // Có thể cần truyền danh sách DatPhong IDs để chọn
+        $datPhongs = DatPhong::all(); 
+        return view('admin.hoa_don.them', compact('datPhongs'));
     }
 
     public function postThem(Request $request)
     {
+        // [CẬP NHẬT] Thêm validation cho cột thanh toán và ghi chú
         $data = $request->validate([
             'dat_phong_id' => 'required|exists:dat_phongs,id',
-            'ma_hoa_don' => 'required|string|max:100',
+            'ma_hoa_don' => 'required|string|max:100|unique:hoa_dons,ma_hoa_don', // Thêm unique check
             'ngay_lap' => 'required|date',
-            'tong_tien' => 'required|numeric',
+            'tong_tien' => 'required|numeric|min:0',
+            'phuong_thuc_thanh_toan' => 'required|string|max:50', // Cột bắt buộc
             'trang_thai' => 'nullable|string|max:50',
+            'ghi_chu' => 'nullable|string', // Thêm ghi chú
         ]);
 
         $orm = new HoaDon();
@@ -35,25 +42,36 @@ class HoaDonController extends Controller
         $orm->ma_hoa_don = $data['ma_hoa_don'];
         $orm->ngay_lap = $data['ngay_lap'];
         $orm->tong_tien = $data['tong_tien'];
-        $orm->trang_thai = $data['trang_thai'] ?? null;
+        
+        // [CẬP NHẬT] Lưu phương thức thanh toán
+        $orm->phuong_thuc_thanh_toan = $data['phuong_thuc_thanh_toan']; 
+        $orm->ghi_chu = $data['ghi_chu'] ?? null;
+        
+        $orm->trang_thai = $data['trang_thai'] ?? 'unpaid';
         $orm->save();
-        return redirect()->route('admin.hoa-don');
+        
+        return redirect()->route('admin.hoa-don')->with('success', 'Thêm hóa đơn thành công!');
     }
 
     public function getSua($id)
     {
-        $hoaDons = HoaDon::findOrFail($id);
-        return view('admin.hoa_don.sua', compact('hoaDons'));
+        $hoaDon = HoaDon::findOrFail($id); // Sửa tên biến từ $hoaDons -> $hoaDon
+        $datPhongs = DatPhong::all();
+        return view('admin.hoa_don.sua', compact('hoaDon', 'datPhongs'));
     }
 
     public function postSua(Request $request, $id)
     {
+        // [CẬP NHẬT] Thêm validation cho cột thanh toán và ghi chú
         $data = $request->validate([
             'dat_phong_id' => 'required|exists:dat_phongs,id',
-            'ma_hoa_don' => 'required|string|max:100',
+            // Unique, bỏ qua chính nó
+            'ma_hoa_don' => 'required|string|max:100|unique:hoa_dons,ma_hoa_don,'.$id, 
             'ngay_lap' => 'required|date',
-            'tong_tien' => 'required|numeric',
+            'tong_tien' => 'required|numeric|min:0',
+            'phuong_thuc_thanh_toan' => 'required|string|max:50', // Cột bắt buộc
             'trang_thai' => 'nullable|string|max:50',
+            'ghi_chu' => 'nullable|string', 
         ]);
 
         $orm = HoaDon::findOrFail($id);
@@ -61,47 +79,21 @@ class HoaDonController extends Controller
         $orm->ma_hoa_don = $data['ma_hoa_don'];
         $orm->ngay_lap = $data['ngay_lap'];
         $orm->tong_tien = $data['tong_tien'];
+        
+        // [CẬP NHẬT] Lưu phương thức thanh toán và ghi chú
+        $orm->phuong_thuc_thanh_toan = $data['phuong_thuc_thanh_toan']; 
+        $orm->ghi_chu = $data['ghi_chu'] ?? $orm->ghi_chu;
+
         $orm->trang_thai = $data['trang_thai'] ?? $orm->trang_thai;
         $orm->save();
-        return redirect()->route('admin.hoa-don');
+        
+        return redirect()->route('admin.hoa-don')->with('success', 'Cập nhật hóa đơn thành công!');
     }
 
     public function getXoa($id)
     {
         $orm = HoaDon::findOrFail($id);
         $orm->delete();
-        return redirect()->route('admin.hoa-don');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, HoaDon $hoaDon)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(HoaDon $hoaDon)
-    {
-        //
+        return redirect()->route('admin.hoa-don')->with('success', 'Xóa hóa đơn thành công!');
     }
 }

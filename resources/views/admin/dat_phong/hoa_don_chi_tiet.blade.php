@@ -28,7 +28,10 @@
             </div>
             <div class="text-right">
                 <p class="font-semibold text-gray-800">Mã đơn đặt: #{{ $datPhong->id }}</p>
-                <p class="text-gray-600">Ngày lập: {{ \Carbon\Carbon::parse($hoaDon->ngay_lap)->format('d/m/Y H:i') }}</p>
+                {{-- [FIXED] Sử dụng Carbon object từ Model DatPhong --}}
+                <p class="text-gray-600">Ngày lập: {{ $hoaDon->ngay_lap->format('d/m/Y H:i') }}</p>
+                <p class="text-xs text-gray-400">Ngày đến: {{ $datPhong->ngay_den->format('d/m/Y') }}</p>
+                <p class="text-xs text-gray-400">Ngày đi: {{ $datPhong->ngay_di->format('d/m/Y') }}</p>
             </div>
         </div>
 
@@ -49,6 +52,7 @@
                         {{ $ct->loaiPhong->ten_loai_phong ?? 'N/A' }}
                         <div class="text-xs text-gray-500">Phòng vật lý: **{{ $ct->phong->so_phong ?? 'Chưa gán' }}**</div>
                     </td>
+                    {{-- [FIXED] Sử dụng Carbon object từ Model DatPhong --}}
                     <td class="p-2 text-center">{{ $datPhong->ngay_den->diffInDays($datPhong->ngay_di) }}</td>
                     <td class="p-2 text-right">{{ number_format($ct->don_gia, 0, ',', '.') }} đ</td>
                     <td class="p-2 text-right">{{ number_format($ct->thanh_tien, 0, ',', '.') }} đ</td>

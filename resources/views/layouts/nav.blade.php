@@ -9,11 +9,6 @@
         Phòng & Suites
     </a>
 
-    <a href="{{ route('khuyen-mai') }}" 
-       class="nav-link {{ request()->routeIs('khuyen-mai*') ? 'active' : '' }}">
-        Ưu đãi
-    </a>
-
     <a href="#" class="nav-link">
         Về chúng tôi
     </a>

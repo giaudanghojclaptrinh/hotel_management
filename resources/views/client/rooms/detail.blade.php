@@ -5,6 +5,7 @@
 <div class="py-12 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
+        <!-- Breadcrumb -->
         <nav class="flex mb-8 text-sm text-gray-500">
             <a href="{{ route('trang_chu') }}" class="hover:text-brand-gold transition">Trang chủ</a>
             <span class="mx-2 text-gray-300">/</span>
@@ -15,8 +16,10 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             
+            <!-- CỘT TRÁI: Hình ảnh & Thông tin -->
             <div class="lg:col-span-2">
                 
+                <!-- ẢNH LỚN -->
                 <div class="rounded-2xl overflow-hidden shadow-2xl mb-8 group relative h-[500px]">
                     <img src="{{ $room->hinh_anh ? asset($room->hinh_anh) : asset('uploads/home/phongdefault.png') }}" 
                          class="w-full h-full object-cover transition duration-700 group-hover:scale-105" 
@@ -34,12 +37,14 @@
                     </div>
                 </div>
                 
+                <!-- MÔ TẢ -->
                 <div class="prose max-w-none text-gray-600 leading-relaxed mb-10">
                     <h3 class="font-serif text-2xl font-bold text-brand-900 mb-4 border-l-4 border-brand-gold pl-4">Mô tả phòng</h3>
                     <p class="mb-4">{{ $room->mo_ta ?? 'Chưa có mô tả chi tiết cho hạng phòng này.' }}</p>
                     <p>Được thiết kế với phong cách hiện đại pha lẫn nét cổ điển, phòng {{ $room->ten_loai_phong }} mang đến không gian nghỉ dưỡng lý tưởng. Nội thất cao cấp, ánh sáng tự nhiên và các tiện ích công nghệ cao sẽ làm hài lòng những vị khách khó tính nhất.</p>
                 </div>
 
+                <!-- TIỆN NGHI -->
                 <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
                     <h3 class="font-serif text-2xl font-bold text-brand-900 mb-6">Tiện nghi cao cấp</h3>
                     
@@ -60,6 +65,7 @@
                 </div>
             </div>
 
+            <!-- CỘT PHẢI: Form Đặt phòng (Sticky) -->
             <div class="lg:col-span-1">
                 <div class="bg-white p-8 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-gray-100 sticky top-24">
                     <div class="flex items-end justify-between mb-6 pb-6 border-b border-gray-100">
@@ -75,26 +81,29 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('booking.create') }}" method="GET">
+                    <!-- FORM KIỂM TRA & ĐẶT -->
+                    <!-- [FIXED] Thêm ID để xử lý JS -->
+                    <form action="{{ route('booking.create') }}" method="GET" id="booking-date-form">
                         <input type="hidden" name="room_id" value="{{ $room->id }}">
                         
                         <div class="space-y-5 mb-6">
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Ngày nhận phòng</label>
                                 <div class="relative">
-                                    <input type="date" name="checkin" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-brand-gold focus:border-transparent transition cursor-pointer" required min="{{ date('Y-m-d') }}">
+                                    <input type="date" id="checkin_date" name="checkin" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-brand-gold focus:border-transparent transition cursor-pointer" required min="{{ date('Y-m-d') }}">
                                     <i class="fa-regular fa-calendar absolute left-3 top-3.5 text-brand-gold"></i>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Ngày trả phòng</label>
                                 <div class="relative">
-                                    <input type="date" name="checkout" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-brand-gold focus:border-transparent transition cursor-pointer" required min="{{ date('Y-m-d') }}">
+                                    <input type="date" id="checkout_date" name="checkout" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:bg-white focus:ring-2 focus:ring-brand-gold focus:border-transparent transition cursor-pointer" required min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                                     <i class="fa-regular fa-calendar-check absolute left-3 top-3.5 text-brand-gold"></i>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Trạng thái phòng & Nút Submit -->
                         @if($phongTrong > 0)
                             <div class="mb-6 bg-green-50 text-green-800 px-4 py-3 rounded-lg flex items-center text-sm border border-green-200">
                                 <i class="fa-solid fa-circle-check mr-3 text-lg"></i> 
@@ -129,4 +138,54 @@
         </div>
     </div>
 </div>
+
+{{-- SCRIPT KIỂM TRA NGÀY HỢP LỆ --}}
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkinInput = document.getElementById('checkin_date');
+        const checkoutInput = document.getElementById('checkout_date');
+        const bookingForm = document.getElementById('booking-date-form');
+
+        // 1. Tự động cập nhật min date cho Checkout khi chọn Checkin
+        checkinInput.addEventListener('change', function() {
+            if (this.value) {
+                // Ngày trả phòng ít nhất phải sau ngày nhận phòng 1 ngày
+                const checkinDate = new Date(this.value);
+                checkinDate.setDate(checkinDate.getDate() + 1);
+                
+                // Format YYYY-MM-DD
+                const minCheckout = checkinDate.toISOString().split('T')[0];
+                checkoutInput.min = minCheckout;
+                
+                // Nếu ngày checkout hiện tại nhỏ hơn ngày checkin mới, reset nó
+                if (checkoutInput.value && checkoutInput.value <= this.value) {
+                    checkoutInput.value = minCheckout;
+                }
+            }
+        });
+
+        // 2. Validate khi bấm nút Submit
+        bookingForm.addEventListener('submit', function(e) {
+            const checkin = checkinInput.value;
+            const checkout = checkoutInput.value;
+
+            if (!checkin || !checkout) {
+                e.preventDefault();
+                alert('Vui lòng chọn đầy đủ ngày nhận và trả phòng!');
+                return;
+            }
+
+            const d1 = new Date(checkin);
+            const d2 = new Date(checkout);
+
+            if (d1 >= d2) {
+                e.preventDefault();
+                alert('Ngày trả phòng phải lớn hơn ngày nhận phòng ít nhất 1 ngày!');
+            }
+        });
+    });
+</script>
+@endpush
+
 @endsection

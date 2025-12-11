@@ -12,16 +12,25 @@ class DatPhong extends Model
 {
     use HasFactory;
 
-    protected $table = 'dat_phongs'; // Định nghĩa rõ tên bảng
+    protected $table = 'dat_phongs';
 
-    // SỬA LẠI FILLABLE CHO KHỚP VỚI CONTROLLER VÀ DATABASE
     protected $fillable = [
         'user_id',
         'ngay_den',      
         'ngay_di',        
         'tong_tien',      
         'trang_thai',
-        'payment_status', 
+        'payment_status',
+        'payment_method', // Thêm cột này
+        'promotion_code',
+        'discount_amount',
+        'ghi_chu',
+    ];
+
+    // [FIX LỖI] Khai báo các trường ngày tháng để tự động convert sang đối tượng Carbon
+    protected $casts = [
+        'ngay_den' => 'date',
+        'ngay_di' => 'date',
     ];
 
     /**

@@ -8,13 +8,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HoaDon extends Model
 {
-
+    use HasFactory;
+    
     protected $fillable = [
         'dat_phong_id',
         'ma_hoa_don',
         'ngay_lap',
         'tong_tien',
         'trang_thai',
+        'phuong_thuc_thanh_toan', 
+    ];
+
+    // [FIX LỖI] Khai báo cột ngày lập để tự động cast sang Carbon
+    protected $casts = [
+        'ngay_lap' => 'datetime', 
     ];
 
     /**
