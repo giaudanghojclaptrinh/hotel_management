@@ -1,9 +1,15 @@
 @extends('layouts.app')
 @section('title', 'Xác nhận đặt phòng')
 
+<!-- Gọi CSS & JS -->
+@vite(['resources/css/client/home.css', 'resources/css/client/booking.css', 'resources/js/client/booking.js'])
 
 @section('content')
-<div class="booking-page-wrapper" x-data="{ onlinePaymentSelected: false, showVnpayModal: false, finalTotalText: '{{ number_format($totalPrice, 0, ',', '.') }}đ' }">
+{{-- CẬP NHẬT: Thêm x-on:open-vnpay-modal.window để lắng nghe sự kiện từ file JS --}}
+<div class="booking-page-wrapper" 
+     x-data="{ onlinePaymentSelected: false, showVnpayModal: false, finalTotalText: '{{ number_format($totalPrice, 0, ',', '.') }}đ' }"
+     x-on:open-vnpay-modal.window="showVnpayModal = true">
+    
     <div class="container">
         
         <!-- Page Header -->
@@ -12,13 +18,20 @@
             <p class="page-desc">Vui lòng kiểm tra lại thông tin và áp dụng ưu đãi trước khi xác nhận.</p>
         </div>
 
+        {{-- FORM CHÍNH: Dùng để submit Pay at Hotel --}}
         <form action="{{ route('booking.store') }}" method="POST" class="booking-layout" id="booking-form">
             @csrf
+            <!-- Dữ liệu ẩn quan trọng -->
             <input type="hidden" name="room_id" value="{{ $roomType->id }}">
             <input type="hidden" name="checkin" value="{{ $checkIn }}">
             <input type="hidden" name="checkout" value="{{ $checkOut }}">
+            
+            <!-- Hidden inputs cho logic giảm giá (JS sẽ cập nhật value) -->
             <input type="hidden" name="discount_amount" id="discount-amount-input" value="0">
             <input type="hidden" name="promotion_code" id="promotion-code-hidden" value="">
+            
+            <!-- Input ẩn để gửi payment_method lên server (JS sẽ cập nhật trước khi submit) -->
+            <input type="hidden" name="payment_method" :value="onlinePaymentSelected ? 'online' : 'pay_at_hotel'">
 
             <!-- CỘT TRÁI -->
             <div class="booking-form-area">
@@ -68,7 +81,7 @@
                     
                     <!-- Option 1: Pay at hotel -->
                     <label class="payment-option" :class="{'selected': !onlinePaymentSelected}">
-                        <input type="radio" name="payment_method" value="pay_at_hotel" 
+                        <input type="radio" name="payment_method_radio" value="pay_at_hotel" 
                                :checked="!onlinePaymentSelected" 
                                @click="onlinePaymentSelected = false"
                                class="radio-custom">
@@ -81,7 +94,7 @@
 
                     <!-- Option 2: Online -->
                     <label class="payment-option" :class="{'selected': onlinePaymentSelected}">
-                        <input type="radio" name="payment_method" value="online" 
+                        <input type="radio" name="payment_method_radio" value="online" 
                                :checked="onlinePaymentSelected" 
                                @click="onlinePaymentSelected = true"
                                class="radio-custom">
@@ -102,7 +115,7 @@
                         <h3 class="step-title">Ghi chú (Tùy chọn)</h3>
                     </div>
                     <textarea name="ghi_chu" rows="3" placeholder="Nhập yêu cầu đặc biệt..." 
-                              class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: var(--white);"></textarea>
+                              class="form-control" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: var(--white); outline: none; padding: 10px; border-radius: 8px; width: 100%;"></textarea>
                 </div>
             </div>
 
@@ -153,11 +166,10 @@
                         </div>
                     </div>
 
-                    <!-- Nút xác nhận -->
-                    <button type="submit" 
-                            x-on:click.prevent="if (onlinePaymentSelected) { showVnpayModal = true; } else { document.getElementById('booking-form').submit(); }"
-                            class="btn-confirm-booking">
-                        <span x-text="onlinePaymentSelected ? 'THANH TOÁN NGAY' : 'GỬI YÊU CẦU'">GỬI YÊU CẦU</span>
+                    <!-- Nút xác nhận chính -->
+                    {{-- Thêm ID btn-main-submit để JS bắt sự kiện --}}
+                    <button type="submit" id="btn-main-submit" class="btn-confirm-booking">
+                        <span x-text="onlinePaymentSelected ? 'THANH TOÁN QR NGAY' : 'GỬI YÊU CẦU ĐẶT PHÒNG'">GỬI YÊU CẦU ĐẶT PHÒNG</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
                     
@@ -169,14 +181,15 @@
         </form>
     </div>
 
-    {{-- MODAL VNPAY QR (Giả lập) --}}
+    {{-- MODAL VNPAY QR (MÀN HÌNH XÁC NHẬN CUỐI CÙNG TRƯỚC KHI TẠO ĐƠN) --}}
     <div x-show="showVnpayModal" class="modal-overlay" x-cloak>
         <div class="modal-content" @click.away="showVnpayModal = false">
             <button @click="showVnpayModal = false" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
 
-            <h3 class="filter-title" style="margin-bottom: 0.5rem;">Quét mã thanh toán</h3>
+            <h3 class="filter-title" style="margin-bottom: 0.5rem; color: #fff;">Quét mã thanh toán</h3>
             <p class="text-muted" style="font-size: 0.9rem;">Sử dụng App Ngân hàng hoặc Ví VNPAY</p>
 
+            {{-- Form này sẽ POST dữ liệu đặt phòng đến Controller VNPay --}}
             <form action="{{ route('booking.vnpay.create') }}" method="POST" id="vnpay-form">
                 @csrf
                 <input type="hidden" name="room_id" value="{{ $roomType->id }}">
@@ -186,18 +199,23 @@
                 <input type="hidden" name="promotion_code" x-bind:value="document.getElementById('promotion-code-hidden').value">
                 <input type="hidden" name="payment_method" value="online">
                 
-                <div class="qr-container">
-                    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=VNPAY_TEST_PAYMENT&choe=UTF-8" alt="QR Code" class="w-full">
+                {{-- Dữ liệu giả định VNPay --}}
+                <input type="hidden" name="vnp_BankCode" value="VNPAYQR">
+                <input type="hidden" name="vnp_Locale" value="vn">
+                
+                <div class="qr-container" style="background: white; padding: 10px; border-radius: 8px; margin: 15px auto; width: fit-content;">
+                    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=VNPAY_TEST_PAYMENT&choe=UTF-8" alt="QR Code" style="width: 200px; height: 200px;">
                 </div>
 
                 <div class="mb-4">
                     <span class="text-muted text-sm block uppercase">Số tiền cần thanh toán</span>
-                    <strong class="final-price" x-text="finalTotalText"></strong>
+                    <strong class="final-price" style="color: #ef4444; font-size: 1.5rem;" x-text="finalTotalText"></strong>
                 </div>
 
-                <button type="submit" class="btn-confirm-booking" style="background: #10b981; color: white;"
-                        onclick="return confirm('Xác nhận đã chuyển khoản?')">
-                    <i class="fa-solid fa-check-double"></i> XÁC NHẬN ĐÃ THANH TOÁN
+                {{-- Thêm ID cho nút trong modal --}}
+                <button type="submit" id="btn-modal-submit" class="btn-confirm-booking" style="background: #10b981; color: white;"
+                        onclick="return confirm('Xác nhận bạn đã chuyển khoản thành công? Hệ thống sẽ tạo đơn ngay lập tức.')">
+                    <i class="fa-solid fa-check-double" style="margin-right: 5px;"></i> XÁC NHẬN ĐÃ THANH TOÁN
                 </button>
             </form>
         </div>

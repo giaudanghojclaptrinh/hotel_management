@@ -41,7 +41,7 @@ Route::get('/uu-dai', [PageController::class, 'promotions'])->name('khuyen-mai')
 // [API] Kiểm tra mã khuyến mãi
 Route::post('/api/check-promo', [BookingController::class, 'checkPromotion'])->name('api.check.promo');
 
-// [VNPAY CALLBACK] Route xử lý kết quả thanh toán (Được gọi nội bộ trong luồng Demo)
+// [VNPAY CALLBACK] Route xử lý kết quả thanh toán
 Route::get('/payment/callback', [BookingController::class, 'paymentCallback'])->name('payment.callback');
 
 
@@ -57,9 +57,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/ho-so', [ProfileController::class, 'update'])->name('profile.update');
 
     // 2. Lịch sử đặt phòng
-    Route::get('/lich-su-dat-phong', [DatPhongController::class, 'getDanhSach'])->name('bookings.history');
+    Route::get('/lich-su-dat-phong', [BookingController::class, 'history'])->name('bookings.history');
+    
+    // [MỚI - FIX LỖI] Route xem chi tiết hóa đơn của user
+    Route::get('/hoa-don-cua-toi/{id}', [BookingController::class, 'invoice'])->name('bookings.invoice');
 
-    // 3. Quy trình đặt phòng
+    // 3. Quy trình đặt phòng (Yêu cầu có Profile)
     Route::middleware(['check.profile'])->group(function () {
         Route::get('/dat-phong/xac-nhan', [BookingController::class, 'create'])->name('booking.create');
         
@@ -108,15 +111,11 @@ Route::prefix('admin')
     // Quản lý Đặt phòng
     Route::prefix('dat-phong')->group(function() {
         Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong');
-        
         Route::delete('/xoa-hang-loat', [DatPhongController::class, 'xoaHangLoat'])->name('admin.dat-phong.xoa-hang-loat');
-
         Route::get('/hoa-don/{id}', [DatPhongController::class, 'getHoaDon'])->name('admin.dat-phong.hoa-don'); 
         Route::post('/thanh-toan/{id}', [DatPhongController::class, 'postThanhToan'])->name('admin.dat-phong.thanh-toan');  
-
         Route::get('/duyet/{id}', [DatPhongController::class, 'duyetDon'])->name('admin.dat-phong.duyet'); 
         Route::get('/huy/{id}', [DatPhongController::class, 'huyDon'])->name('admin.dat-phong.huy'); 
-        
         Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');
         Route::post('/sua/{id}', [DatPhongController::class, 'postSua'])->name('admin.dat-phong.update');
         Route::get('/xoa/{id}', [DatPhongController::class, 'getXoa'])->name('admin.dat-phong.xoa');

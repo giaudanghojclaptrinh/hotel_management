@@ -19,13 +19,9 @@ use Illuminate\Support\Facades\Log;
 class BookingController extends Controller
 {
     // ===============================================
-    // HÀM HIỂN THỊ & API
+    // 1. HÀM HIỂN THỊ & API
     // ===============================================
 
-    /**
-     * Bước 1: Hiển thị form xác nhận đặt phòng
-     * [FIXED] Thêm kiểm tra phòng trống ngay tại đây để chặn nếu đã hết phòng.
-     */
     public function create(Request $request)
     {
         $loaiPhongId = $request->room_id;
@@ -37,23 +33,18 @@ class BookingController extends Controller
                 ->with('error', 'Vui lòng chọn ngày và loại phòng trước!');
         }
 
-        // --- [LOGIC MỚI] CHECK TRÙNG LỊCH NGAY LẬP TỨC ---
-        // Nếu không có phòng nào thỏa mãn điều kiện ngày tháng -> Quay về báo lỗi ngay
         $phongTrong = $this->findAvailableRoom($loaiPhongId, $checkIn, $checkOut);
-
+        
         if (!$phongTrong) {
             return redirect()->back()
-                ->with('error', 'Rất tiếc, loại phòng này đã HẾT PHÒNG hoặc CÓ NGƯỜI ĐẶT trong khoảng thời gian bạn chọn. Vui lòng chọn ngày khác!')
-                ->withInput(); // Giữ lại ngày khách đã chọn để họ biết
+                ->with('error', 'Rất tiếc, hạng phòng này đã HẾT CHỖ trong khoảng thời gian bạn chọn.')
+                ->withInput();
         }
-        // -------------------------------------------------
 
         $roomType = LoaiPhong::findOrFail($loaiPhongId);
-        
         $start = Carbon::parse($checkIn);
         $end = Carbon::parse($checkOut);
         $days = $start->diffInDays($end) ?: 1;
-        
         $totalPrice = $roomType->gia * $days;
 
         return view('client.booking.create', compact('roomType', 'checkIn', 'checkOut', 'days', 'totalPrice'));
@@ -79,11 +70,12 @@ class BookingController extends Controller
             : $khuyenMai->so_tien_giam_gia;
 
         if ($discountAmount > $originalTotal) $discountAmount = $originalTotal;
+        $finalTotal = $originalTotal - $discountAmount;
 
         return response()->json([
             'success' => true,
             'discount_amount' => round($discountAmount),
-            'final_total' => round($originalTotal - $discountAmount),
+            'final_total' => round($finalTotal),
             'message' => 'Áp dụng mã thành công!'
         ], 200);
     }
@@ -92,20 +84,14 @@ class BookingController extends Controller
         return view('client.booking.success');
     }
 
-    // ================================================================
-    // LOGIC TÌM PHÒNG TRỐNG THEO NGÀY
-    // ================================================================
+    // ===============================================
+    // 2. LOGIC TÌM PHÒNG (CORE)
+    // ===============================================
 
-    /**
-     * Tìm 1 phòng vật lý thuộc Loại Phòng, KHÔNG BỊ TRÙNG LỊCH trong khoảng thời gian khách chọn.
-     */
     private function findAvailableRoom($loaiPhongId, $checkIn, $checkOut)
     {
-        // 1. Lấy danh sách ID các phòng ĐANG BẬN trong khoảng thời gian này
-        // Logic trùng lịch: (NgayDen_Moi < NgayDi_Cu) AND (NgayDi_Moi > NgayDen_Cu)
         $bookedRoomIds = ChiTietDatPhong::whereHas('datPhong', function ($query) use ($checkIn, $checkOut) {
-            // Chỉ xét các đơn đang hoạt động (kể cả pending chưa duyệt)
-            $query->whereIn('trang_thai', ['pending', 'confirmed', 'awaiting_payment'])
+            $query->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment'])
                   ->where(function ($q) use ($checkIn, $checkOut) {
                       $q->where('ngay_den', '<', $checkOut)
                         ->where('ngay_di', '>', $checkIn);
@@ -114,7 +100,6 @@ class BookingController extends Controller
           ->pluck('phong_id')
           ->toArray();
 
-        // 2. Tìm phòng thuộc loại này, KHÔNG nằm trong danh sách bận, và không bảo trì
         $phongTrong = Phong::where('loai_phong_id', $loaiPhongId)
                            ->where('tinh_trang', '!=', 'maintenance') 
                            ->whereNotIn('id', $bookedRoomIds) 
@@ -124,12 +109,9 @@ class BookingController extends Controller
     }
     
     // ===============================================
-    // XỬ LÝ LƯU ĐƠN HÀNG (STORE LOGIC)
+    // 3. XỬ LÝ ĐẶT PHÒNG
     // ===============================================
 
-    /**
-     * Case 1: Thanh toán tại khách sạn
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -142,19 +124,19 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         try {
-            // Check lại lần nữa khi submit cho chắc chắn
             $phongTrong = $this->findAvailableRoom($request->room_id, $request->checkin, $request->checkout);
 
             if (!$phongTrong) {
                 DB::rollBack();
-                return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất trong lúc bạn đang thao tác.');
+                return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất.');
             }
 
             $this->createBooking($request, 'pending', 'unpaid', $phongTrong);
             
             DB::commit();
+            
             return redirect()->route('booking.success')
-                ->with('success', 'Đặt phòng thành công! Vui lòng chờ Admin xác nhận.')
+                ->with('success', 'Đặt phòng thành công! Đơn hàng đang chờ Admin xác nhận.')
                 ->with('booking_id', session('temp_booking_id'));
 
         } catch (\Exception $e) {
@@ -163,15 +145,12 @@ class BookingController extends Controller
         }
     }
     
-    /**
-     * Case 2: Thanh toán Online VNPay (Demo)
-     */
     public function postVnPayStore(Request $request)
     {
         $request->validate([
             'room_id' => 'required|exists:loai_phongs,id',
             'checkin' => 'required|date',
-            'checkout' => 'required|date|after:checkin',
+            'checkout' => 'required|date',
             'vnp_BankCode' => 'required|string', 
         ]);
 
@@ -181,13 +160,11 @@ class BookingController extends Controller
 
             if (!$phongTrong) {
                 DB::rollBack();
-                return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất trong lúc bạn đang thao tác.');
+                return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất.');
             }
 
-            // Tạo đơn confirmed & paid
             $booking = $this->createBooking($request, 'confirmed', 'paid', $phongTrong);
             
-            // Tạo hóa đơn
             HoaDon::create([
                 'dat_phong_id' => $booking->id,
                 'ma_hoa_don' => 'HD' . time() . rand(1000, 9999),
@@ -209,10 +186,10 @@ class BookingController extends Controller
         }
     }
 
-    // --- Helper function ---
     private function createBooking($request, $status, $paymentStatus, $phongTrong)
     {
         $loaiPhong = LoaiPhong::find($request->room_id);
+
         $days = Carbon::parse($request->checkin)->diffInDays(Carbon::parse($request->checkout)) ?: 1;
         $originalTotal = $loaiPhong->gia * $days;
         $discountAmount = $request->discount_amount ?? 0;
@@ -228,13 +205,13 @@ class BookingController extends Controller
             'payment_method' => $request->payment_method,
             'promotion_code' => $request->promotion_code,
             'discount_amount' => $discountAmount,
-            'ghi_chu' => $request->ghi_chu,
+            'ghi_chu' => $request->ghi_chu ?? ($request->vnp_OrderInfo ?? null),
         ]);
 
         ChiTietDatPhong::create([
             'dat_phong_id' => $booking->id,
             'loai_phong_id' => $loaiPhong->id,
-            'phong_id' => $phongTrong->id,
+            'phong_id' => $phongTrong->id, 
             'so_luong' => 1,
             'don_gia' => $loaiPhong->gia,
             'thanh_tien' => $originalTotal,
@@ -242,5 +219,31 @@ class BookingController extends Controller
         
         session()->flash('temp_booking_id', $booking->id);
         return $booking;
+    }
+
+    public function paymentCallback(Request $request) { return redirect()->route('trang_chu'); }
+
+    // ===============================================
+    // [HÀM LỊCH SỬ & HÓA ĐƠN]
+    // ===============================================
+    
+    public function history()
+    {
+        $bookings = DatPhong::where('user_id', Auth::id())
+            ->with(['chiTietDatPhongs.loaiPhong', 'hoaDon']) 
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('client.booking.history', compact('bookings'));
+    }
+
+    public function invoice($id)
+    {
+        $booking = DatPhong::where('user_id', Auth::id())
+            ->with(['chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong', 'hoaDon', 'user'])
+            ->findOrFail($id);
+
+        // [FIXED] Trỏ đúng đường dẫn view: 'client.booking.invoice' (số ít)
+        return view('client.booking.invoice', compact('booking'));
     }
 }

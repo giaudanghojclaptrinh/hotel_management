@@ -37,8 +37,8 @@
 
         <!-- Buttons -->
         <div class="btn-group-vertical">
-            @if (Route::has('bookings.history'))
-                <a href="{{ route('bookings.history') }}" class="btn btn-primary" style="color: #000; width: 100%; box-sizing: border-box; text-decoration: none;">
+            @if (Route::has('booking.invoice'))
+                <a href="{{ route('booking.invoice') }}" class="btn btn-primary" style="color: #000; width: 100%; box-sizing: border-box; text-decoration: none;">
                     Xem chi tiết đơn hàng
                 </a>
             @endif
