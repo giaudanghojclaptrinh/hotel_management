@@ -33,6 +33,7 @@ class BookingController extends Controller
                 ->with('error', 'Vui lòng chọn ngày và loại phòng trước!');
         }
 
+        // Kiểm tra phòng trống
         $phongTrong = $this->findAvailableRoom($loaiPhongId, $checkIn, $checkOut);
         
         if (!$phongTrong) {
@@ -42,6 +43,7 @@ class BookingController extends Controller
         }
 
         $roomType = LoaiPhong::findOrFail($loaiPhongId);
+        
         $start = Carbon::parse($checkIn);
         $end = Carbon::parse($checkOut);
         $days = $start->diffInDays($end) ?: 1;
@@ -81,7 +83,14 @@ class BookingController extends Controller
     }
 
     public function success() {
-        return view('client.booking.success');
+        $bookingId = session('booking_id');
+        $booking = null;
+
+        if ($bookingId) {
+            $booking = DatPhong::find($bookingId);
+        }
+
+        return view('client.booking.success', compact('booking'));
     }
 
     // ===============================================
@@ -176,9 +185,8 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('booking.success')
-                ->with('success', 'Thanh toán Online thành công! Đơn phòng của bạn đã được xác nhận tự động.')
-                ->with('booking_id', $booking->id);
+            return redirect()->route('bookings.invoice', $booking->id)
+                ->with('success', 'Thanh toán Online thành công! Đơn phòng của bạn đã được xác nhận tự động.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -243,7 +251,7 @@ class BookingController extends Controller
             ->with(['chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong', 'hoaDon', 'user'])
             ->findOrFail($id);
 
-        // [FIXED] Trỏ đúng đường dẫn view: 'client.booking.invoice' (số ít)
+        // [FIXED] Sửa biến compact từ 'bookings' thành 'booking'
         return view('client.booking.invoice', compact('booking'));
     }
 }

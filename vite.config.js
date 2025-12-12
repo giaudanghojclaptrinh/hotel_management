@@ -22,6 +22,8 @@ export default defineConfig({
                 'resources/js/client/profile.js',
                 'resources/css/client/booking.css',
                 'resources/js/client/booking.js',
+                'resources/js/client/about.js',
+                'resources/css/client/about.css',
             ],
             refresh: true,
         }),

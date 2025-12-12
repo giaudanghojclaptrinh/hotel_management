@@ -1,32 +1,51 @@
+import '../bootstrap';
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Booking Logic Loaded');
 
-    // Kiểm tra Axios
+    // 0. CẤU HÌNH AXIOS & CSRF TOKEN
     if (typeof axios === 'undefined') {
-        console.warn('Axios is not loaded. AJAX requests may fail.');
+        console.warn('Axios is not loaded.');
+    } else {
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (token) {
+            axios.defaults.headers.common['X-CSRF-TOKEN'] = token.getAttribute('content');
+        } else {
+            console.error('CSRF token not found');
+        }
     }
 
     // ==========================================
-    // 1. XỬ LÝ MÃ KHUYẾN MÃI (PROMO CODE) - Giữ nguyên logic cũ
+    // 1. XỬ LÝ MÃ KHUYẾN MÃI (PROMO CODE)
     // ==========================================
-    const promoInput = document.getElementById('promotion-code-input');
     const applyBtn = document.getElementById('apply-promo-btn');
+    const promoInput = document.getElementById('promotion-code-input');
     const promoMessage = document.getElementById('promo-message');
+
+    // Các phần tử hiển thị giá
     const originalTotalSpan = document.getElementById('original-total');
     const discountDisplay = document.getElementById('discount-display');
     const finalTotalDisplay = document.getElementById('final-total-display');
     const promoCodeDisplay = document.getElementById('promo-code-display');
+
+    // Inputs ẩn (Form Chính)
     const discountAmountInput = document.getElementById('discount-amount-input');
     const promoCodeHidden = document.getElementById('promotion-code-hidden');
 
-    // Helper function để lấy Alpine data an toàn
+    // Inputs ẩn trong Modal (để cập nhật giá trị khi submit modal)
+    const modalDiscountInput = document.querySelector('#vnpay-form input[name="discount_amount"]');
+    const modalPromoInput = document.querySelector('#vnpay-form input[name="promotion_code"]');
+
+    // AlpineJS Helper (Để cập nhật số tiền trong Modal QR)
     const getAlpineData = () => {
         const alpineEl = document.querySelector('[x-data]');
         return (alpineEl && alpineEl.__x) ? alpineEl.__x.$data : null;
     };
 
     if (applyBtn && originalTotalSpan) {
-        const originalTotal = parseFloat(originalTotalSpan.dataset.originalPrice || 0);
+        // Lấy giá trị gốc từ data-attribute
+        const rawPrice = originalTotalSpan.dataset.originalPrice || '0';
+        const originalTotal = parseFloat(rawPrice);
 
         const formatCurrency = (amount) => {
             return new Intl.NumberFormat('vi-VN', {
@@ -37,22 +56,37 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const updateSummary = (discount, finalTotal, message, code = '—') => {
+            // 1. Cập nhật giao diện text
             if (discountDisplay) discountDisplay.textContent = '- ' + formatCurrency(discount);
             if (finalTotalDisplay) finalTotalDisplay.textContent = formatCurrency(finalTotal);
             if (promoCodeDisplay) promoCodeDisplay.textContent = code;
 
+            // 2. Cập nhật Input ẩn (Form Chính)
             if (discountAmountInput) discountAmountInput.value = discount;
             if (promoCodeHidden) promoCodeHidden.value = (code !== '—') ? code : '';
 
-            // Update AlpineJS data
+            // 3. Cập nhật Input ẩn (Form Modal) - Quan trọng để thanh toán đúng giá
+            if (modalDiscountInput) modalDiscountInput.value = discount;
+            if (modalPromoInput) modalPromoInput.value = (code !== '—') ? code : '';
+
+            // 4. Cập nhật Alpine Data (Để hiển thị số tiền trong Modal QR)
             const alpineData = getAlpineData();
             if (alpineData) {
                 alpineData.finalTotalText = formatCurrency(finalTotal);
             }
 
+            // 5. Hiển thị thông báo
             if (message && promoMessage) {
                 promoMessage.textContent = message;
-                promoMessage.className = `promo-msg ${discount > 0 ? 'success' : 'error'}`;
+                promoMessage.className = 'promo-msg text-sm mt-2 font-medium';
+
+                if (discount > 0) {
+                    promoMessage.classList.add('text-green-600');
+                    promoMessage.style.color = '#10b981';
+                } else {
+                    promoMessage.classList.add('text-red-600');
+                    promoMessage.style.color = '#ef4444';
+                }
             } else if (promoMessage) {
                 promoMessage.textContent = '';
             }
@@ -66,15 +100,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Loading state
             applyBtn.disabled = true;
+            const originalBtnText = applyBtn.textContent;
             applyBtn.textContent = '...';
+
             if (promoMessage) {
                 promoMessage.textContent = 'Đang kiểm tra...';
-                promoMessage.className = 'promo-msg';
+                promoMessage.style.color = '#6b7280';
             }
 
             try {
-                const response = await axios.post('/api/check-promo', {
+                // [FIXED] Lấy URL từ data-attribute (đã được Blade truyền)
+                const checkUrl = applyBtn.dataset.routeCheckPromo;
+
+                if (!checkUrl) {
+                    throw new Error("Không tìm thấy đường dẫn API (data-route-check-promo thiếu).");
+                }
+
+                const response = await axios.post(checkUrl, {
                     code: code,
                     original_total: originalTotal
                 });
@@ -86,68 +130,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     updateSummary(0, originalTotal, data.message, '—');
                 }
+
             } catch (error) {
                 console.error("Promo Check Error:", error);
+
                 let msg = 'Lỗi hệ thống khi kiểm tra mã.';
-                if (error.response && error.response.data && error.response.data.message) {
-                    msg = error.response.data.message;
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        msg = 'Không tìm thấy API (404). Kiểm tra route.';
+                    } else if (error.response.status === 419) {
+                        msg = 'Phiên làm việc hết hạn. Vui lòng tải lại trang.';
+                    } else if (error.response.data && error.response.data.message) {
+                        // Lấy thông báo lỗi từ server (Ví dụ: Mã hết hạn, mã đã dùng)
+                        msg = error.response.data.message;
+                    }
                 }
+
                 updateSummary(0, originalTotal, msg, '—');
             } finally {
                 applyBtn.disabled = false;
-                applyBtn.textContent = 'Áp dụng';
+                applyBtn.textContent = originalBtnText;
             }
         });
 
-        promoInput.addEventListener('input', () => {
-            if (promoMessage && promoMessage.classList.contains('error')) {
-                promoMessage.textContent = '';
-            }
-        });
-    }
-
-    // ==========================================
-    // 2. XỬ LÝ SUBMIT FORM CHÍNH (Chọn phương thức)
-    // ==========================================
-    const mainSubmitBtn = document.getElementById('btn-main-submit');
-
-    if (mainSubmitBtn) {
-        mainSubmitBtn.addEventListener('click', function(e) {
-            // Lấy radio button đang được chọn
-            const paymentMethodRadio = document.querySelector('input[name="payment_method_radio"]:checked');
-
-            let isOnline = false;
-
-            if (paymentMethodRadio) {
-                isOnline = (paymentMethodRadio.value === 'online');
-            } else {
-                // Fallback: Check state Alpine nếu radio chưa tìm thấy trong DOM
-                const alpineData = getAlpineData();
-                if (alpineData) {
-                    isOnline = alpineData.onlinePaymentSelected;
+        // Reset message khi user nhập lại
+        if (promoInput) {
+            promoInput.addEventListener('input', () => {
+                if (promoMessage) {
+                    promoMessage.textContent = '';
                 }
-            }
-
-            if (isOnline) {
-                // Nếu chọn Online: Chặn submit form gốc, mở Modal VNPay
-                e.preventDefault();
-
-                // Dispatch sự kiện custom để mở modal (tương tác tốt hơn với Alpine)
-                window.dispatchEvent(new CustomEvent('open-vnpay-modal'));
-            } else {
-                // Nếu chọn Pay at Hotel: Để form tự submit (nút type="submit")
-                // Không cần làm gì thêm
-            }
-        });
+            });
+        }
     }
-
-    // ==========================================
-    // 3. XỬ LÝ NÚT XÁC NHẬN THANH TOÁN QR (Trong Modal)
-    // ==========================================
-    // Phần này chủ yếu để đảm bảo form submit đúng route khi nhấn nút trong modal
-    // Mặc định HTML form đã có action đúng, nút submit sẽ tự động gửi đi.
-    // Logic confirm() đã được xử lý inline trong blade onclick="return confirm(...)"
-
-    const vnpayForm = document.getElementById('vnpay-form');
-    // Không cần can thiệp thêm nếu form HTML đã chuẩn
 });
+
+// LƯU Ý: Hàm submitVnPay (logic xử lý nút Xác nhận thanh toán) đã được chuyển
+// sang script nội tuyến trong create.blade.php.

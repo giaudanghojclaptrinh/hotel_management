@@ -9,7 +9,8 @@
         Phòng & Suites
     </a>
 
-    <a href="#" class="nav-link">
+    <a href="{{ route('ve-chung-toi') }}" 
+       class="nav-link {{ request()->routeIs('ve-chung-toi') ? 'active' : '' }}">
         Về chúng tôi
     </a>
     

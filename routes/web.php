@@ -44,6 +44,10 @@ Route::post('/api/check-promo', [BookingController::class, 'checkPromotion'])->n
 // [VNPAY CALLBACK] Route xử lý kết quả thanh toán
 Route::get('/payment/callback', [BookingController::class, 'paymentCallback'])->name('payment.callback');
 
+Route::get('/ve-chung-toi', function () {
+    return view('client.about.index');
+})->name('ve-chung-toi');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +65,8 @@ Route::middleware('auth')->group(function () {
     
     // [MỚI - FIX LỖI] Route xem chi tiết hóa đơn của user
     Route::get('/hoa-don-cua-toi/{id}', [BookingController::class, 'invoice'])->name('bookings.invoice');
+    
+    // route::get('')
 
     // 3. Quy trình đặt phòng (Yêu cầu có Profile)
     Route::middleware(['check.profile'])->group(function () {

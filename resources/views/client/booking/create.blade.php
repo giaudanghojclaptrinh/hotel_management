@@ -5,9 +5,9 @@
 @vite(['resources/css/client/home.css', 'resources/css/client/booking.css', 'resources/js/client/booking.js'])
 
 @section('content')
-{{-- CẬP NHẬT: Thêm x-on:open-vnpay-modal.window để lắng nghe sự kiện từ file JS --}}
+{{-- Khai báo Alpine.js --}}
 <div class="booking-page-wrapper" 
-     x-data="{ onlinePaymentSelected: false, showVnpayModal: false, finalTotalText: '{{ number_format($totalPrice, 0, ',', '.') }}đ' }"
+     x-data="{ onlinePaymentSelected: false, showVnpayModal: false, finalTotalText: '{{ number_format($totalPrice, 0, ',', '.') }}đ', vnpLocale: 'vn', vnpOrderInfo: 'Thanh toan don dat phong #{{ $roomType->id }}' }"
      x-on:open-vnpay-modal.window="showVnpayModal = true">
     
     <div class="container">
@@ -19,7 +19,10 @@
         </div>
 
         {{-- FORM CHÍNH: Dùng để submit Pay at Hotel --}}
-        <form action="{{ route('booking.store') }}" method="POST" class="booking-layout" id="booking-form">
+        <form action="{{ route('booking.store') }}" 
+              method="POST" 
+              class="booking-layout" 
+              id="booking-form">
             @csrf
             <!-- Dữ liệu ẩn quan trọng -->
             <input type="hidden" name="room_id" value="{{ $roomType->id }}">
@@ -30,7 +33,7 @@
             <input type="hidden" name="discount_amount" id="discount-amount-input" value="0">
             <input type="hidden" name="promotion_code" id="promotion-code-hidden" value="">
             
-            <!-- Input ẩn để gửi payment_method lên server (JS sẽ cập nhật trước khi submit) -->
+            <!-- Input ẩn để gửi payment_method lên server -->
             <input type="hidden" name="payment_method" :value="onlinePaymentSelected ? 'online' : 'pay_at_hotel'">
 
             <!-- CỘT TRÁI -->
@@ -42,7 +45,6 @@
                         <div class="step-number">1</div>
                         <h3 class="step-title">Thông tin đăng ký</h3>
                     </div>
-                    
                     <div class="info-grid">
                         <div class="info-group">
                             <label class="info-label">Họ và tên</label>
@@ -67,9 +69,13 @@
                     <div class="promo-input-group">
                         <input type="text" name="promotion_code_display" id="promotion-code-input"
                                placeholder="NHẬP MÃ (VD: SUMMER2025)..." class="promo-input">
-                        <button type="button" id="apply-promo-btn" class="btn-apply">Áp dụng</button>
+                        
+                        {{-- data-route-check-promo để booking.js gọi API --}}
+                        <button type="button" id="apply-promo-btn" 
+                                data-route-check-promo="{{ route('api.check.promo') }}"
+                                class="btn-apply">Áp dụng</button>
                     </div>
-                    <p id="promo-message" class="promo-msg"></p>
+                    <p id="promo-message" class="promo-msg text-sm font-medium mt-2"></p>
                 </div>
                 
                 <!-- 3. Thanh toán -->
@@ -124,7 +130,6 @@
                 <div class="summary-card" id="summary-card">
                     <h3 class="summary-title">Chi tiết đơn đặt</h3>
                     
-                    <!-- Info Phòng -->
                     <div class="summary-room-info">
                         <img src="{{ $roomType->hinh_anh ? asset($roomType->hinh_anh) : asset('uploads/home/phongdefault.png') }}" class="summary-thumb">
                         <div>
@@ -133,7 +138,6 @@
                         </div>
                     </div>
 
-                    <!-- Ngày -->
                     <div class="summary-dates">
                         <div class="date-row">
                             <div class="date-col">
@@ -149,10 +153,10 @@
                         <span class="stay-duration"><i class="fa-regular fa-clock"></i> {{ $days }} Đêm lưu trú</span>
                     </div>
 
-                    <!-- Tiền -->
                     <div class="summary-totals">
                         <div class="total-row">
                             <span>Giá gốc</span>
+                            {{-- [QUAN TRỌNG] data-original-price cho JS đọc --}}
                             <span id="original-total" data-original-price="{{ $totalPrice }}">{{ number_format($totalPrice, 0, ',', '.') }}đ</span>
                         </div>
                         <div class="total-row discount">
@@ -166,9 +170,11 @@
                         </div>
                     </div>
 
-                    <!-- Nút xác nhận chính -->
-                    {{-- Thêm ID btn-main-submit để JS bắt sự kiện --}}
-                    <button type="submit" id="btn-main-submit" class="btn-confirm-booking">
+                    {{-- NÚT SUBMIT CHÍNH --}}
+                    {{-- Logic: Nếu Online -> Mở Modal. Nếu Tại quầy -> Submit form store --}}
+                    <button type="submit" 
+                            x-on:click.prevent="if (onlinePaymentSelected) { showVnpayModal = true; } else { document.getElementById('booking-form').action = '{{ route('booking.store') }}'; document.getElementById('booking-form').submit(); }"
+                            class="btn-confirm-booking">
                         <span x-text="onlinePaymentSelected ? 'THANH TOÁN QR NGAY' : 'GỬI YÊU CẦU ĐẶT PHÒNG'">GỬI YÊU CẦU ĐẶT PHÒNG</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
@@ -181,7 +187,7 @@
         </form>
     </div>
 
-    {{-- MODAL VNPAY QR (MÀN HÌNH XÁC NHẬN CUỐI CÙNG TRƯỚC KHI TẠO ĐƠN) --}}
+    {{-- MODAL VNPAY QR (MÀN HÌNH XÁC NHẬN DEMO) --}}
     <div x-show="showVnpayModal" class="modal-overlay" x-cloak>
         <div class="modal-content" @click.away="showVnpayModal = false">
             <button @click="showVnpayModal = false" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
@@ -189,20 +195,23 @@
             <h3 class="filter-title" style="margin-bottom: 0.5rem; color: #fff;">Quét mã thanh toán</h3>
             <p class="text-muted" style="font-size: 0.9rem;">Sử dụng App Ngân hàng hoặc Ví VNPAY</p>
 
-            {{-- Form này sẽ POST dữ liệu đặt phòng đến Controller VNPay --}}
-            <form action="{{ route('booking.vnpay.create') }}" method="POST" id="vnpay-form">
+            {{-- Form này sẽ POST dữ liệu đặt phòng đến Controller VNPay (Demo) --}}
+            <form action="{{ route('booking.vnpay.create') }}" method="POST" id="vnpay-form" class="space-y-4"> 
                 @csrf
                 <input type="hidden" name="room_id" value="{{ $roomType->id }}">
                 <input type="hidden" name="checkin" value="{{ $checkIn }}">
                 <input type="hidden" name="checkout" value="{{ $checkOut }}">
-                <input type="hidden" name="discount_amount" x-bind:value="document.getElementById('discount-amount-input').value">
-                <input type="hidden" name="promotion_code" x-bind:value="document.getElementById('promotion-code-hidden').value">
+                
+                {{-- Các input này sẽ được JS cập nhật từ form chính khi submit modal --}}
+                <input type="hidden" name="discount_amount" value="0">
+                <input type="hidden" name="promotion_code" value="">
+
                 <input type="hidden" name="payment_method" value="online">
-                
-                {{-- Dữ liệu giả định VNPay --}}
                 <input type="hidden" name="vnp_BankCode" value="VNPAYQR">
-                <input type="hidden" name="vnp_Locale" value="vn">
-                
+                {{-- Các input này sẽ được cập nhật từ Alpine --}}
+                <input type="hidden" name="vnp_Locale" x-model="vnpLocale">
+                <input type="hidden" name="vnp_OrderInfo" x-model="vnpOrderInfo">
+
                 <div class="qr-container" style="background: white; padding: 10px; border-radius: 8px; margin: 15px auto; width: fit-content;">
                     <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=VNPAY_TEST_PAYMENT&choe=UTF-8" alt="QR Code" style="width: 200px; height: 200px;">
                 </div>
@@ -212,13 +221,46 @@
                     <strong class="final-price" style="color: #ef4444; font-size: 1.5rem;" x-text="finalTotalText"></strong>
                 </div>
 
-                {{-- Thêm ID cho nút trong modal --}}
-                <button type="submit" id="btn-modal-submit" class="btn-confirm-booking" style="background: #10b981; color: white;"
-                        onclick="return confirm('Xác nhận bạn đã chuyển khoản thành công? Hệ thống sẽ tạo đơn ngay lập tức.')">
-                    <i class="fa-solid fa-check-double" style="margin-right: 5px;"></i> XÁC NHẬN ĐÃ THANH TOÁN
-                </button>
+                <div>
+                    {{-- NÚT NÀY GỌI HÀM JS submitVnPay() định nghĩa bên dưới --}}
+                    <button type="button" 
+                            onclick="submitVnPay()"
+                            class="btn-confirm-booking" style="background: #10b981; color: white;">
+                        <i class="fa-solid fa-check-double" style="margin-right: 5px;"></i> XÁC NHẬN ĐÃ THANH TOÁN
+                    </button>
+                    <p class="text-[11px] text-gray-400 mt-2">Nhấn nút trên sau khi đã quét mã thành công.</p>
+                </div>
             </form>
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Hàm xử lý khi nhấn nút Xác nhận trong Modal
+    window.submitVnPay = function() {
+        if (confirm('Xác nhận đã thanh toán bằng QR Code? Đơn hàng sẽ được tạo và duyệt ngay lập tức.')) {
+            
+            const modalForm = document.getElementById('vnpay-form');
+            if (!modalForm) return;
+
+            // Đồng bộ dữ liệu giảm giá từ form chính sang form modal
+            // Để đảm bảo giá trị giảm giá được gửi đi chính xác
+            const mainDiscount = document.getElementById('discount-amount-input');
+            const mainPromo = document.getElementById('promotion-code-hidden');
+            
+            if (mainDiscount) {
+                modalForm.querySelector('input[name="discount_amount"]').value = mainDiscount.value;
+            }
+            if (mainPromo) {
+                modalForm.querySelector('input[name="promotion_code"]').value = mainPromo.value;
+            }
+
+            // Submit form modal
+            modalForm.submit();
+        }
+    };
+</script>
+@endpush
+
 @endsection
