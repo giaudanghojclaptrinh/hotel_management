@@ -1,0 +1,33 @@
+.contact-hero {
+    background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+}
+
+.contact-card {
+    background: #ffffff;
+    border: 1px solid #eef2f7;
+    padding: 1.25rem;
+    border-radius: .75rem;
+}
+
+.contact-list li {
+    color: #374151;
+}
+
+.contact-form-wrapper .form-input {
+    width: 100%;
+    padding: .6rem .75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: .5rem;
+}
+
+.contact-form-wrapper .btn-primary {
+    background: #c5a47e;
+    color: #000;
+    padding: .6rem 1rem;
+    border-radius: .5rem;
+}
+
+.contact-form-wrapper .btn-primary:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}

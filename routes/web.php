@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\TienNghiController;
 use App\Http\Controllers\Client\PageController;
 use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Client\NotificationController; // Import Notification Controller
 
 Auth::routes();
 
@@ -44,9 +45,11 @@ Route::post('/api/check-promo', [BookingController::class, 'checkPromotion'])->n
 // [VNPAY CALLBACK] Route xử lý kết quả thanh toán
 Route::get('/payment/callback', [BookingController::class, 'paymentCallback'])->name('payment.callback');
 
-Route::get('/ve-chung-toi', function () {
-    return view('client.about.index');
-})->name('ve-chung-toi');
+Route::get('/ve-chung-toi', [PageController::class, 'about'])->name('ve-chung-toi');
+// Contact page
+Route::get('/lien-he', function () {
+    return view('client.contact.index');
+})->name('contact');
 
 
 /*
@@ -63,12 +66,20 @@ Route::middleware('auth')->group(function () {
     // 2. Lịch sử đặt phòng
     Route::get('/lich-su-dat-phong', [BookingController::class, 'history'])->name('bookings.history');
     
-    // [MỚI - FIX LỖI] Route xem chi tiết hóa đơn của user
+    // Route xem chi tiết hóa đơn của user
     Route::get('/hoa-don-cua-toi/{id}', [BookingController::class, 'invoice'])->name('bookings.invoice');
     
-    // route::get('')
+    // 3. [QUẢN LÝ THÔNG BÁO]
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.count');
+        Route::post('/mark-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.markRead');
+        Route::delete('/delete/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
+        // Xóa hàng loạt
+        Route::post('/delete-multiple', [NotificationController::class, 'bulkDelete'])->name('notifications.deleteMultiple'); 
+    });
 
-    // 3. Quy trình đặt phòng (Yêu cầu có Profile)
+    // 4. Quy trình đặt phòng (Yêu cầu có Profile)
     Route::middleware(['check.profile'])->group(function () {
         Route::get('/dat-phong/xac-nhan', [BookingController::class, 'create'])->name('booking.create');
         
@@ -119,7 +130,7 @@ Route::prefix('admin')
         Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong');
         Route::delete('/xoa-hang-loat', [DatPhongController::class, 'xoaHangLoat'])->name('admin.dat-phong.xoa-hang-loat');
         Route::get('/hoa-don/{id}', [DatPhongController::class, 'getHoaDon'])->name('admin.dat-phong.hoa-don'); 
-        Route::post('/thanh-toan/{id}', [DatPhongController::class, 'postThanhToan'])->name('admin.dat-phong.thanh-toan');  
+        Route::post('/thanh-toan/{id}', [DatPhongController::class, 'postThanhToan'])->name('admin.dat-phong.thanh-toan'); 
         Route::get('/duyet/{id}', [DatPhongController::class, 'duyetDon'])->name('admin.dat-phong.duyet'); 
         Route::get('/huy/{id}', [DatPhongController::class, 'huyDon'])->name('admin.dat-phong.huy'); 
         Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');

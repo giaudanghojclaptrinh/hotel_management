@@ -11,6 +11,32 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+// Global response interceptor: reload page after successful non-GET actions
+axios.interceptors.response.use(function(response) {
+    try {
+        // Only reload when response came from a mutating request (POST/PUT/PATCH/DELETE)
+        const method = (response.config && response.config.method) ? response.config.method.toLowerCase() : 'get';
+        // Allow opt-out by setting header 'X-No-Reload' on specific requests
+        const noReload = response.config && response.config.headers && response.config.headers['X-No-Reload'];
+        if (!noReload && ['post', 'put', 'patch', 'delete'].includes(method)) {
+            // If server explicitly returns { reload: false } then skip
+            if (response.data && typeof response.data.reload !== 'undefined') {
+                if (response.data.reload) {
+                    window.location.reload();
+                }
+            } else {
+                // Default behaviour: reload after successful mutating request
+                window.location.reload();
+            }
+        }
+    } catch (e) {
+        // fail silently
+    }
+    return response;
+}, function(error) {
+    return Promise.reject(error);
+});
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

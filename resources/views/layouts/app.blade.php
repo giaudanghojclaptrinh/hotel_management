@@ -27,11 +27,13 @@
         'resources/css/client/profile.css',
         'resources/css/client/booking.css',
         'resources/css/client/about.css',
-        'resources/js/client/js/home.js',
-        'resources/js/client/js/rooms.js',
-        'resources/js/client/js/profile.js',
-        'resources/js/client/js/booking.js',
-        'resources/js/client/js/about.js',
+        'resources/js/client/home.js',
+        'resources/js/client/rooms.js',
+        'resources/js/client/profile.js',
+        'resources/js/client/booking.js',
+        'resources/js/client/about.js',
+        'resources/css/client/contact.css',
+        'resources/js/client/contact.js',
     ])
 
     <!-- Alpine.js -->

@@ -12,6 +12,7 @@ use App\Models\Phong;
 use App\Models\KhuyenMai;
 use App\Models\TienNghi;
 use App\Models\ChiTietDatPhong; // <--- Cần thêm model này để check lịch
+use App\Models\User;
 
 class PageController extends Controller
 {
@@ -191,5 +192,13 @@ class PageController extends Controller
     {
         $promotions = KhuyenMai::where('ngay_ket_thuc', '>=', Carbon::today())->get();
         return view('client.promotions.index', compact('promotions'));
+    }
+
+    /**
+     * Trang Về chúng tôi (About)
+     */
+    public function about()
+    {
+        return view('client.about.index');
     }
 }
