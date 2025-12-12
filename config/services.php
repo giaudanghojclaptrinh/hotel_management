@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        // If GOOGLE_REDIRECT is not set, fall back to APP_URL + '/login/google/callback'
+        'redirect' => env('GOOGLE_REDIRECT') ?: rtrim(env('APP_URL', ''), '/') . '/login/google/callback',
+    ],
+
+
 ];

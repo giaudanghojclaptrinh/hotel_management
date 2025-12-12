@@ -1,14 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Đăng nhập hệ thống')
 
-@vite(['resources/css/login.css'])
-
 @section('content')
 <div class="login-wrapper">
-    
     <!-- Background (Hình nền & Lớp phủ) -->
     <div class="login-bg-container">
-        {{-- Đảm bảo bạn có hình ảnh này, hoặc thay bằng link ảnh mạng để test --}}
         <img src="{{ asset('uploads/home/home.png') }}" 
              onerror="this.src='https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070&auto=format&fit=crop'" 
              alt="Background" 
@@ -100,15 +96,11 @@
                     <span class="divider-text">Hoặc tiếp tục với</span>
                 </div>
             </div>
-
-            <!-- Social Login -->
-            <div class="social-grid">
-                <a href="#" class="btn-social google">
-                    <i class="fa-brands fa-google"></i> Google
-                </a>
-                <a href="#" class="btn-social facebook">
-                    <i class="fa-brands fa-facebook"></i> Facebook
-                </a>
+            <!-- đăng nhập bằng google -->
+            <div class="social-grid single-item">
+                    <a href="{{ route('google.login') }}" class="btn-social google">
+                        <i class="fa-brands fa-google"></i> Đăng nhập bằng Google
+                    </a>
             </div>
         </div>
         
@@ -117,8 +109,4 @@
         </p>
     </div>
 </div>
-
-@push('scripts')
-    @vite(['resources/js/login.js'])
-@endpush
 @endsection

@@ -13,6 +13,10 @@ use App\Models\KhuyenMai;
 use App\Models\TienNghi;
 use App\Models\ChiTietDatPhong; // <--- Cần thêm model này để check lịch
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
 
 class PageController extends Controller
 {
@@ -135,7 +139,7 @@ class PageController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $rooms = $query->paginate(9)->withQueryString();
+        $rooms = $query->paginate(10)->withQueryString();
         
         // Dữ liệu Sidebar
         $tienNghis = TienNghi::all();
@@ -203,4 +207,58 @@ class PageController extends Controller
     {
         return view('client.about.index');
     }
+
+    // Chuyển tới màn hình Đăng nhập bằng Google
+    public function getGoogleLogin()
+    {
+        // Build a redirect URL based on the current request host so the
+        // redirect URI matches either localhost or 127.0.0.1 depending
+        // on how the developer accessed the app.
+        $redirect = rtrim(request()->getSchemeAndHttpHost(), '/') . '/login/google/callback';
+
+        return Socialite::driver('google')
+            ->redirectUrl($redirect)
+            ->redirect();
+    }
+
+    // Xử lý phản hồi sau khi đăng nhập thành công ở Google
+    public function getGoogleCallback()
+    {
+        // Ensure the same redirect URL is used when exchanging the code
+        // so Socialite/Guzzle uses the exact redirect_uri that was sent.
+        $redirect = rtrim(request()->getSchemeAndHttpHost(), '/') . '/login/google/callback';
+
+        try {
+            $user = Socialite::driver('google')
+                ->redirectUrl($redirect)
+                ->setHttpClient(new \GuzzleHttp\Client(['verify' => false]))
+                ->stateless()
+                ->user();
+        } catch (\Exception $e) {
+            // Log exception for debugging and redirect to login page
+            \Log::error('Google OAuth callback error: ' . $e->getMessage());
+            return redirect()->route('login')->with('warning', 'Lỗi xác thực Google. Vui lòng thử lại.');
+        }
+
+    $existingUser = User::where('email', $user->email)->first();
+    if ($existingUser) {
+        // Nếu người dùng đã tồn tại thì đăng nhập
+        Auth::login($existingUser, true);
+        return redirect()->route('trang_chu');
+    }
+
+    // Nếu chưa tồn tại người dùng thì thêm mới
+    $newUser = User::create([
+        'name' => $user->name,
+        'email' => $user->email,
+        'username' => Str::before($user->email, '@'),
+        'password' => Hash::make(Str::random(16)), // mật khẩu ngẫu nhiên, user dùng Google để đăng nhập
+    ]);
+
+    // Sau đó đăng nhập
+    Auth::login($newUser, true);
+    return redirect()->route('trang_chu');
+    }
+
+
 }

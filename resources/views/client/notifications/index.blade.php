@@ -96,14 +96,8 @@
                 @endforeach
             </div>
 
-            <!-- Phân trang -->
-            @if($notifications->hasPages())
-            <div class="pagination-container">
-                {{ $notifications->links() }} 
-                {{-- Lưu ý: Laravel mặc định dùng Tailwind cho pagination, 
-                     nếu bạn đã custom pagination view trong home.css thì nó sẽ nhận style đó --}}
-            </div>
-            @endif
+            {{-- Phân trang: dùng partial để tái sử dụng style/logic --}}
+            @include('partials.pagination', ['paginator' => $notifications])
         @endif
     </div>
 </div>

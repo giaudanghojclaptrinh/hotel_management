@@ -244,14 +244,8 @@
                 @endforelse
             </div>
 
-            <!-- PHÂN TRANG -->
-            @if($rooms->hasPages())
-            <div class="pagination-wrapper">
-                <div class="pagination-box">
-                    {{ $rooms->appends(request()->query())->links() }}
-                </div>
-            </div>
-            @endif
+            {{-- PHÂN TRANG: sử dụng partial chung --}}
+            @include('partials.pagination', ['paginator' => $rooms])
         </main>
     </div>
 </div>

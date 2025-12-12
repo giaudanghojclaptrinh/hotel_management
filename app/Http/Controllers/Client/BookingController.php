@@ -264,9 +264,9 @@ class BookingController extends Controller
     public function history()
     {
         $bookings = DatPhong::where('user_id', Auth::id())
-            ->with(['chiTietDatPhongs.loaiPhong', 'hoaDon']) 
+            ->with(['chiTietDatPhongs.loaiPhong', 'hoaDon'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(5);
 
         return view('client.booking.history', compact('bookings'));
     }

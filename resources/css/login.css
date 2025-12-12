@@ -325,85 +325,71 @@ body {
 .social-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    /* Mặc định 2 cột */
     gap: 1rem;
     margin-top: 1.5rem;
+}
+
+
+/* Khi chỉ có 1 nút (Google), cho nó full chiều rộng */
+
+.social-grid.single-item {
+    grid-template-columns: 1fr;
 }
 
 .btn-social {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.7rem;
+    padding: 0.8rem;
+    /* Tăng padding để nút dày dặn hơn */
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 50px;
+    /* Bo tròn hoàn toàn */
     background-color: rgba(255, 255, 255, 0.05);
+    /* Nền mờ nhẹ */
     color: var(--text-color);
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: var(--transition);
+    font-weight: 600;
+    /* Chữ đậm hơn */
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
     font-family: 'Open Sans', sans-serif;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-social:hover {
     background-color: rgba(255, 255, 255, 0.15);
     border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.btn-social i {
-    margin-right: 0.5rem;
-    font-size: 1.1rem;
+.btn-social img.social-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.75rem;
+}
+
+
+/* Style riêng cho Google để nổi bật */
+
+.btn-social.google {
+    background-color: #fff;
+    /* Nền trắng nổi bật */
+    color: #333;
+    /* Chữ đen tương phản */
+    border-color: #fff;
 }
 
 .btn-social.google:hover {
-    color: #db4437;
-}
-
-.btn-social.facebook:hover {
-    color: #1877f2;
-}
-
-
-/* --- Divider --- */
-
-.divider-wrapper {
-    margin: 1.5rem 0;
-    position: relative;
-    text-align: center;
-}
-
-.divider-line {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    width: 100%;
-}
-
-.divider-text-wrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: transparent;
-    /* Trong suốt vì nền thẻ đã mờ */
-    padding: 0 0.5rem;
-}
-
-
-/* Vì nền divider trong suốt, ta cần backdrop nhỏ hoặc màu nền trùng màu thẻ nếu muốn che line */
-
-
-/* Ở đây dùng cách đơn giản: background trùng màu overlay nhẹ */
-
-.divider-text-wrapper {
-    background: #2a2a2a;
-    /* Màu xám tối gần giống nền */
-    border-radius: 4px;
-}
-
-.divider-text {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-family: 'Open Sans', sans-serif;
+    background-color: #f1f1f1;
+    /* Hover xám nhẹ */
+    border-color: #e0e0e0;
+    box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+    /* Glow trắng */
+    color: #000;
 }
 
 

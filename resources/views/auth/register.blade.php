@@ -2,8 +2,10 @@
 @section('title', 'Đăng ký thành viên')
 
 
-@vite(['resources/css/register.css'])
-
+{{-- @vite(['resources/css/register.css']) --}}
+{{-- Ghi chú: `register.css` đã được include chung trong `layouts.app` (Vite manifest).
+    Đã comment lại để tránh tải nhiều lần trên cùng một trang. Nếu muốn tách riêng,
+    bỏ comment để kích hoạt lại. --}}
 
 @section('content')
 <div class="register-wrapper">
@@ -122,5 +124,7 @@
     </div>
 </div>
 
-@vite(['resources/js/register.js'])
+{{-- @vite(['resources/js/register.js']) --}}
+{{-- Ghi chú: `register.js` đã được include trong `layouts.app` khi build assets.
+    Comment để tránh tải trùng; giữ dòng comment để dễ khôi phục. --}}
 @endsection

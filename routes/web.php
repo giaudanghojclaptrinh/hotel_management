@@ -32,6 +32,13 @@ Auth::routes();
 Route::get('/', [PageController::class, 'home'])->name('trang_chu');
 Route::get('/home', [PageController::class, 'home'])->name('home');
 
+//login with google
+Route::get('/login/google', [PageController::class, 'getGoogleLogin'])->name('google.login');
+Route::get('/login/google/callback', [PageController::class, 'getGoogleCallback'])->name('google.callback');
+// Accept legacy/common callback paths to reduce redirect_uri mismatch causes
+Route::get('/larashop/login/google/callback', [PageController::class, 'getGoogleCallback']);
+Route::get('/hotel_management/public/login/google/callback', [PageController::class, 'getGoogleCallback']);
+
 // Danh sách & Chi tiết phòng
 Route::get('/danh-sach-phong', [PageController::class, 'rooms'])->name('phong.danh-sach');
 Route::get('/chi-tiet-phong/{id}', [PageController::class, 'roomDetail'])->name('phong.chi-tiet');

@@ -21,35 +21,35 @@
     <!-- GỌI ASSETS QUA VITE -->
     <!-- Đã bao gồm config màu, css tùy chỉnh và js logic -->
     @vite([
-        
         'resources/js/tailwind-config.js',
 
+        // Centralized client assets (single manifest files)
         //client
-        //css
-        'resources/css/login.css',
-        'resources/css/register.css',
-        'resources/css/password.css',
-        'resources/css/client/home.css',
-        'resources/css/client/rooms.css',
-        'resources/css/client/profile.css',
-        'resources/css/client/booking.css',
-        'resources/css/client/about.css',
-        'resources/css/client/contact.css',
-        'resources/css/client/promo.css',
-        'resources/css/client/notifications.css',
+                //css
+                'resources/css/login.css',
+                'resources/css/register.css',
+                'resources/css/password.css',
+                'resources/css/client/home.css',
+                'resources/css/client/rooms.css',
+                'resources/css/client/profile.css',
+                'resources/css/client/booking.css',
+                'resources/css/client/about.css',
+                'resources/css/client/contact.css',
+                'resources/css/client/promo.css',
+                'resources/css/client/notifications.css',
 
-        //js
-        'resources/js/login.js',
-        'resources/js/register.js',
-        'resources/js/password.js',
-        'resources/js/client/home.js',
-        'resources/js/client/rooms.js',
-        'resources/js/client/profile.js',
-        'resources/js/client/booking.js',
-        'resources/js/client/about.js',
-        'resources/js/client/contact.js',
-        'resources/js/client/promo.js',
-        'resources/js/client/notifications.js',
+                //js
+                'resources/js/login.js',
+                'resources/js/register.js',
+                'resources/js/password.js',
+                'resources/js/client/home.js',
+                'resources/js/client/rooms.js',
+                'resources/js/client/profile.js',
+                'resources/js/client/booking.js',
+                'resources/js/client/about.js',
+                'resources/js/client/contact.js',
+                'resources/js/client/promo.js',
+                'resources/js/client/notifications.js',
         
     ])
 

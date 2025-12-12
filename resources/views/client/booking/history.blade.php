@@ -2,7 +2,11 @@
 @section('title', 'Lịch sử đặt phòng')
 
 <!-- Gọi CSS -->
-@vite(['resources/css/client/home.css', 'resources/css/client/history.css'])
+{{-- Ghi chú: `home.css` đã được include trong `layouts.app` để tránh lặp lại;
+    trước đây chúng ta gọi cả `home.css` và `history.css` tại đây dẫn tới tải thừa.
+    Dòng dưới đây là bản cũ (đã comment) để bạn dễ khôi phục nếu cần: --}}
+{{-- @vite(['resources/css/client/home.css', 'resources/css/client/history.css']) --}}
+@vite(['resources/css/client/history.css'])
 
 @section('content')
 <div class="history-page-wrapper">
@@ -135,6 +139,9 @@
                     </div>
                 @endforeach
             </div>
+
+                {{-- Pagination --}}
+                @include('partials.pagination', ['paginator' => $bookings])
         @endif
     </div>
 </div>
