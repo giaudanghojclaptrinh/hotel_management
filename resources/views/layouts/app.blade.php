@@ -34,6 +34,8 @@
         'resources/js/client/about.js',
         'resources/css/client/contact.css',
         'resources/js/client/contact.js',
+        'resources/css/client/promo.css',
+        'resources/js/client/promo.js',
     ])
 
     <!-- Alpine.js -->

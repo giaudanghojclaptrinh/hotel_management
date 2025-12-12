@@ -130,15 +130,3 @@
         </div>
     </div>
 </header> {{-- [CẬP NHẬT] Link Thông báo (Sử dụng x-show trực tiếp trên span) --}}
-    @auth
-    <a href="{{ route('notifications.index') }}" 
-        class="nav-link flex items-center {{ request()->routeIs('notifications.index') ? 'active' : '' }}">
-        Thông báo
-        {{-- Badge hiển thị số lượng chưa đọc, chỉ hiện khi unreadCount > 0 --}}
-        <span x-show="unreadCount > 0" 
-              x-text="unreadCount" 
-              class="ml-1.5 inline-block bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full"
-              x-cloak>
-        </span>
-    </a>
-    @endauth

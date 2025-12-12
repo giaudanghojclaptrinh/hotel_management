@@ -24,9 +24,8 @@
             <div>
                 <h3 class="footer-heading">Khám phá</h3>
                 <ul class="footer-list">
-                    <li><a href="#" class="footer-link"><i class="fa-solid fa-angle-right"></i> Về chúng tôi</a></li>
+                    <li><a href="{{ route('ve-chung-toi') }}" class="footer-link"><i class="fa-solid fa-angle-right"></i> Về chúng tôi</a></li>
                     <li><a href="{{ route('khuyen-mai') }}" class="footer-link"><i class="fa-solid fa-angle-right"></i> Ưu đãi đặc biệt</a></li>
-                    <li><a href="#" class="footer-link"><i class="fa-solid fa-angle-right"></i> Thư viện ảnh</a></li>
                 </ul>
             </div>
 

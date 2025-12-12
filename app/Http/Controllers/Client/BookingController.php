@@ -99,30 +99,35 @@ class BookingController extends Controller
 
     private function findAvailableRoom($loaiPhongId, $checkIn, $checkOut)
     {
+        // 1. Tìm ID các phòng vật lý đang bận (đã được đặt)
         $bookedRoomIds = ChiTietDatPhong::whereHas('datPhong', function ($query) use ($checkIn, $checkOut) {
+            // Chỉ coi là bận nếu đơn đang trong trạng thái active (Pending, Confirmed, Paid, Awaiting)
             $query->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment'])
                   ->where(function ($q) use ($checkIn, $checkOut) {
+                      // Điều kiện trùng lịch: (Ngày Đến Cũ < Ngày Đi Mới) AND (Ngày Đi Cũ > Ngày Đến Mới)
                       $q->where('ngay_den', '<', $checkOut)
                         ->where('ngay_di', '>', $checkIn);
                   });
         })->where('loai_phong_id', $loaiPhongId) 
           ->pluck('phong_id')
-          ->toArray();
+          ->toArray(); // Mảng ID các phòng BẬN
 
+        // 2. Tìm một phòng vật lý thuộc loại phòng này đang trống
         $phongTrong = Phong::where('loai_phong_id', $loaiPhongId)
-                           ->where('tinh_trang', '!=', 'maintenance') 
-                           ->whereNotIn('id', $bookedRoomIds) 
-                           ->first();
+                           ->where('tinh_trang', '!=', 'maintenance') // Loại trừ phòng bảo trì
+                           ->whereNotIn('id', $bookedRoomIds) // Loại trừ phòng đang bận
+                           ->first(); // Chỉ cần tìm MỘT phòng
         
         return $phongTrong;
     }
     
     // ===============================================
-    // 3. XỬ LÝ ĐẶT PHÒNG
+    // 3. XỬ LÝ ĐẶT PHÒNG TẠI KHÁCH SẠN (PAY AT HOTEL - PENDING)
     // ===============================================
 
     public function store(Request $request)
     {
+        // Validation cơ bản (Đã bỏ payment_method vì nó được set là 'pay_at_hotel' ở client)
         $request->validate([
             'room_id' => 'required|exists:loai_phongs,id',
             'checkin' => 'required|date',
@@ -133,6 +138,7 @@ class BookingController extends Controller
 
         DB::beginTransaction();
         try {
+            // Kiểm tra và gán phòng ngay lập tức trước khi tạo đơn
             $phongTrong = $this->findAvailableRoom($request->room_id, $request->checkin, $request->checkout);
 
             if (!$phongTrong) {
@@ -140,31 +146,42 @@ class BookingController extends Controller
                 return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất.');
             }
 
+            // Tạo Booking: PENDING (Chờ duyệt), UNPAID (Chưa thanh toán)
             $this->createBooking($request, 'pending', 'unpaid', $phongTrong);
             
             DB::commit();
             
+            // Chuyển hướng đến trang thành công
             return redirect()->route('booking.success')
                 ->with('success', 'Đặt phòng thành công! Đơn hàng đang chờ Admin xác nhận.')
                 ->with('booking_id', session('temp_booking_id'));
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Lỗi hệ thống: ' . $e->getMessage());
+            Log::error('Lỗi khi tạo đơn (Store): ' . $e->getMessage());
+            return back()->with('error', 'Lỗi hệ thống khi tạo đơn: ' . $e->getMessage());
         }
     }
     
+    // ===============================================
+    // 4. XỬ LÝ THANH TOÁN ONLINE (VNPAY DEMO - CONFIRMED/PAID)
+    // ===============================================
+    
     public function postVnPayStore(Request $request)
     {
+        // Validation cần thiết cho cả booking data và payment data
         $request->validate([
             'room_id' => 'required|exists:loai_phongs,id',
             'checkin' => 'required|date',
             'checkout' => 'required|date',
+            'payment_method' => 'required|in:online',
             'vnp_BankCode' => 'required|string', 
+            // Các trường khác như promotion_code, discount_amount tự động được xử lý
         ]);
 
         DB::beginTransaction();
         try {
+            // Kiểm tra và gán phòng ngay lập tức trước khi tạo đơn
             $phongTrong = $this->findAvailableRoom($request->room_id, $request->checkin, $request->checkout);
 
             if (!$phongTrong) {
@@ -172,14 +189,16 @@ class BookingController extends Controller
                 return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất.');
             }
 
+            // Tạo Booking: CONFIRMED (Đã xác nhận), PAID (Đã thanh toán)
             $booking = $this->createBooking($request, 'confirmed', 'paid', $phongTrong);
             
+            // Tạo Hóa đơn ngay lập tức cho thanh toán online
             HoaDon::create([
                 'dat_phong_id' => $booking->id,
                 'ma_hoa_don' => 'HD' . time() . rand(1000, 9999),
                 'ngay_lap' => now(),
                 'tong_tien' => $booking->tong_tien,
-                'phuong_thuc_thanh_toan' => 'online', 
+                'phuong_thuc_thanh_toan' => $request->payment_method, // 'online'
                 'trang_thai' => 'paid', 
             ]);
 
@@ -190,9 +209,14 @@ class BookingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Lỗi xử lý VNPay Store: ' . $e->getMessage());
             return back()->with('error', 'Lỗi xử lý thanh toán: ' . $e->getMessage());
         }
     }
+    
+    // ===============================================
+    // 5. HÀM TẠO BOOKING CHUNG
+    // ===============================================
 
     private function createBooking($request, $status, $paymentStatus, $phongTrong)
     {
@@ -216,6 +240,7 @@ class BookingController extends Controller
             'ghi_chu' => $request->ghi_chu ?? ($request->vnp_OrderInfo ?? null),
         ]);
 
+        // Tạo chi tiết đặt phòng (gán phòng vật lý đã tìm thấy)
         ChiTietDatPhong::create([
             'dat_phong_id' => $booking->id,
             'loai_phong_id' => $loaiPhong->id,
@@ -225,6 +250,7 @@ class BookingController extends Controller
             'thanh_tien' => $originalTotal,
         ]);
         
+        // Lưu ID đơn hàng vào session (dùng cho trang success)
         session()->flash('temp_booking_id', $booking->id);
         return $booking;
     }
@@ -251,7 +277,6 @@ class BookingController extends Controller
             ->with(['chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong', 'hoaDon', 'user'])
             ->findOrFail($id);
 
-        // [FIXED] Sửa biến compact từ 'bookings' thành 'booking'
         return view('client.booking.invoice', compact('booking'));
     }
 }

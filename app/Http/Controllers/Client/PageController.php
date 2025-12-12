@@ -191,7 +191,9 @@ class PageController extends Controller
     public function promotions()
     {
         $promotions = KhuyenMai::where('ngay_ket_thuc', '>=', Carbon::today())->get();
-        return view('client.promotions.index', compact('promotions'));
+        // Backwards compatibility: some views expect $khuyenMais variable
+        $khuyenMais = $promotions;
+        return view('client.promotions.index', compact('promotions', 'khuyenMais'));
     }
 
     /**
