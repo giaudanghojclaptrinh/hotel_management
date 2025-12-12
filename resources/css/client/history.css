@@ -1,0 +1,354 @@
+/* =========================================
+   HISTORY PAGE (Luxury Dark Theme)
+   ========================================= */
+
+
+/* --- 1. LAYOUT & CONTAINER --- */
+
+.history-page-wrapper {
+    padding-top: 3rem;
+    padding-bottom: 6rem;
+    min-height: 80vh;
+    background-color: var(--bg-body);
+    /* Nền tối */
+}
+
+
+/* --- 2. HEADER SECTION --- */
+
+.history-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .history-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.history-title {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    color: var(--white);
+    margin: 0 0 0.5rem 0;
+}
+
+.history-desc {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.btn-new-booking {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--white);
+    color: var(--primary-dark);
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    border: 1px solid var(--white);
+}
+
+.btn-new-booking:hover {
+    background: var(--primary-gold);
+    border-color: var(--primary-gold);
+    color: #000;
+    transform: translateY(-2px);
+}
+
+.btn-new-booking i {
+    transition: transform 0.3s;
+}
+
+.btn-new-booking:hover i {
+    transform: rotate(90deg);
+}
+
+
+/* --- 3. EMPTY STATE --- */
+
+.empty-state {
+    text-align: center;
+    padding: 6rem 2rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--border-light);
+    animation: fadeInUp 0.5s ease;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--text-muted);
+}
+
+.empty-title {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+}
+
+.empty-desc {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8rem 2rem;
+    background: var(--primary-gold);
+    color: #000;
+    font-weight: 700;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-cta-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 5px 15px rgba(205, 164, 94, 0.4);
+    transform: translateY(-2px);
+}
+
+
+/* --- 4. BOOKING LIST & CARDS --- */
+
+.booking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.booking-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+    animation: fadeInUp 0.5s ease;
+}
+
+.booking-card:hover {
+    border-color: var(--border-gold);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Header Card */
+
+.card-header {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.booking-id {
+    font-family: monospace;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+}
+
+.booking-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+
+/* Status Badges */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.status-pending {
+    background: rgba(234, 179, 8, 0.15);
+    color: #fbbf24;
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+.status-confirmed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.status-completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status-cancelled {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+
+/* Body Card */
+
+.card-body {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .card-body {
+        grid-template-columns: 100px 1fr auto;
+    }
+}
+
+.room-thumb {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--border-light);
+}
+
+.room-info h3 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--white);
+    margin: 0 0 0.5rem 0;
+}
+
+.room-detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.room-detail-list li {
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.room-detail-list i {
+    color: var(--primary-gold);
+    font-size: 0.8rem;
+}
+
+
+/* Price & Action */
+
+.card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1rem;
+    text-align: right;
+}
+
+@media (max-width: 767px) {
+    .card-actions {
+        align-items: flex-start;
+        text-align: left;
+        margin-top: 1rem;
+        border-top: 1px solid var(--border-light);
+        padding-top: 1rem;
+    }
+}
+
+.total-price {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-gold);
+}
+
+.price-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.btn-view-detail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.btn-view-detail:hover {
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+    background: rgba(205, 164, 94, 0.1);
+}
+
+
+/* Animation Helper */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,8 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Liên hệ - Luxury Stay')
 
-<!-- Gọi CSS & JS -->
-@vite(['resources/css/client/home.css', 'resources/css/client/contact.css', 'resources/js/client/contact.js'])
 
 @section('content')
 
