@@ -765,3 +765,121 @@
         width: 100%;
     }
 }
+
+
+/* Print adjustments: hide site chrome and non-essential UI when printing invoices/PDFs */
+
+@media print {
+    /* Remove site chrome */
+    .header-wrapper,
+    .footer-wrapper,
+    .mobile-menu-wrapper,
+    .mobile-toggle,
+    .header-actions,
+    .flash-container,
+    .dropdown-menu,
+    nav,
+    .site-nav {
+        display: none !important;
+    }
+    /* Hide interactive controls */
+    .btn,
+    .btn-apply,
+    .btn-confirm-booking,
+    .btn-copy,
+    .print-hidden,
+    .print\:hidden,
+    .print-only-hide {
+        display: none !important;
+    }
+    /* Make invoice content centered and full-width inside print layout */
+    .booking-page-wrapper,
+    .booking-layout,
+    .max-w-3xl,
+    .max-w-4xl,
+    .container,
+    .main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+    }
+    /* Keep card white and remove heavy shadows for print */
+    .booking-card,
+    .summary-card,
+    .success-card,
+    .bg-white {
+        box-shadow: none !important;
+        background: #fff !important;
+        border: 1px solid #e6e7eb !important;
+    }
+    /* Ensure readable, Unicode-safe fonts for Vietnamese text */
+    html,
+    body,
+    .booking-card,
+    .invoice-body,
+    .text-gray-600,
+    .text-gray-900 {
+        color: #111827 !important;
+        font-family: 'Segoe UI', Tahoma, Arial, 'Helvetica Neue', sans-serif !important;
+        font-size: 12px !important;
+    }
+    /* Header band styling (map Tailwind classes used in view to print-friendly header) */
+    .bg-brand-900 {
+        background: #0f1724 !important;
+        color: #fff !important;
+        padding: 28px 32px !important;
+        text-align: center !important;
+    }
+    .bg-brand-900 .text-3xl {
+        font-family: Georgia, 'Times New Roman', serif !important;
+        font-size: 28px !important;
+    }
+    .bg-brand-900 .inline-block {
+        border-radius: 999px !important;
+    }
+    /* Avoid page breaks inside key sections */
+    .booking-card,
+    .summary-card,
+    .success-card,
+    table,
+    thead,
+    tbody,
+    tr,
+    .order-code-box {
+        page-break-inside: avoid !important;
+    }
+    /* Remove link URL suffixes */
+    a::after {
+        content: none !important;
+    }
+    /* Page size */
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
+    /* Reduce paddings for print */
+    .p-8 {
+        padding: 0.6rem !important;
+    }
+    .md\:p-12 {
+        padding: 0.6rem !important;
+    }
+    .booking-card,
+    .success-card {
+        padding: 1rem !important;
+    }
+    /* Table tweaks for compact layout */
+    table {
+        border-collapse: collapse !important;
+    }
+    thead th {
+        color: #6b7280 !important;
+        font-size: 11px !important;
+        text-transform: uppercase !important;
+    }
+    th,
+    td {
+        padding: 8px 10px !important;
+    }
+}

@@ -1,22 +1,23 @@
-@extends('layouts.app')
+@extends($layout ?? 'layouts.app')
 @section('title', 'Chi tiết hóa đơn')
 
 @section('content')
 <div class="bg-gray-100 min-h-screen py-12">
+    <!-- Print-only view; no server-side PDF injection -->
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <!-- Nút quay lại -->
+        <!-- Nút quay lại: dùng previous URL với fallback JS để trở về trang trước -->
         <div class="mb-6">
-            <a href="{{ route('bookings.history') }}" class="text-sm text-gray-600 hover:text-brand-900 flex items-center transition">
-                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại lịch sử
+            <a href="{{ url()->previous() }}" onclick="event.preventDefault(); history.back();" class="text-sm text-gray-600 hover:text-brand-900 flex items-center transition">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
             </a>
         </div>
 
         <!-- Card Hóa đơn -->
-        <div class="bg-white rounded-3xl shadow-xl overflow-hidden print:shadow-none animate-fade-in-up">
+        <div class="invoice-card bg-white rounded-3xl shadow-xl overflow-hidden print:shadow-none animate-fade-in-up">
             
             <!-- Header Hóa đơn -->
-            <div class="bg-brand-900 text-white p-8 text-center relative overflow-hidden">
+            <div class="invoice-header bg-brand-900 text-white p-8 text-center relative overflow-hidden">
                 <!-- Họa tiết nền mờ -->
                 <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
                 
@@ -29,7 +30,12 @@
                 </div>
             </div>
 
-            <div class="p-8 md:p-12">
+            <div class="invoice-body p-8 md:p-12">
+                @if(isset($error))
+                    <div class="mb-4 p-3 rounded-md bg-red-50 text-red-700 text-sm">
+                        {{ $error }}
+                    </div>
+                @endif
                 <!-- Thông tin khách hàng & Đơn hàng -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-100">
                     <div>
@@ -148,9 +154,13 @@
 
         <!-- Nút In (Ẩn khi in) -->
         <div class="mt-8 text-center print:hidden">
-            <button onclick="window.print()" class="px-8 py-3 bg-white border border-gray-300 rounded-xl text-gray-700 font-bold hover:bg-gray-50 hover:text-brand-900 hover:border-brand-900 transition shadow-sm flex items-center mx-auto gap-2">
-                <i class="fa-solid fa-print"></i> In hóa đơn
-            </button>
+            <div class="inline-flex gap-3">
+                <button onclick="window.print()" class="px-6 py-3 bg-white border border-gray-300 rounded-xl text-gray-700 font-bold hover:bg-gray-50 hover:text-brand-900 hover:border-brand-900 transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> In hóa đơn
+                </button>
+
+                <!-- PDF download removed; use browser Print -->
+            </div>
         </div>
     </div>
 </div>

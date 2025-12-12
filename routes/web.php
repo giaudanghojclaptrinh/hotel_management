@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     
     // Route xem chi tiết hóa đơn của user
     Route::get('/hoa-don-cua-toi/{id}', [BookingController::class, 'invoice'])->name('bookings.invoice');
+    // (PDF export removed) server-side PDF route was removed; printing uses browser print
     
     // 3. [QUẢN LÝ THÔNG BÁO]
     Route::prefix('notifications')->group(function () {

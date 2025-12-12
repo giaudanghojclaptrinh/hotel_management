@@ -277,6 +277,12 @@ class BookingController extends Controller
             ->with(['chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong', 'hoaDon', 'user'])
             ->findOrFail($id);
 
-        return view('client.booking.invoice', compact('booking'));
+        // If request contains ?print=1 or ?pdf=1, use the minimal print layout
+        $usePrintLayout = request()->query('print') || request()->query('pdf');
+        $layout = $usePrintLayout ? 'layouts.print' : 'layouts.app';
+
+        return view('client.booking.invoice', compact('booking'))->with('layout', $layout);
     }
+
+    // Server-side PDF export removed; printing is handled via browser print and `layouts.print` when ?print=1
 }
