@@ -374,7 +374,9 @@
 }
 
 .summary-totals {
-    space-y: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
     margin-bottom: 2rem;
     font-size: 0.95rem;
 }

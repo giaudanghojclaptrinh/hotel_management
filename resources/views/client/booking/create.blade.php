@@ -1,8 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Xác nhận đặt phòng')
 
-<!-- Gọi CSS & JS -->
-@vite(['resources/css/client/home.css', 'resources/css/client/booking.css', 'resources/js/client/booking.js'])
 
 @section('content')
 {{-- Khai báo Alpine.js --}}
@@ -18,11 +16,12 @@
             <p class="page-desc">Vui lòng kiểm tra lại thông tin và áp dụng ưu đãi trước khi xác nhận.</p>
         </div>
 
-        {{-- FORM CHÍNH: Dùng để submit Pay at Hotel --}}
+        {{-- FORM CHÍNH --}}
         <form action="{{ route('booking.store') }}" 
               method="POST" 
               class="booking-layout" 
-              id="booking-form">
+              id="booking-form"
+              data-route-vnpay="{{ route('booking.vnpay.create') }}">
             @csrf
             <!-- Dữ liệu ẩn quan trọng -->
             <input type="hidden" name="room_id" value="{{ $roomType->id }}">
@@ -70,7 +69,7 @@
                         <input type="text" name="promotion_code_display" id="promotion-code-input"
                                placeholder="NHẬP MÃ (VD: SUMMER2025)..." class="promo-input">
                         
-                        {{-- data-route-check-promo để booking.js gọi API --}}
+                        {{-- [QUAN TRỌNG] Thêm data-route-check-promo để JS lấy URL chính xác --}}
                         <button type="button" id="apply-promo-btn" 
                                 data-route-check-promo="{{ route('api.check.promo') }}"
                                 class="btn-apply">Áp dụng</button>
@@ -85,7 +84,6 @@
                         <h3 class="step-title">Lựa chọn thanh toán</h3>
                     </div>
                     
-                    <!-- Option 1: Pay at hotel -->
                     <label class="payment-option" :class="{'selected': !onlinePaymentSelected}">
                         <input type="radio" name="payment_method_radio" value="pay_at_hotel" 
                                :checked="!onlinePaymentSelected" 
@@ -98,7 +96,6 @@
                         <div class="payment-icon"><i class="fa-solid fa-hotel"></i></div>
                     </label>
 
-                    <!-- Option 2: Online -->
                     <label class="payment-option" :class="{'selected': onlinePaymentSelected}">
                         <input type="radio" name="payment_method_radio" value="online" 
                                :checked="onlinePaymentSelected" 
@@ -156,7 +153,7 @@
                     <div class="summary-totals">
                         <div class="total-row">
                             <span>Giá gốc</span>
-                            {{-- [QUAN TRỌNG] data-original-price cho JS đọc --}}
+                            {{-- [QUAN TRỌNG] Thêm data-original-price --}}
                             <span id="original-total" data-original-price="{{ $totalPrice }}">{{ number_format($totalPrice, 0, ',', '.') }}đ</span>
                         </div>
                         <div class="total-row discount">
@@ -170,10 +167,9 @@
                         </div>
                     </div>
 
-                    {{-- NÚT SUBMIT CHÍNH --}}
-                    {{-- Logic: Nếu Online -> Mở Modal. Nếu Tại quầy -> Submit form store --}}
+                    {{-- NÚT SUBMIT --}}
                     <button type="submit" 
-                            x-on:click.prevent="if (onlinePaymentSelected) { showVnpayModal = true; } else { document.getElementById('booking-form').action = '{{ route('booking.store') }}'; document.getElementById('booking-form').submit(); }"
+                            x-on:click.prevent="if (onlinePaymentSelected) { showVnpayModal = true; } else { document.getElementById('booking-form').submit(); }"
                             class="btn-confirm-booking">
                         <span x-text="onlinePaymentSelected ? 'THANH TOÁN QR NGAY' : 'GỬI YÊU CẦU ĐẶT PHÒNG'">GỬI YÊU CẦU ĐẶT PHÒNG</span>
                         <i class="fa-solid fa-arrow-right"></i>
@@ -195,18 +191,19 @@
             <h3 class="filter-title" style="margin-bottom: 0.5rem; color: #fff;">Quét mã thanh toán</h3>
             <p class="text-muted" style="font-size: 0.9rem;">Sử dụng App Ngân hàng hoặc Ví VNPAY</p>
 
-            {{-- Form này sẽ POST dữ liệu đặt phòng đến Controller VNPay (Demo) --}}
-            <form action="{{ route('booking.vnpay.create') }}" method="POST" id="vnpay-form" class="space-y-4"> 
+            {{-- Form này chỉ để hiển thị hoặc chứa input ẩn cho JS clone --}}
+            {{-- [FIXED] Form này sẽ được JS submitVnPay() sử dụng --}}
+            <form id="vnpay-form" method="POST" action="{{ route('booking.vnpay.create') }}" class="space-y-4"> 
                 @csrf
+                {{-- Các input ẩn cần thiết cho Controller --}}
                 <input type="hidden" name="room_id" value="{{ $roomType->id }}">
                 <input type="hidden" name="checkin" value="{{ $checkIn }}">
                 <input type="hidden" name="checkout" value="{{ $checkOut }}">
                 
-                {{-- Các input này sẽ được JS cập nhật từ form chính khi submit modal --}}
+                {{-- [QUAN TRỌNG] Các input này sẽ được JS cập nhật khi áp mã --}}
                 <input type="hidden" name="discount_amount" value="0">
                 <input type="hidden" name="promotion_code" value="">
 
-                <input type="hidden" name="payment_method" value="online">
                 <input type="hidden" name="vnp_BankCode" value="VNPAYQR">
                 {{-- Các input này sẽ được cập nhật từ Alpine --}}
                 <input type="hidden" name="vnp_Locale" x-model="vnpLocale">
@@ -222,7 +219,7 @@
                 </div>
 
                 <div>
-                    {{-- NÚT NÀY GỌI HÀM JS submitVnPay() định nghĩa bên dưới --}}
+                    {{-- NÚT NÀY GỌI HÀM JS submitVnPay() --}}
                     <button type="button" 
                             onclick="submitVnPay()"
                             class="btn-confirm-booking" style="background: #10b981; color: white;">
@@ -233,34 +230,6 @@
             </form>
         </div>
     </div>
+    
 </div>
-
-@push('scripts')
-<script>
-    // Hàm xử lý khi nhấn nút Xác nhận trong Modal
-    window.submitVnPay = function() {
-        if (confirm('Xác nhận đã thanh toán bằng QR Code? Đơn hàng sẽ được tạo và duyệt ngay lập tức.')) {
-            
-            const modalForm = document.getElementById('vnpay-form');
-            if (!modalForm) return;
-
-            // Đồng bộ dữ liệu giảm giá từ form chính sang form modal
-            // Để đảm bảo giá trị giảm giá được gửi đi chính xác
-            const mainDiscount = document.getElementById('discount-amount-input');
-            const mainPromo = document.getElementById('promotion-code-hidden');
-            
-            if (mainDiscount) {
-                modalForm.querySelector('input[name="discount_amount"]').value = mainDiscount.value;
-            }
-            if (mainPromo) {
-                modalForm.querySelector('input[name="promotion_code"]').value = mainPromo.value;
-            }
-
-            // Submit form modal
-            modalForm.submit();
-        }
-    };
-</script>
-@endpush
-
 @endsection
