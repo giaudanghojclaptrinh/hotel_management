@@ -59,6 +59,11 @@
                         $time = $notification->created_at->diffForHumans();
                     @endphp
 
+                    @php $linkTo = null; @endphp
+                    @if(isset($data['loai_phong_id']) && isset($data['reply_id']))
+                        @php $linkTo = route('phong.chi-tiet', $data['loai_phong_id']) . '#reply-' . $data['reply_id']; @endphp
+                    @endif
+
                     <div class="notify-item {{ $statusClass }}" data-id="{{ $notification->id }}">
                         <!-- Checkbox -->
                         <div class="pt-1">
@@ -86,10 +91,14 @@
 
                         <!-- Actions -->
                         <div class="notify-actions">
-                            @if(isset($data['booking_id']))
-                            <a href="{{ route('bookings.invoice', $data['booking_id']) }}" class="btn-view-detail">
-                                <span>Xem chi tiết</span> <i class="fa-solid fa-arrow-right"></i>
-                            </a>
+                            @if($linkTo)
+                                <a href="{{ $linkTo }}" class="btn-view-detail">
+                                    <span>Xem</span> <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            @elseif(isset($data['booking_id']))
+                                <a href="{{ route('bookings.invoice', $data['booking_id']) }}" class="btn-view-detail">
+                                    <span>Xem chi tiết</span> <i class="fa-solid fa-arrow-right"></i>
+                                </a>
                             @endif
                         </div>
                     </div>

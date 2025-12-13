@@ -211,6 +211,33 @@
                                 </span>
                             </div>
                         </div>
+                        {{-- Rating summary --}}
+                        @php
+                            if (\Illuminate\Support\Facades\Schema::hasTable('reviews')) {
+                                $avg = $room->reviews()->avg('rating') ?: 0;
+                                $avgRating = number_format($avg, 1);
+                                $reviewsCount = $room->reviews()->count();
+                            } else {
+                                $avgRating = number_format(0, 1);
+                                $reviewsCount = 0;
+                            }
+                            $filledStars = (int) floor($avgRating);
+                        @endphp
+                        <div class="room-rating">
+                            <div class="stars">
+                                @for($i=1; $i<=5; $i++)
+                                    @if($i <= $filledStars)
+                                        <i class="fa-solid fa-star"></i>
+                                    @else
+                                        <i class="fa-regular fa-star"></i>
+                                    @endif
+                                @endfor
+                            </div>
+                            <div class="rating-meta">
+                                <span class="avg">{{ $avgRating }}</span>
+                                <span class="count">({{ $reviewsCount }} đánh giá)</span>
+                            </div>
+                        </div>
 
                         <p class="room-short-desc">
                             {{ $room->mo_ta ?? 'Trải nghiệm không gian sang trọng với nội thất cao cấp...' }}
@@ -246,6 +273,8 @@
 
             {{-- PHÂN TRANG: sử dụng partial chung --}}
             @include('partials.pagination', ['paginator' => $rooms])
+
+            {{-- Reviews are displayed on the room detail page; removed form from index. --}}
         </main>
     </div>
 </div>

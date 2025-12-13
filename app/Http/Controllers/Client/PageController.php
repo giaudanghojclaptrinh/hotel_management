@@ -25,7 +25,12 @@ class PageController extends Controller
      */
     public function home()
     {
-        $loaiPhongs = LoaiPhong::take(3)->get();
+        // Load top 3 room types and precompute average rating (only rating>0)
+        $loaiPhongs = LoaiPhong::withAvg(['reviews as reviews_avg_rating' => function($q) {
+            $q->where('rating', '>', 0);
+        }], 'rating')
+        ->take(3)
+        ->get();
         $khuyenMais = KhuyenMai::where('ngay_ket_thuc', '>=', Carbon::today())->take(2)->get();
 
         return view('home', compact('loaiPhongs', 'khuyenMais'));

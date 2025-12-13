@@ -800,6 +800,219 @@
     text-align: center;
 }
 
+
+/* -----------------------------
+   Reviews & Ratings
+   ----------------------------- */
+
+.room-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.8rem;
+}
+
+.room-rating .stars {
+    color: var(--primary-gold);
+}
+
+.room-rating .stars i {
+    margin-right: 3px;
+}
+
+.room-rating .rating-meta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.reviews-section {
+    margin-top: 2.5rem;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+}
+
+.reviews-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.reviews-title {
+    font-family: var(--font-serif);
+    color: var(--white);
+    margin-bottom: 1rem;
+}
+
+.review-form {
+    display: block;
+    margin-bottom: 1.25rem;
+}
+
+.review-form .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.review-form label {
+    color: var(--white);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.review-form select,
+.review-form textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-light);
+    color: var(--white);
+}
+
+.review-form .form-actions {
+    text-align: right;
+}
+
+.review-list {
+    /* make comments stack vertically on detail pages */
+    display: block;
+    margin-top: 1rem;
+}
+
+.review-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-light);
+    padding: 1rem;
+    border-radius: 8px;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.rev-user {
+    font-weight: 700;
+    color: var(--white);
+}
+
+.rev-meta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.review-body {
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.review-footer {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+
+/* Facebook-like comment styling additions */
+
+.rev-avatar,
+.reply-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+}
+
+.rev-main {
+    display: block;
+}
+
+.review-actions button.reply-toggle {
+    background: none;
+    border: none;
+    color: var(--primary-gold);
+    cursor: pointer;
+    padding: 4px 6px;
+}
+
+.reply-card {
+    background: transparent;
+}
+
+.reply-body {
+    color: var(--text-main);
+}
+
+.reply-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reply-card .reply-avatar {
+    font-size: 18px
+}
+
+.reply-form-wrapper textarea {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--white);
+}
+
+.btn-sm {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-light);
+    color: var(--white);
+    cursor: pointer
+}
+
+.btn-sm:hover {
+    opacity: 0.9
+}
+
+.flash-note {
+    font-size: 0.95rem;
+    color: var(--text-muted)
+}
+
+
+/* Interactive star rating */
+
+.star-rating {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.star-rating .star {
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: color 120ms ease;
+}
+
+.star-rating .star.filled {
+    color: var(--primary-gold);
+}
+
+.star-rating .star i {
+    pointer-events: none;
+}
+
 .guarantee-icon-box {
     width: 60px;
     height: 60px;

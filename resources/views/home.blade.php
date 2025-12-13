@@ -53,6 +53,26 @@
                                 {{ $phong->ten_loai_phong }}
                             </a>
                         </h3>
+                        @php
+                            if (\Illuminate\Support\Facades\Schema::hasTable('reviews')) {
+                                $avg = $phong->reviews()->where('rating', '>', 0)->avg('rating') ?: 0;
+                                $avgRating = round($avg, 1);
+                            } else {
+                                $avgRating = 0;
+                            }
+                        @endphp
+                        <div class="room-rating" style="margin-top:6px; display:flex; align-items:center; gap:8px;">
+                            <div class="stars" aria-hidden>
+                                @for($i=1;$i<=5;$i++)
+                                    @if($i <= (int) floor($avgRating))
+                                        <i class="fa-solid fa-star" style="color:var(--primary-gold);"></i>
+                                    @else
+                                        <i class="fa-regular fa-star" style="color:var(--text-muted);"></i>
+                                    @endif
+                                @endfor
+                            </div>
+                            <div class="rating-num" style="color:var(--text-muted); font-size:0.95rem;">{{ $avgRating }}</div>
+                        </div>
                         
                         <div class="room-specs">
                             <div class="spec-item" title="Sức chứa">

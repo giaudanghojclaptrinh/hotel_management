@@ -19,6 +19,7 @@ use App\Http\Controllers\Client\PageController;
 use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Client\NotificationController; // Import Notification Controller
+use App\Http\Controllers\Client\ReviewController;
 
 Auth::routes();
 
@@ -86,6 +87,9 @@ Route::middleware('auth')->group(function () {
         // Xóa hàng loạt
         Route::post('/delete-multiple', [NotificationController::class, 'bulkDelete'])->name('notifications.deleteMultiple'); 
     });
+
+    // 4. Reviews (khách hàng đã đăng nhập mới được gửi đánh giá)
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 
     // 4. Quy trình đặt phòng (Yêu cầu có Profile)
     Route::middleware(['check.profile'])->group(function () {
