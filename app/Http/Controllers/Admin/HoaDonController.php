@@ -4,17 +4,50 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HoaDon;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 use App\Models\DatPhong; // Import Model DatPhong để lấy dữ liệu nếu cần
 
 class HoaDonController extends Controller
 {
     
-    public function getDanhSach()
+    public function getDanhSach(Request $request)
     {
-        // Sử dụng eager loading để lấy thông tin đơn đặt phòng liên quan
-        $hoaDons = HoaDon::with('datPhong.user')->get();
-        return view('admin.hoa_don.danh_sach', compact('hoaDons'));
+        // 1. Khởi tạo Query với eager loading datPhong.user
+        $query = HoaDon::with('datPhong.user');
+
+        // 2. Xử lý bộ lọc
+        if ($request->q) {
+            $query->where(function($q) use ($request) {
+                $q->where('ma_hoa_don', 'like', '%'.$request->q.'%')
+                  ->orWhereHas('datPhong.user', function($qq) use ($request) {
+                      $qq->where('name', 'like', '%'.$request->q.'%');
+                  });
+            });
+        }
+
+        if ($request->status) {
+            $query->where('trang_thai', $request->status);
+        }
+
+        if ($request->from_date) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+
+        if ($request->to_date) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        // 3. Tính toán thống kê (clone query để không ảnh hưởng phân trang)
+        $statsQuery = clone $query;
+        $totalRevenue = (clone $statsQuery)->where('trang_thai', 'paid')->sum('tong_tien');
+        $countPaid = (clone $query)->where('trang_thai', 'paid')->count();
+        $countUnpaid = (clone $query)->where('trang_thai', 'unpaid')->count();
+
+        // 4. Lấy dữ liệu phân trang, sắp xếp mới nhất trước
+        $hoaDons = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        return view('admin.hoa_don.danh_sach', compact('hoaDons', 'totalRevenue', 'countPaid', 'countUnpaid'));
     }
 
     public function getThem()
@@ -45,8 +78,10 @@ class HoaDonController extends Controller
         
         // [CẬP NHẬT] Lưu phương thức thanh toán
         $orm->phuong_thuc_thanh_toan = $data['phuong_thuc_thanh_toan']; 
-        $orm->ghi_chu = $data['ghi_chu'] ?? null;
-        
+        if (Schema::hasColumn('hoa_dons', 'ghi_chu')) {
+            $orm->ghi_chu = $data['ghi_chu'] ?? null;
+        }
+
         $orm->trang_thai = $data['trang_thai'] ?? 'unpaid';
         $orm->save();
         
@@ -82,7 +117,9 @@ class HoaDonController extends Controller
         
         // [CẬP NHẬT] Lưu phương thức thanh toán và ghi chú
         $orm->phuong_thuc_thanh_toan = $data['phuong_thuc_thanh_toan']; 
-        $orm->ghi_chu = $data['ghi_chu'] ?? $orm->ghi_chu;
+        if (Schema::hasColumn('hoa_dons', 'ghi_chu')) {
+            $orm->ghi_chu = $data['ghi_chu'] ?? $orm->ghi_chu;
+        }
 
         $orm->trang_thai = $data['trang_thai'] ?? $orm->trang_thai;
         $orm->save();
