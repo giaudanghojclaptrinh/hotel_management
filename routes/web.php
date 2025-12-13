@@ -141,6 +141,8 @@ Route::prefix('admin')
         Route::get('/sua/{id}', [PhongController::class, 'getSua'])->name('admin.phong.sua');
         Route::post('/sua/{id}', [PhongController::class, 'postSua'])->name('admin.phong.update');
         Route::get('/xoa/{id}', [PhongController::class, 'getXoa'])->name('admin.phong.xoa');
+        // Bulk delete rooms
+        Route::post('/bulk-delete', [PhongController::class, 'bulkDelete'])->name('admin.phong.bulk-delete');
     });
 
     // Quản lý Đặt phòng

@@ -36,7 +36,8 @@
                         class="relative mr-4 lg:mr-6"
                     >
                         <a href="{{ route('notifications.index') }}" class="notification-icon-wrapper">
-                            <i class="fa-solid fa-bell text-xl text-gray-700 hover:text-brand-900 transition-colors"></i>
+                            <i class="fa-solid fa-bell text-xl transition-colors"
+                               :class="unreadCount > 0 ? 'notification-active' : 'notification-inactive'"></i>
                             <template x-if="unreadCount > 0">
                                 <!-- Show number when small, otherwise show a subtle dot to avoid large numbers -->
                                 <span x-show="unreadCount <= 9" class="notification-badge" x-text="unreadCount"></span>
