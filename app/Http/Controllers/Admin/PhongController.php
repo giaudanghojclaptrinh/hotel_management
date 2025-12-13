@@ -90,6 +90,16 @@ class PhongController extends Controller
         $orm->delete();
         return redirect()->route('admin.phong');
     }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:phongs,id'
+        ]);
+        Phong::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.phong')->with('success', 'Đã xóa các phòng được chọn.');
+    }
     /**
      * Display the specified resource.
      */

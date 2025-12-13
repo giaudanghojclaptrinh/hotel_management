@@ -76,9 +76,23 @@
                     <p class="text-sm mt-1">Thử thay đổi bộ lọc hoặc thêm phòng mới.</p>
                 </div>
             @else
+            <div class="p-4 flex items-center justify-between">
+                <form id="bulkPhongForm" method="POST" action="{{ route('admin.phong.bulk-delete') }}">
+                    @csrf
+                    <button type="submit" class="h-10 px-4 bg-gray-800 border border-red-900/50 text-red-500 rounded-lg text-sm font-bold hover:bg-red-900/20 hover:border-red-500 shadow-sm transition-all" onclick="return confirm('Xóa các phòng được chọn?')">
+                        <i class="fa-solid fa-trash-can mr-2"></i> Xóa chọn
+                    </button>
+                </form>
+                <div class="text-sm text-gray-400">Đã chọn: <span id="phong-selected-count">0</span></div>
+            </div>
+                <form id="phongTableForm" method="POST" action="{{ route('admin.phong.bulk-delete') }}">
+                @csrf
                 <table class="min-w-full divide-y divide-gray-800">
                     <thead class="bg-gray-800">
                         <tr>
+                            <th class="px-6 py-4 text-left w-10">
+                                <input id="selectAllPhong" type="checkbox" class="rounded bg-gray-700 border-gray-600 text-brand-gold focus:ring-brand-gold focus:ring-offset-gray-900">
+                            </th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Số phòng</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Hạng phòng</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Giá niêm yết</th>
@@ -89,6 +103,9 @@
                     <tbody class="bg-gray-900 divide-y divide-gray-800">
                         @foreach($phongs as $phong)
                         <tr class="hover:bg-gray-800/50 transition-colors group">
+                            <td class="px-6 py-4">
+                                <input type="checkbox" name="ids[]" value="{{ $phong->id }}" class="phong-checkbox rounded bg-gray-700 border-gray-600 text-brand-gold focus:ring-brand-gold focus:ring-offset-gray-900">
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center text-brand-gold font-serif font-bold group-hover:bg-brand-gold group-hover:text-gray-900 transition-colors">
@@ -146,6 +163,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </form>
             @endif
         </div>
         <div class="bg-gray-800/50 px-6 py-4 border-t border-gray-800">
@@ -154,3 +172,21 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function(){
+        const selectAll = document.getElementById('selectAllPhong');
+        const checkboxes = document.querySelectorAll('.phong-checkbox');
+        const countEl = document.getElementById('phong-selected-count');
+        function update(){
+            const c = document.querySelectorAll('.phong-checkbox:checked').length;
+            if(countEl) countEl.textContent = c;
+            if(selectAll) selectAll.checked = (c>0 && c===checkboxes.length);
+        }
+        if(selectAll){ selectAll.addEventListener('change', ()=>{ checkboxes.forEach(cb=>cb.checked = selectAll.checked); update(); }); }
+        checkboxes.forEach(cb=>cb.addEventListener('change', update));
+        update();
+    })();
+</script>
+@endpush
