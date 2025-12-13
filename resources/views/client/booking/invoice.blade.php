@@ -1,61 +1,64 @@
 @extends($layout ?? 'layouts.app')
 @section('title', 'Chi tiết hóa đơn')
 
+@Vite(['resources/css/client/invoice.css', 'resources/js/client/invoice.js'])
+
 @section('content')
-<div class="bg-gray-100 min-h-screen py-12">
+<div class="invoice-page-wrapper">
     <!-- Print-only view; no server-side PDF injection -->
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="invoice-container">
         
-        <!-- Nút quay lại: dùng previous URL với fallback JS để trở về trang trước -->
+        <!-- Nút quay lại -->
         <div class="mb-6">
-            <a href="{{ url()->previous() }}" onclick="event.preventDefault(); history.back();" class="text-sm text-gray-600 hover:text-brand-900 flex items-center transition">
+            {{-- Thẻ a đã được xóa logic JS inline và dùng ID để lắng nghe trong invoice.js --}}
+            <a href="{{ url()->previous() }}" id="back-to-previous" class="back-link">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
             </a>
         </div>
 
         <!-- Card Hóa đơn -->
-        <div class="invoice-card bg-white rounded-3xl shadow-xl overflow-hidden print:shadow-none animate-fade-in-up">
+        <div class="invoice-card">
             
             <!-- Header Hóa đơn -->
-            <div class="invoice-header bg-brand-900 text-white p-8 text-center relative overflow-hidden">
+            <div class="invoice-header">
                 <!-- Họa tiết nền mờ -->
-                <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+                <div class="header-pattern"></div>
                 
-                <h1 class="text-3xl font-serif font-bold relative z-10 tracking-wide">HÓA ĐƠN DỊCH VỤ</h1>
-                <p class="opacity-80 text-sm mt-1 relative z-10 uppercase tracking-widest">Luxury Stay Hotel & Resort</p>
+                <h1 class="header-title">HÓA ĐƠN DỊCH VỤ</h1>
+                <p class="header-subtitle">Luxury Stay Hotel & Resort</p>
                 
                 <!-- Mã hóa đơn -->
-                <div class="mt-4 inline-block px-4 py-1 border border-white/30 rounded-full text-sm font-mono relative z-10 bg-white/10 backdrop-blur-sm">
+                <div class="invoice-code">
                     #{{ $booking->hoaDon ? $booking->hoaDon->ma_hoa_don : 'TMP-'.$booking->id }}
                 </div>
             </div>
 
-            <div class="invoice-body p-8 md:p-12">
+            <div class="invoice-body">
                 @if(isset($error))
                     <div class="mb-4 p-3 rounded-md bg-red-50 text-red-700 text-sm">
                         {{ $error }}
                     </div>
                 @endif
                 <!-- Thông tin khách hàng & Đơn hàng -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 pb-8 border-b border-gray-100">
+                <div class="detail-grid">
                     <div>
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Khách hàng</h4>
-                        <p class="text-lg font-bold text-gray-900">{{ $booking->user->name }}</p>
-                        <p class="text-gray-600 text-sm mt-1"><i class="fa-regular fa-envelope mr-2 w-4"></i> {{ $booking->user->email }}</p>
-                        <p class="text-gray-600 text-sm mt-1"><i class="fa-solid fa-phone mr-2 w-4"></i> {{ $booking->user->phone ?? 'Chưa cập nhật SĐT' }}</p>
+                        <h4 class="detail-heading">Khách hàng</h4>
+                        <p class="customer-name">{{ $booking->user->name }}</p>
+                        <p class="info-item"><i class="fa-regular fa-envelope"></i> {{ $booking->user->email }}</p>
+                        <p class="info-item"><i class="fa-solid fa-phone"></i> {{ $booking->user->phone ?? 'Chưa cập nhật SĐT' }}</p>
                     </div>
-                    <div class="text-left md:text-right">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Chi tiết đặt phòng</h4>
-                        <p class="text-gray-900 text-sm mb-1">
-                            <span class="font-bold text-gray-500 mr-2">Ngày đặt:</span> {{ $booking->created_at->format('d/m/Y H:i') }}
+                    <div class="booking-info">
+                        <h4 class="detail-heading">Chi tiết đặt phòng</h4>
+                        <p>
+                            <strong>Ngày đặt:</strong> {{ $booking->created_at->format('d/m/Y H:i') }}
                         </p>
-                        <p class="text-gray-900 text-sm mb-1">
-                            <span class="font-bold text-gray-500 mr-2">Nhận phòng:</span> {{ \Carbon\Carbon::parse($booking->ngay_den)->format('d/m/Y') }}
+                        <p>
+                            <strong>Nhận phòng:</strong> {{ \Carbon\Carbon::parse($booking->ngay_den)->format('d/m/Y') }}
                         </p>
-                        <p class="text-gray-900 text-sm mb-2">
-                            <span class="font-bold text-gray-500 mr-2">Trả phòng:</span> {{ \Carbon\Carbon::parse($booking->ngay_di)->format('d/m/Y') }}
+                        <p class="mb-2">
+                            <strong>Trả phòng:</strong> {{ \Carbon\Carbon::parse($booking->ngay_di)->format('d/m/Y') }}
                         </p>
-                        <div class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <div class="payment-method-tag">
                             <i class="fa-solid fa-credit-card mr-1.5"></i>
                             {{ $booking->payment_method == 'online' ? 'Thanh toán Online (VNPay)' : 'Thanh toán tại khách sạn' }}
                         </div>
@@ -63,38 +66,36 @@
                 </div>
 
                 <!-- Bảng chi tiết dịch vụ -->
-                <div class="mb-8">
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Dịch vụ sử dụng</h4>
-                    <div class="overflow-x-auto border border-gray-100 rounded-lg">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 text-gray-500 font-bold uppercase text-xs">
+                <div class="service-table-wrapper">
+                    <h4 class="detail-heading">Dịch vụ sử dụng</h4>
+                    <div class="table-responsive">
+                        <table class="invoice-table">
+                            <thead>
                                 <tr>
-                                    <th class="py-3 px-4">Hạng phòng</th>
-                                    <th class="py-3 px-4 text-center">Số đêm</th>
-                                    <th class="py-3 px-4 text-right">Đơn giá</th>
-                                    <th class="py-3 px-4 text-right">Thành tiền</th>
+                                    <th>Hạng phòng</th>
+                                    <th class="text-center">Số đêm</th>
+                                    <th class="text-right">Đơn giá</th>
+                                    <th class="text-right">Thành tiền</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody>
                                 @foreach($booking->chiTietDatPhongs as $detail)
-                                <tr class="hover:bg-gray-50/50 transition-colors">
-                                    <td class="py-4 px-4 font-medium text-gray-900">
+                                <tr>
+                                    <td class="font-medium">
                                         {{ $detail->loaiPhong->ten_loai_phong }}
                                         @if($detail->phong)
-                                            <div class="text-xs text-green-600 mt-1 flex items-center font-bold">
+                                            <div class="room-detail-info">
                                                 <i class="fa-solid fa-door-open mr-1"></i> Phòng {{ $detail->phong->so_phong }}
                                             </div>
                                         @else
-                                            <div class="text-xs text-orange-500 mt-1 italic flex items-center">
+                                            <div class="room-detail-pending">
                                                 <i class="fa-solid fa-hourglass-half mr-1"></i> Đang xếp phòng
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="py-4 px-4 text-center text-gray-600">
-                                        {{ \Carbon\Carbon::parse($booking->ngay_den)->diffInDays($booking->ngay_di) }}
-                                    </td>
-                                    <td class="py-4 px-4 text-right text-gray-600">{{ number_format($detail->don_gia, 0, ',', '.') }}đ</td>
-                                    <td class="py-4 px-4 text-right font-bold text-gray-900">{{ number_format($detail->thanh_tien, 0, ',', '.') }}đ</td>
+                                    <td class="text-center">{{ \Carbon\Carbon::parse($booking->ngay_den)->diffInDays($booking->ngay_di) }}</td>
+                                    <td class="text-right">{{ number_format($detail->don_gia, 0, ',', '.') }}đ</td>
+                                    <td class="text-right table-amount">{{ number_format($detail->thanh_tien, 0, ',', '.') }}đ</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -103,39 +104,40 @@
                 </div>
 
                 <!-- Tổng kết tài chính -->
-                <div class="flex justify-end">
-                    <div class="w-full md:w-1/2 space-y-3">
-                        <div class="flex justify-between text-sm text-gray-600">
+                <div class="summary-container">
+                    <div class="summary-box">
+                        
+                        <div class="summary-row">
                             <span>Tạm tính</span>
                             <span class="font-medium">{{ number_format($booking->chiTietDatPhongs->sum('thanh_tien'), 0, ',', '.') }}đ</span>
                         </div>
                         
                         @if($booking->discount_amount > 0)
-                        <div class="flex justify-between text-sm text-red-500 font-medium">
+                        <div class="summary-row summary-discount">
                             <span>Giảm giá ({{ $booking->promotion_code }})</span>
                             <span>-{{ number_format($booking->discount_amount, 0, ',', '.') }}đ</span>
                         </div>
                         @endif
                         
-                        <div class="border-t border-dashed border-gray-200 my-2"></div>
+                        <div class="summary-separator"></div>
                         
-                        <div class="flex justify-between items-center">
-                            <span class="text-base font-bold text-gray-900">Tổng thanh toán</span>
-                            <span class="text-2xl font-serif font-bold text-brand-gold">{{ number_format($booking->tong_tien, 0, ',', '.') }}đ</span>
+                        <div class="summary-total">
+                            <span class="total-label">Tổng thanh toán</span>
+                            <span class="total-amount">{{ number_format($booking->tong_tien, 0, ',', '.') }}đ</span>
                         </div>
                         
                         <!-- Trạng thái thanh toán (Con dấu) -->
-                        <div class="text-right mt-6">
+                        <div class="status-stamp-wrapper">
                             @if($booking->payment_status == 'paid')
-                                <div class="inline-block px-6 py-2 border-2 border-green-500 text-green-600 font-bold text-sm tracking-widest uppercase transform -rotate-6 opacity-80 mask-image" style="border-radius: 8px;">
+                                <div class="status-stamp status-paid">
                                     ĐÃ THANH TOÁN
                                 </div>
                             @elseif($booking->payment_status == 'awaiting_payment')
-                                <div class="inline-block px-6 py-2 border-2 border-orange-400 text-orange-500 font-bold text-sm tracking-widest uppercase transform -rotate-6 opacity-80" style="border-radius: 8px;">
+                                <div class="status-stamp status-awaiting">
                                     CHỜ THANH TOÁN
                                 </div>
                             @else
-                                <div class="inline-block px-6 py-2 border-2 border-gray-300 text-gray-400 font-bold text-sm tracking-widest uppercase transform -rotate-6 opacity-80" style="border-radius: 8px;">
+                                <div class="status-stamp status-unpaid">
                                     CHƯA THANH TOÁN
                                 </div>
                             @endif
@@ -144,24 +146,23 @@
                 </div>
 
                 <!-- Footer Hóa đơn -->
-                <div class="mt-12 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
-                    <p class="mb-1 font-medium text-gray-500">Cảm ơn quý khách đã lựa chọn Luxury Stay Hotel & Resort.</p>
-                    <p>Mọi thắc mắc xin vui lòng liên hệ hotline: <strong class="text-gray-600">1900 1234</strong> hoặc email: <span class="text-brand-900">support@luxurystay.com</span></p>
-                    <p class="mt-4 italic opacity-70">Hóa đơn điện tử này có giá trị như hóa đơn giấy.</p>
+                <div class="invoice-footer">
+                    <p class="footer-highlight">Cảm ơn quý khách đã lựa chọn Luxury Stay Hotel & Resort.</p>
+                    <p>Mọi thắc mắc xin vui lòng liên hệ hotline: <strong class="footer-highlight">1900 1234</strong> hoặc email: <span class="footer-brand">support@luxurystay.com</span></p>
+                    <p class="footer-italic">Hóa đơn điện tử này có giá trị như hóa đơn giấy.</p>
                 </div>
             </div>
         </div>
 
         <!-- Nút In (Ẩn khi in) -->
-        <div class="mt-8 text-center print:hidden">
+        <div class="print-button-container print:hidden">
             <div class="inline-flex gap-3">
-                <button onclick="window.print()" class="px-6 py-3 bg-white border border-gray-300 rounded-xl text-gray-700 font-bold hover:bg-gray-50 hover:text-brand-900 hover:border-brand-900 transition shadow-sm flex items-center gap-2">
+                {{-- Nút In đã được xóa logic JS inline và dùng ID để lắng nghe trong invoice.js --}}
+                <button id="print-invoice-btn" class="print-button">
                     <i class="fa-solid fa-print"></i> In hóa đơn
                 </button>
-
-                <!-- PDF download removed; use browser Print -->
             </div>
         </div>
     </div>
 </div>
-@endsection
+@endsection 

@@ -135,15 +135,33 @@ Route::prefix('admin')
 
     // Quản lý Đặt phòng
     Route::prefix('dat-phong')->group(function() {
-        Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong');
+        Route::get('/', [DatPhongController::class, 'getDanhSach'])->name('admin.dat-phong'); // Sơ đồ phòng
+        // Tạo đơn đặt phòng (admin) - route thêm mới
+        Route::get('/them', [DatPhongController::class, 'getThem'])->name('admin.dat-phong.them');
+        Route::post('/them', [DatPhongController::class, 'postThem'])->name('admin.dat-phong.store');
+
+        Route::get('/thung-rac', [DatPhongController::class, 'getThungRac'])->name('admin.dat-phong.trash');
+        Route::get('/lich-su', [DatPhongController::class, 'getLichSu'])->name('admin.dat-phong.history');
+
+        Route::get('/duyet/{id}', [DatPhongController::class, 'duyetDon'])->name('admin.dat-phong.duyet'); 
+        Route::get('/huy/{id}', [DatPhongController::class, 'huyDon'])->name('admin.dat-phong.huy');
+
         Route::delete('/xoa-hang-loat', [DatPhongController::class, 'xoaHangLoat'])->name('admin.dat-phong.xoa-hang-loat');
         Route::get('/hoa-don/{id}', [DatPhongController::class, 'getHoaDon'])->name('admin.dat-phong.hoa-don'); 
-        Route::post('/thanh-toan/{id}', [DatPhongController::class, 'postThanhToan'])->name('admin.dat-phong.thanh-toan'); 
+        Route::post('/thanh-toan/{id}', [DatPhongController::class, 'postThanhToan'])->name('admin.dat-phong.thanh-toan');
+
         Route::get('/duyet/{id}', [DatPhongController::class, 'duyetDon'])->name('admin.dat-phong.duyet'); 
         Route::get('/huy/{id}', [DatPhongController::class, 'huyDon'])->name('admin.dat-phong.huy'); 
+        // AJAX POST endpoints for approve/reject (preferred for modal actions)
+        Route::post('/duyet/{id}', [DatPhongController::class, 'postDuyet'])->name('admin.dat-phong.duyet.post');
+        Route::post('/huy/{id}', [DatPhongController::class, 'postHuy'])->name('admin.dat-phong.huy.post');
+        Route::get('/history', [DatPhongController::class, 'getHistory'])->name('admin.dat-phong.history'); 
+        Route::get('/trash', [DatPhongController::class, 'getTrash'])->name('admin.dat-phong.trash'); 
         Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');
         Route::post('/sua/{id}', [DatPhongController::class, 'postSua'])->name('admin.dat-phong.update');
         Route::get('/xoa/{id}', [DatPhongController::class, 'getXoa'])->name('admin.dat-phong.xoa');
+        // Chi tiết phòng: hiển thị tất cả đơn liên quan tới phòng này
+        Route::get('/phong/{id}', [DatPhongController::class, 'getRoomDetail'])->name('admin.dat-phong.room-detail');
     });
 
     // Quản lý Khuyến mãi

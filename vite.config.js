@@ -9,7 +9,6 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/tailwind-config.js',
 
-
                 //client
                 //css
                 'resources/css/login.css',
@@ -23,6 +22,7 @@ export default defineConfig({
                 'resources/css/client/contact.css',
                 'resources/css/client/promo.css',
                 'resources/css/client/notifications.css',
+                'resources/css/client/invoice.css',
 
                 //js
                 'resources/js/login.js',
@@ -36,6 +36,7 @@ export default defineConfig({
                 'resources/js/client/contact.js',
                 'resources/js/client/promo.js',
                 'resources/js/client/notifications.js',
+                'resources/js/client/invoice.js',
 
             ],
             refresh: true,

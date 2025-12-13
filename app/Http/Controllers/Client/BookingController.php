@@ -147,14 +147,14 @@ class BookingController extends Controller
             }
 
             // Tạo Booking: PENDING (Chờ duyệt), UNPAID (Chưa thanh toán)
-            $this->createBooking($request, 'pending', 'unpaid', $phongTrong);
+            $booking = $this->createBooking($request, 'pending', 'unpaid', $phongTrong);
             
             DB::commit();
             
             // Chuyển hướng đến trang thành công
             return redirect()->route('booking.success')
                 ->with('success', 'Đặt phòng thành công! Đơn hàng đang chờ Admin xác nhận.')
-                ->with('booking_id', session('temp_booking_id'));
+                ->with('booking_id', $booking->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -164,7 +164,9 @@ class BookingController extends Controller
     }
     
     // ===============================================
-    // 4. XỬ LÝ THANH TOÁN ONLINE (VNPAY DEMO - CONFIRMED/PAID)
+    // 4. XỬ LÝ THANH TOÁN ONLINE (VNPAY) - KHÔNG TỰ ĐỘNG DUYỆT
+    // Sau khi thanh toán online, hệ thống chỉ ghi nhận trạng thái thanh toán
+    // nhưng vẫn giữ `trang_thai` là 'pending' để Admin duyệt và xác nhận phòng.
     // ===============================================
     
     public function postVnPayStore(Request $request)
@@ -189,8 +191,8 @@ class BookingController extends Controller
                 return back()->with('error', 'Rất tiếc, phòng vừa bị người khác đặt mất.');
             }
 
-            // Tạo Booking: CONFIRMED (Đã xác nhận), PAID (Đã thanh toán)
-            $booking = $this->createBooking($request, 'confirmed', 'paid', $phongTrong);
+            // Tạo Booking: PENDING (chờ Admin duyệt) nhưng payment_status = PAID
+            $booking = $this->createBooking($request, 'pending', 'paid', $phongTrong);
             
             // Tạo Hóa đơn ngay lập tức cho thanh toán online
             HoaDon::create([
@@ -204,8 +206,10 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('bookings.invoice', $booking->id)
-                ->with('success', 'Thanh toán Online thành công! Đơn phòng của bạn đã được xác nhận tự động.');
+            // Redirect to success page (do not auto-open invoice). Pass booking_id for the success view.
+            return redirect()->route('booking.success')
+                ->with('success', 'Thanh toán Online thành công! Đơn phòng đã được ghi nhận. Vui lòng chờ Admin xác nhận.')
+                ->with('booking_id', $booking->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -232,8 +236,8 @@ class BookingController extends Controller
             'ngay_den' => $request->checkin,
             'ngay_di' => $request->checkout,
             'tong_tien' => $finalTotal,
-            'trang_thai' => $status, 
-            'payment_status' => $paymentStatus, 
+            'trang_thai' => $status,
+            'payment_status' => $paymentStatus,
             'payment_method' => $request->payment_method,
             'promotion_code' => $request->promotion_code,
             'discount_amount' => $discountAmount,
@@ -244,14 +248,15 @@ class BookingController extends Controller
         ChiTietDatPhong::create([
             'dat_phong_id' => $booking->id,
             'loai_phong_id' => $loaiPhong->id,
-            'phong_id' => $phongTrong->id, 
+            'phong_id' => $phongTrong->id,
             'so_luong' => 1,
             'don_gia' => $loaiPhong->gia,
             'thanh_tien' => $originalTotal,
         ]);
-        
+
         // Lưu ID đơn hàng vào session (dùng cho trang success)
-        session()->flash('temp_booking_id', $booking->id);
+        // Dùng key 'booking_id' để nhất quán với các redirect khác.
+        session()->flash('booking_id', $booking->id);
         return $booking;
     }
 
