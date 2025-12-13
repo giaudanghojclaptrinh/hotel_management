@@ -11,7 +11,12 @@ class TienNghiController extends Controller
     // Danh sách
     public function getDanhSach()
     {
-        $tienNghis = TienNghi::all();
+        $q = request()->query('q');
+        $query = TienNghi::query();
+        if ($q) {
+            $query->where('ten_tien_nghi', 'like', "%{$q}%")->orWhere('ma_tien_nghi', 'like', "%{$q}%");
+        }
+        $tienNghis = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         return view('admin.tien_nghi.danh_sach', compact('tienNghis'));
     }
 
@@ -62,5 +67,16 @@ class TienNghiController extends Controller
     {
         TienNghi::destroy($id);
         return redirect()->route('admin.tien-nghi')->with('success', 'Xóa thành công!');
+    }
+
+    // Bulk delete
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:tien_nghis,id',
+        ]);
+        TienNghi::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.tien-nghi')->with('success', 'Đã xóa các tiện nghi được chọn.');
     }
 }

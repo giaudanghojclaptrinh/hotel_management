@@ -155,6 +155,9 @@ Route::prefix('admin')
         // AJAX POST endpoints for approve/reject (preferred for modal actions)
         Route::post('/duyet/{id}', [DatPhongController::class, 'postDuyet'])->name('admin.dat-phong.duyet.post');
         Route::post('/huy/{id}', [DatPhongController::class, 'postHuy'])->name('admin.dat-phong.huy.post');
+        // Bulk actions: move history items to trash, and permanently delete from trash
+        Route::post('/bulk-trash', [DatPhongController::class, 'bulkMoveToTrash'])->name('admin.dat-phong.bulk-trash');
+        Route::post('/bulk-delete', [DatPhongController::class, 'bulkDeletePermanent'])->name('admin.dat-phong.bulk-delete');
         Route::get('/history', [DatPhongController::class, 'getHistory'])->name('admin.dat-phong.history'); 
         Route::get('/trash', [DatPhongController::class, 'getTrash'])->name('admin.dat-phong.trash'); 
         Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');
@@ -162,6 +165,8 @@ Route::prefix('admin')
         Route::get('/xoa/{id}', [DatPhongController::class, 'getXoa'])->name('admin.dat-phong.xoa');
         // Chi tiết phòng: hiển thị tất cả đơn liên quan tới phòng này
         Route::get('/phong/{id}', [DatPhongController::class, 'getRoomDetail'])->name('admin.dat-phong.room-detail');
+        // Báo cáo doanh thu
+        Route::get('/bao-cao/danh-thu', [DatPhongController::class, 'revenueReport'])->name('admin.reports.revenue');
     });
 
     // Quản lý Khuyến mãi
@@ -172,6 +177,7 @@ Route::prefix('admin')
         Route::get('/sua/{id}', [KhuyenMaiController::class, 'getSua'])->name('admin.khuyen-mai.sua');
         Route::post('/sua/{id}', [KhuyenMaiController::class, 'postSua'])->name('admin.khuyen-mai.update');
         Route::get('/xoa/{id}', [KhuyenMaiController::class, 'getXoa'])->name('admin.khuyen-mai.xoa');
+        Route::post('/bulk-delete', [KhuyenMaiController::class, 'bulkDelete'])->name('admin.khuyen-mai.bulk-delete');
     });
 
     // Quản lý Hóa đơn
@@ -190,6 +196,7 @@ Route::prefix('admin')
         Route::get('/sua/{id}', [UserController::class, 'getSua'])->name('admin.user.sua');
         Route::post('/sua/{id}', [UserController::class, 'postSua'])->name('admin.user.update');
         Route::get('/xoa/{id}', [UserController::class, 'getXoa'])->name('admin.user.xoa');
+        Route::post('/bulk-delete', [UserController::class, 'bulkDelete'])->name('admin.users.bulk-delete');
     });
 
     // Quản lý Tiện nghi
@@ -200,5 +207,6 @@ Route::prefix('admin')
         Route::get('/sua/{id}', [TienNghiController::class, 'getSua'])->name('admin.tien-nghi.sua');
         Route::post('/sua/{id}', [TienNghiController::class, 'postSua'])->name('admin.tien-nghi.update');
         Route::get('/xoa/{id}', [TienNghiController::class, 'getXoa'])->name('admin.tien-nghi.xoa');
+        Route::post('/bulk-delete', [TienNghiController::class, 'bulkDelete'])->name('admin.tien-nghi.bulk-delete');
     });
 });

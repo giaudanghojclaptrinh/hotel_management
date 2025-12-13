@@ -1,45 +1,69 @@
 @extends('admin.layouts.dashboard')
+@section('title', 'Sửa Phòng')
+@section('header', 'Cập nhật phòng')
+
 @section('content')
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="card-common p-6">
-        <div class="toolbar mb-4">
-            <h2 class="text-lg font-semibold">Sửa phòng</h2>
-            <a href="{{ route('admin.phong') }}" class="text-sm text-gray-600 hover:text-gray-900">&larr; Quay lại</a>
-        </div>
+<div class="max-w-3xl mx-auto">
+    
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-serif font-bold text-gray-900">Cập nhật phòng: {{ $phong->so_phong }}</h1>
+        <a href="{{ route('admin.phong') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-gold hover:text-brand-gold transition-all shadow-sm">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+        </a>
+    </div>
 
-        <form action="{{ route('admin.phong.sua', ['id' => $phong->id]) }}" method="POST">
-            @csrf
-            <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700" for="so_phong">Số phòng</label>
-                    <input type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-900 focus:border-brand-900" id="so_phong" name="so_phong" value="{{ $phong->so_phong }}" required />
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-8">
+            <form action="{{ route('admin.phong.update', ['id' => $phong->id]) }}" method="POST">
+                @csrf
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Số phòng <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-door-closed text-gray-400"></i>
+                            </div>
+                            <input type="text" name="so_phong" required value="{{ old('so_phong', $phong->so_phong) }}"
+                                   class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11 font-medium text-brand-900">
+                        </div>
+                        @error('so_phong') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Thuộc Hạng phòng <span class="text-red-500">*</span></label>
+                        <select name="loai_phong_id" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11">
+                            <option value="">-- Chọn hạng phòng --</option>
+                            @foreach($loaiPhongs as $lp)
+                                <option value="{{ $lp->id }}" {{ $phong->loai_phong_id == $lp->id ? 'selected' : '' }}>
+                                    {{ $lp->ten_loai_phong }} - {{ number_format($lp->gia ?? 0, 0, ',', '.') }} đ
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('loai_phong_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Tình trạng hiện tại</label>
+                        <select name="tinh_trang" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11">
+                            <option value="available" {{ $phong->tinh_trang == 'available' ? 'selected' : '' }}>Sẵn sàng đón khách (Available)</option>
+                            <option value="occupied" {{ $phong->tinh_trang == 'occupied' ? 'selected' : '' }}>Đang có khách (Occupied)</option>
+                            <option value="maintenance" {{ $phong->tinh_trang == 'maintenance' ? 'selected' : '' }}>Đang bảo trì (Maintenance)</option>
+                            <option value="cleaning" {{ $phong->tinh_trang == 'cleaning' ? 'selected' : '' }}>Đang dọn dẹp (Cleaning)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700" for="loai_phong_id">Loại phòng</label>
-                    <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-brand-900 focus:border-brand-900" id="loai_phong_id" name="loai_phong_id" required>
-                        @foreach($loaiPhongs as $lp)
-                            <option value="{{ $lp->id }}" {{ $phong->loai_phong_id == $lp->id ? 'selected' : '' }}>{{ $lp->ten_loai_phong }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700" for="tinh_trang">Tình trạng</label>
-                    <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" id="tinh_trang" name="tinh_trang">
-                        @foreach(\App\Models\Phong::tinh_trang_options as $key => $meta)
-                            <option value="{{ $key }}" {{ $phong->tinh_trang == $key ? 'selected' : '' }}>{{ $meta['label'] }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="flex items-center justify-end pt-2">
-                    <button type="submit" class="btn-primary inline-flex items-center gap-2">
-                        <i class="fa fa-save"></i> Lưu
+                <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+                    <a href="{{ route('admin.phong') }}" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-all">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-900 text-brand-gold rounded-lg font-bold hover:bg-gray-800 shadow-md transition-all flex items-center">
+                        <i class="fa-solid fa-check mr-2"></i> Cập nhật
                     </button>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

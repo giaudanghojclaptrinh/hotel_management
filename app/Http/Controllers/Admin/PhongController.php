@@ -12,8 +12,30 @@ class PhongController extends Controller
     
     public function getDanhSach()
     {
-        $phongs = Phong::all();
-        return view('admin.phong.danh_sach', compact('phongs'));
+        $q = request()->query('q');
+        $loaiPhongId = request()->query('loai_phong_id');
+        $tinhTrang = request()->query('tinh_trang');
+
+        $query = Phong::with('loaiPhong');
+        if ($q) {
+            $query->where('so_phong', 'like', "%{$q}%");
+        }
+        if ($loaiPhongId) {
+            $query->where('loai_phong_id', $loaiPhongId);
+        }
+        if ($tinhTrang) {
+            $query->where('tinh_trang', $tinhTrang);
+        }
+
+        // Attempt numeric sort by room number when possible, fallback to lexicographic
+        $query->orderByRaw("CAST(so_phong AS UNSIGNED) ASC")->orderBy('so_phong', 'asc');
+
+        $phongs = $query->paginate(15)->withQueryString();
+
+        // provide room types for filter select
+        $loaiPhongs = LoaiPhong::select('id', 'ten_loai_phong')->orderBy('ten_loai_phong')->get();
+
+        return view('admin.phong.danh_sach', compact('phongs', 'loaiPhongs'));
     }
 
     public function getThem()
