@@ -37,6 +37,7 @@
                 'resources/css/client/contact.css',
                 'resources/css/client/promo.css',
                 'resources/css/client/notifications.css',
+                
 
                 //js
                 'resources/js/login.js',

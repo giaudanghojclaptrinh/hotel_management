@@ -1,0 +1,553 @@
+/* =======================================================
+   LUXURY STAY HOTEL & RESORT - UNIFIED CLIENT STYLES
+   Phiên bản: Đồng bộ hóa toàn bộ biến và utility.
+   ======================================================= */
+
+
+/* --- 1. UNIVERSAL THEME VARIABLES --- */
+
+:root {
+    --color-brand-900: #0b3d68;
+    /* Màu xanh đậm chủ đạo (Navy/Dark Blue) */
+    --color-brand-gold: #c5a47e;
+    /* Màu vàng gold nhấn (Accent Gold) */
+    --color-bg-primary: #f9fafb;
+    /* Background nền chính (Gray 50/100) */
+    --color-text-main: #1f2937;
+    /* Text chính (Gray 900) */
+    --color-text-muted: #6b7280;
+    /* Text mờ (Gray 600) */
+    --color-border: #e5e7eb;
+    /* Border/Separator (Gray 200) */
+    --color-shadow-light: rgba(0, 0, 0, 0.05);
+    /* Shadow nhẹ */
+    /* Buttons & Form */
+    --color-btn-primary-bg: var(--color-brand-gold);
+    --color-btn-primary-text: #000000;
+}
+
+
+/* --- 2. BASE AND COMMON UTILITIES --- */
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--color-text-main);
+    background-color: var(--color-bg-primary);
+}
+
+.container {
+    max-width: 1280px;
+    /* max-w-7xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+
+/* Primary Button Style (btn-primary) */
+
+.btn-primary {
+    background: var(--color-btn-primary-bg);
+    color: var(--color-btn-primary-text);
+    padding: .6rem 1rem;
+    border-radius: .5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    /* Bổ sung để đồng bộ với theme */
+    border: 1px solid transparent;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    filter: none;
+    /* Bỏ filter, dùng hover style rõ ràng hơn */
+    background: var(--color-brand-900);
+    color: #ffffff;
+    border-color: var(--color-brand-900);
+    box-shadow: 0 4px 6px -1px var(--color-shadow-light), 0 2px 4px -2px var(--color-shadow-light);
+}
+
+.btn-primary:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    background: var(--color-btn-primary-bg);
+    color: var(--color-btn-primary-text);
+    box-shadow: none;
+}
+
+
+/* Common Form Input Style (form-input) */
+
+.form-input {
+    width: 100%;
+    padding: .6rem .75rem;
+    border: 1px solid var(--color-border);
+    border-radius: .5rem;
+    color: var(--color-text-main);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #ffffff;
+    /* Đảm bảo nền trắng */
+}
+
+.form-input:focus {
+    border-color: var(--color-brand-gold);
+    /* Chuyển sang màu gold khi focus */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(197, 164, 126, 0.5);
+    /* Vòng sáng gold */
+}
+
+
+/* =======================================================
+   3. INVOICE PAGE STYLES
+   ======================================================= */
+
+
+/* --- Base Layout --- */
+
+.invoice-page-wrapper {
+    background-color: var(--color-bg-primary);
+    min-height: 100vh;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.invoice-container {
+    max-width: 768px;
+    /* max-w-3xl */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+
+/* --- Back Button --- */
+
+.back-link {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+    margin-bottom: 1.5rem;
+}
+
+.back-link:hover {
+    color: var(--color-brand-900);
+}
+
+
+/* --- Invoice Card --- */
+
+.invoice-card {
+    background-color: #ffffff;
+    border-radius: 1.5rem;
+    /* rounded-3xl */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    /* Dùng class riêng cho animation để không xung đột */
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+
+/* --- Header Section --- */
+
+.invoice-header {
+    background-color: var(--color-brand-900);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    pointer-events: none;
+    background-image: radial-gradient(#fff 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.header-title {
+    font-family: 'Georgia', serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 10;
+}
+
+.header-subtitle {
+    opacity: 0.8;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    position: relative;
+    z-index: 10;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.invoice-code {
+    margin-top: 1rem;
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-family: monospace;
+    position: relative;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+}
+
+
+/* --- Body Section (Details) --- */
+
+.invoice-body {
+    padding: 3rem;
+}
+
+
+/* Customer & Booking Details */
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 768px) {
+    .detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.detail-heading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+}
+
+.customer-name {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.info-item {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.info-item i {
+    width: 1rem;
+    margin-right: 0.5rem;
+}
+
+.booking-info {
+    text-align: left;
+}
+
+@media (min-width: 768px) {
+    .booking-info {
+        text-align: right;
+    }
+}
+
+.booking-info p {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    color: var(--color-text-main);
+}
+
+.booking-info strong {
+    font-weight: 700;
+    color: #9ca3af;
+    margin-right: 0.5rem;
+}
+
+.payment-method-tag {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+
+/* --- Service Table --- */
+
+.service-table-wrapper {
+    margin-bottom: 2rem;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+}
+
+.invoice-table {
+    width: 100%;
+    font-size: 0.875rem;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.invoice-table thead {
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.invoice-table th,
+.invoice-table td {
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+}
+
+.invoice-table tbody tr {
+    border-top: 1px solid #f3f4f6;
+    transition: background-color 0.2s;
+}
+
+.invoice-table tbody tr:hover {
+    background-color: rgba(249, 250, 251, 0.5);
+}
+
+.room-detail-info {
+    color: #10b981;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+}
+
+.room-detail-pending {
+    color: #f97316;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    font-style: italic;
+}
+
+.table-amount {
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+
+/* --- Financial Summary --- */
+
+.summary-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.summary-box {
+    width: 100%;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+}
+
+.summary-discount {
+    color: #ef4444;
+    font-weight: 500;
+}
+
+.summary-separator {
+    border-top: 1px dashed var(--color-border);
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.total-amount {
+    font-size: 1.5rem;
+    font-family: 'Georgia', serif;
+    font-weight: 700;
+    color: var(--color-brand-gold);
+}
+
+
+/* --- Payment Status Stamp --- */
+
+.status-stamp-wrapper {
+    text-align: right;
+    margin-top: 1.5rem;
+}
+
+.status-stamp {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-width: 2px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transform: rotate(-6deg);
+    opacity: 0.8;
+    border-radius: 8px;
+}
+
+
+/* Paid Status */
+
+.status-paid {
+    border-color: #10b981;
+    color: #059669;
+}
+
+
+/* Awaiting Status */
+
+.status-awaiting {
+    border-color: #fb923c;
+    color: #f97316;
+}
+
+
+/* Unpaid Status */
+
+.status-unpaid {
+    border-color: #d1d5db;
+    color: #9ca3af;
+}
+
+
+/* --- Footer --- */
+
+.invoice-footer {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+    text-align: center;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.invoice-footer p {
+    margin-bottom: 0.25rem;
+}
+
+
+/* --- Nút In Hóa đơn (MỚI) --- */
+
+.btn-invoice-print {
+    padding: 0.75rem 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    /* gray-300 */
+    border-radius: 0.75rem;
+    /* rounded-xl */
+    color: #374151;
+    /* gray-700 */
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-invoice-print:hover {
+    background-color: var(--color-bg-primary);
+    color: var(--color-brand-900);
+    border-color: var(--color-brand-900);
+    box-shadow: 0 4px 6px -1px var(--color-shadow-light);
+}
+
+
+/* =========================================
+   4. PRINT MEDIA QUERY (Cho Hóa đơn)
+   ========================================= */
+
+@media print {
+    /* Ẩn các phần tử không cần thiết khi in */
+    .invoice-page-wrapper {
+        background-color: white !important;
+        padding: 0 !important;
+    }
+    .invoice-container {
+        margin: 0 auto !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+    .back-link,
+    .print-button-container,
+    .btn-invoice-print {
+        /* Ẩn nút In khi in */
+        display: none !important;
+    }
+    .invoice-card {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    .invoice-header,
+    .invoice-body {
+        padding: 1rem !important;
+    }
+}
