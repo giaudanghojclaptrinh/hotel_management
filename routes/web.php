@@ -59,6 +59,10 @@ Route::get('/lien-he', function () {
     return view('client.contact.index');
 })->name('contact');
 
+// Legal pages: privacy & terms (simple static views)
+Route::view('/privacy', 'privacy')->name('privacy');
+Route::view('/terms', 'terms')->name('terms');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +77,8 @@ Route::middleware('auth')->group(function () {
 
     // 2. Lịch sử đặt phòng
     Route::get('/lich-su-dat-phong', [BookingController::class, 'history'])->name('bookings.history');
+    // Hủy đơn đặt phòng (khách hàng)
+    Route::post('/huy-dat-phong/{id}', [BookingController::class, 'cancel'])->name('bookings.cancel');
     
     // Route xem chi tiết hóa đơn của user
     Route::get('/hoa-don-cua-toi/{id}', [BookingController::class, 'invoice'])->name('bookings.invoice');
@@ -135,7 +141,6 @@ Route::prefix('admin')
         Route::get('/sua/{id}', [PhongController::class, 'getSua'])->name('admin.phong.sua');
         Route::post('/sua/{id}', [PhongController::class, 'postSua'])->name('admin.phong.update');
         Route::get('/xoa/{id}', [PhongController::class, 'getXoa'])->name('admin.phong.xoa');
-        Route::post('/bulk-delete', [PhongController::class, 'bulkDelete'])->name('admin.phong.bulk-delete');
     });
 
     // Quản lý Đặt phòng

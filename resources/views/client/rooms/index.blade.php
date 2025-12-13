@@ -23,9 +23,9 @@
 <div class="container pb-section">
 
     <!-- Mobile Filter Button -->
-    <button type="button" class="btn btn-primary mobile-filter-btn" onclick="document.querySelector('.sidebar-filter').classList.toggle('active')">
+    <!-- <button type="button" class="btn btn-primary mobile-filter-btn" onclick="document.querySelector('.sidebar-filter').classList.toggle('active')">
         <i class="fa-solid fa-filter mr-2"></i> Bộ lọc tìm kiếm
-    </button>
+    </button> -->
     
     <div class="listing-layout">
         
@@ -302,4 +302,4 @@
     </div>
 </div>
 
-@endsection
+@endsectionionion

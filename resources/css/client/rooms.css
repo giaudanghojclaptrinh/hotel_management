@@ -257,13 +257,36 @@
     border: 1px solid var(--border-light) !important;
     color: var(--text-main) !important;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: 6px;
     outline: none;
     cursor: pointer;
+    /* custom arrow using SVG data URI matching gold color */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23cda45e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .filter-select:focus {
     border-color: var(--primary-gold) !important;
+    box-shadow: 0 0 0 4px rgba(205, 164, 94, 0.06);
+}
+
+
+/* Ensure options are readable in dark theme */
+
+.filter-select option {
+    background: var(--bg-body);
+    color: var(--text-main);
+}
+
+
+/* For IE/Edge default arrow hide */
+
+.filter-select::-ms-expand {
+    display: none;
 }
 
 
