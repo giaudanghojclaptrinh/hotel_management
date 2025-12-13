@@ -17,9 +17,24 @@
 
     <div class="bg-gray-900 rounded-xl shadow-lg border border-gray-800 overflow-hidden">
         <div class="overflow-x-auto">
+            <div class="p-4 flex items-center justify-between">
+                <form id="bulkDpForm" method="POST" action="{{ route('admin.dat-phong.bulk-delete') }}">
+                    @csrf
+                    <button type="submit" class="h-10 px-4 bg-gray-800 border border-red-900/50 text-red-500 rounded-lg text-sm font-bold hover:bg-red-900/20 hover:border-red-500 shadow-sm transition-all" onclick="return confirm('Xóa các đơn được chọn?')">
+                        <i class="fa-solid fa-trash-can mr-2"></i> Xóa chọn
+                    </button>
+                </form>
+                <div class="text-sm text-gray-400">Đã chọn: <span id="dp-selected-count">0</span></div>
+            </div>
+
+            <form id="dpTableForm" method="POST" action="{{ route('admin.dat-phong.bulk-delete') }}">
+            @csrf
             <table class="min-w-full divide-y divide-gray-800">
                 <thead class="bg-gray-800">
                     <tr>
+                        <th class="px-6 py-4 text-left w-10">
+                            <input id="selectAllDp" type="checkbox" class="rounded bg-gray-700 border-gray-600 text-brand-gold focus:ring-brand-gold focus:ring-offset-gray-900">
+                        </th>
                         <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-400">Mã Đơn</th>
                         <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-400">Khách hàng</th>
                         <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-400">Phòng</th>
@@ -31,6 +46,9 @@
                 <tbody class="bg-gray-900 divide-y divide-gray-800">
                     @foreach($datPhongs as $dp)
                     <tr class="hover:bg-gray-800/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" name="ids[]" value="{{ $dp->id }}" class="dp-checkbox rounded bg-gray-700 border-gray-600 text-brand-gold focus:ring-brand-gold focus:ring-offset-gray-900">
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-medium text-brand-gold group-hover:text-white transition-colors">
                             #{{ $dp->id }}
                         </td>
@@ -75,6 +93,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </form>
         </div>
         
         <div class="bg-gray-800/50 px-6 py-4 border-t border-gray-800">
@@ -83,3 +102,21 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function(){
+        const selectAll = document.getElementById('selectAllDp');
+        const checkboxes = document.querySelectorAll('.dp-checkbox');
+        const countEl = document.getElementById('dp-selected-count');
+        function update(){
+            const c = document.querySelectorAll('.dp-checkbox:checked').length;
+            if(countEl) countEl.textContent = c;
+            if(selectAll) selectAll.checked = (c>0 && c===checkboxes.length);
+        }
+        if(selectAll){ selectAll.addEventListener('change', ()=>{ checkboxes.forEach(cb=>cb.checked = selectAll.checked); update(); }); }
+        checkboxes.forEach(cb=>cb.addEventListener('change', update));
+        update();
+    })();
+</script>
+@endpush

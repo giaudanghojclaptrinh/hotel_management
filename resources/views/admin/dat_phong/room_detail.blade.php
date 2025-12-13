@@ -46,10 +46,28 @@
         </form>
     </div>
 
+    <div class="flex items-center justify-between mb-4">
+        <form id="roomBulkForm" method="POST" action="{{ route('admin.dat-phong.bulk-delete') }}">
+            @csrf
+            <button type="submit" class="h-10 px-4 bg-gray-800 border border-red-900/50 text-red-500 rounded-lg text-sm font-bold hover:bg-red-900/20 hover:border-red-500 shadow-sm transition-all" onclick="return confirm('Xóa các đơn được chọn?')">
+                <i class="fa-solid fa-trash-can mr-2"></i> Xóa chọn
+            </button>
+        </form>
+        <div class="flex items-center gap-3">
+            <label class="text-sm text-gray-400 flex items-center gap-2"><input id="selectAllRoom" type="checkbox" class="rounded bg-gray-700 border-gray-600 text-brand-gold focus:ring-brand-gold focus:ring-offset-gray-900"> Chọn tất cả</label>
+            <div class="text-sm text-gray-400">Đã chọn: <span id="room-selected-count">0</span></div>
+        </div>
+    </div>
+
+    <form id="roomTableForm" method="POST" action="{{ route('admin.dat-phong.bulk-delete') }}">
+    @csrf
     <div class="space-y-6">
         @forelse($datPhongs as $bk)
             <div class="relative lux-card rounded-2xl shadow-md border border-gray-800 overflow-hidden group hover:border-brand-gold/30 transition-all duration-300 
                 {{ $bk->trang_thai == 'pending' ? 'ring-1 ring-red-500' : '' }}">
+                <div class="absolute top-3 left-3">
+                    <input type="checkbox" name="ids[]" value="{{ $bk->id }}" class="bk-checkbox rounded bg-gray-700 border-gray-600 text-brand-gold focus:ring-brand-gold focus:ring-offset-gray-900">
+                </div>
                 
                 <div class="absolute top-0 right-0 px-4 py-1.5 rounded-bl-2xl text-xs font-bold uppercase tracking-wider text-white
                     {{ $bk->trang_thai == 'pending' ? 'bg-red-600' : 
@@ -189,5 +207,19 @@
             postAction('{{ url('/admin/dat-phong') }}/huy/' + this.dataset.id).then(() => window.location.reload());
         });
     });
+    // Bulk select logic for room detail
+    (function(){
+        const selectAll = document.getElementById('selectAllRoom');
+        const checkboxes = document.querySelectorAll('.bk-checkbox');
+        const countEl = document.getElementById('room-selected-count');
+        function update(){
+            const c = document.querySelectorAll('.bk-checkbox:checked').length;
+            if(countEl) countEl.textContent = c;
+            if(selectAll) selectAll.checked = (c>0 && c===checkboxes.length);
+        }
+        if(selectAll){ selectAll.addEventListener('change', ()=>{ checkboxes.forEach(cb=>cb.checked = selectAll.checked); update(); }); }
+        checkboxes.forEach(cb=>cb.addEventListener('change', update));
+        update();
+    })();
 </script>
 @endpush
