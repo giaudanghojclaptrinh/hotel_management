@@ -32,6 +32,14 @@ class LoaiPhong extends Model
 	}
 
 	/**
+	 * Reviews for this room type
+	 */
+	public function reviews()
+	{
+		return $this->hasMany(\App\Models\Review::class, 'loai_phong_id');
+	}
+
+	/**
 	 * Get the booking details for this LoaiPhong.
 	 */
 	public function chiTietDatPhongs(): HasMany

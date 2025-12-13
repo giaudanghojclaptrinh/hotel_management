@@ -1,44 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Admin dashboard styles - placeholder
+   Create/extend as needed. Generated to satisfy Vite entry. */
 
-/* --- Custom Styles cho Admin --- */
-
-
-/* 1. Ẩn element khi Alpine chưa load xong */
-
-[x-cloak] {
-    display: none !important;
+:root {
+    --admin-bg: #0f172a;
+    --admin-card: #0b1220;
+    --admin-text: #e6eef8;
 }
 
-
-/* 2. Scrollbar đẹp (Theme Gold/Black) */
-
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+body.admin-dashboard {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
 
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
+.admin-card {
+    background: var(--admin-card);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-::-webkit-scrollbar-thumb {
-    background: #c5a47e;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #b08d55;
-}
-
-
-/* 3. Style cho dòng active trong menu sidebar */
-
-.nav-active {
-    background-color: rgba(31, 41, 55, 1);
-    /* brand-800 */
-    color: #c5a47e;
-    /* brand-gold */
-    border-left: 4px solid #c5a47e;
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px
 }
