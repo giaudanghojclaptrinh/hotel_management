@@ -101,7 +101,7 @@
                     <div class="checkbox-wrapper">
                         <input id="terms" name="terms" type="checkbox" required class="checkbox-custom">
                         <label for="terms" class="checkbox-label">
-                            Tôi đồng ý với <a href="#" class="link-term">Điều khoản dịch vụ</a> và <a href="#" class="link-term">Chính sách bảo mật</a>.
+                            Tôi đồng ý với <a href="terms" class="link-term">Điều khoản dịch vụ</a> và <a href="privacy" class="link-term">Chính sách bảo mật</a>.
                         </label>
                     </div>
                 </div>
