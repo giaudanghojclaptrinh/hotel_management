@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Custom Styles cho Admin --- */
+
+
+/* 1. Ẩn element khi Alpine chưa load xong */
+
+[x-cloak] {
+    display: none !important;
+}
+
+
+/* 2. Scrollbar đẹp (Theme Gold/Black) */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c5a47e;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b08d55;
+}
+
+
+/* 3. Style cho dòng active trong menu sidebar */
+
+.nav-active {
+    background-color: rgba(31, 41, 55, 1);
+    /* brand-800 */
+    color: #c5a47e;
+    /* brand-gold */
+    border-left: 4px solid #c5a47e;
+}

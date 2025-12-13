@@ -7,10 +7,8 @@ export default defineConfig({
             input: [
                 'resources/sass/app.scss',
                 'resources/js/app.js',
-                'resources/js/tailwind-config.js',
 
-                //client
-                //css
+                // Client Assets
                 'resources/css/login.css',
                 'resources/css/register.css',
                 'resources/css/password.css',
@@ -24,7 +22,6 @@ export default defineConfig({
                 'resources/css/client/notifications.css',
                 'resources/css/client/invoice.css',
 
-                //js
                 'resources/js/login.js',
                 'resources/js/register.js',
                 'resources/js/password.js',
@@ -38,6 +35,9 @@ export default defineConfig({
                 'resources/js/client/notifications.js',
                 'resources/js/client/invoice.js',
 
+                // Admin Assets (Quan trọng cho trang Dashboard của bạn)
+                'resources/css/admin/admin.css',
+                'resources/js/admin/admin.js',
             ],
             refresh: true,
         }),

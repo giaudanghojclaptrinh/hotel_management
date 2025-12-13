@@ -210,7 +210,9 @@
                 <input type="hidden" name="vnp_OrderInfo" x-model="vnpOrderInfo">
 
                 <div class="qr-container" style="background: white; padding: 10px; border-radius: 8px; margin: 15px auto; width: fit-content;">
-                    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=VNPAY_TEST_PAYMENT&choe=UTF-8" alt="QR Code" style="width: 200px; height: 200px;">
+                    <img src="{{ asset('uploads/QR/QR.jpg') }}" 
+                        alt="QR Code" 
+                        style="width: 200px; height: 200px;">
                 </div>
 
                 <div class="mb-4">

@@ -16,11 +16,21 @@ class UserController extends Controller
      */
     public function getDanhSach()
     {
-        // Thêm ->paginate(10) để thực thi câu lệnh và phân trang
-        // Nếu thiếu ->paginate() hoặc ->get(), biến $users chỉ là câu lệnh SQL chưa chạy -> Lỗi View
-        $users = User::where('role', 'user')
-                     ->orderBy('created_at', 'desc')
-                     ->paginate(10);
+        $q = request()->query('q');
+        $role = request()->query('role');
+        // Remove hard-coded role filter so admin can view all users (including admins)
+        $query = User::query();
+        if ($q) {
+            $query->where(function($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                   ->orWhere('email', 'like', "%{$q}%")
+                   ->orWhere('phone', 'like', "%{$q}%");
+            });
+        }
+        if ($role && in_array($role, ['admin', 'user'])) {
+            $query->where('role', $role);
+        }
+        $users = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('admin.users.danh_sach', compact('users'));
     }
@@ -108,5 +118,26 @@ class UserController extends Controller
 
         $orm->delete();
         return redirect()->route('admin.users')->with('success', 'Đã xóa khách hàng.');
+    }
+
+    // Bulk delete users
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $ids = $request->ids;
+        // Prevent deleting admins
+        $deleted = 0;
+        foreach ($ids as $id) {
+            $u = User::find($id);
+            if ($u && $u->role !== 'admin') {
+                $u->delete();
+                $deleted++;
+            }
+        }
+        return redirect()->route('admin.users')->with('success', "Đã xóa $deleted người dùng.");
     }
 }

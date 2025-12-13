@@ -13,8 +13,13 @@ class LoaiPhongController extends Controller
 {
     public function getDanhSach()
     {
-        // Eager load tienNghis để hiển thị danh sách tiện nghi ở trang index (nếu cần)
-        $loaiPhongs = LoaiPhong::with('tienNghis')->get();
+        // Eager load tienNghis and paginate results
+        $q = request()->query('q');
+        $query = LoaiPhong::with('tienNghis');
+        if ($q) {
+            $query->where('ten_loai_phong', 'like', "%{$q}%");
+        }
+        $loaiPhongs = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
         return view('admin.loai_phong.danh_sach', compact('loaiPhongs'));
     }
 
@@ -31,7 +36,8 @@ class LoaiPhongController extends Controller
         // 1. Validate
         $request->validate([
             'ten_loai_phong' => 'required|string|max:100',
-            'gia' => 'nullable|numeric',
+            // Decimal(10,2) -> max integer part is 99999999, so cap accordingly to avoid DB overflow
+            'gia' => 'nullable|numeric|max:99999999',
             'so_nguoi' => 'nullable|integer',
             'dien_tich' => 'nullable|integer',
             'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -89,7 +95,7 @@ class LoaiPhongController extends Controller
         // 1. Validate
         $request->validate([
             'ten_loai_phong' => 'required|string|max:100',
-            'gia' => 'nullable|numeric',
+            'gia' => 'nullable|numeric|max:99999999',
             'so_nguoi' => 'nullable|integer',
             'dien_tich' => 'nullable|integer',
             'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',

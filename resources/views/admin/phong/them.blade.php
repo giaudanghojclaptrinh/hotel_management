@@ -1,38 +1,68 @@
 @extends('admin.layouts.dashboard')
+@section('title', 'Thêm Phòng')
+@section('header', 'Thêm phòng mới')
+
 @section('content')
-<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-	<div class="card-common p-6">
-		<div class="toolbar mb-4">
-			<h2 class="text-lg font-semibold">Thêm phòng</h2>
-			<a href="{{ route('admin.phong') }}" class="text-sm text-gray-600 hover:text-gray-900">&larr; Quay lại</a>
-		</div>
+<div class="max-w-3xl mx-auto">
+    
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-serif font-bold text-gray-900">Thông tin phòng</h1>
+        <a href="{{ route('admin.phong') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-gold hover:text-brand-gold transition-all shadow-sm">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+        </a>
+    </div>
 
-		<form action="{{ route('admin.phong.store') }}" method="POST">
-			@csrf
-			<div class="grid grid-cols-1 gap-4">
-				<div>
-					<label class="block text-sm font-medium text-gray-700" for="so_phong">Số phòng</label>
-					<input type="text" id="so_phong" name="so_phong" value="{{ old('so_phong') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
-				</div>
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-8">
+            <form action="{{ route('admin.phong.store') }}" method="POST">
+                @csrf
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Số phòng <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fa-solid fa-door-closed text-gray-400"></i>
+                            </div>
+                            <input type="text" name="so_phong" required placeholder="Ví dụ: 101, 205, VIP-01"
+                                   class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11 font-medium text-brand-900">
+                        </div>
+                        @error('so_phong') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-				<div>
-					<label class="block text-sm font-medium text-gray-700" for="loai_phong_id">Loại phòng</label>
-					<select id="loai_phong_id" name="loai_phong_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-						<option value="">-- Chọn loại phòng --</option>
-						@foreach(\App\Models\LoaiPhong::all() as $lp)
-							<option value="{{ $lp->id }}">{{ $lp->ten_loai_phong }}</option>
-						@endforeach
-					</select>
-				</div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Thuộc Hạng phòng <span class="text-red-500">*</span></label>
+                        <select name="loai_phong_id" required class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11">
+                            <option value="">-- Chọn hạng phòng --</option>
+                            @foreach($loaiPhongs as $lp)
+                                <option value="{{ $lp->id }}">
+                                    {{ $lp->ten_loai_phong }} - {{ number_format($lp->gia ?? 0, 0, ',', '.') }} đ
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('loai_phong_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
 
-				<div class="flex items-center justify-end pt-2">
-					<button type="submit" class="btn-primary inline-flex items-center gap-2">
-						<i class="fa fa-save"></i> Thêm
-					</button>
-				</div>
-			</div>
-		</form>
-	</div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Tình trạng ban đầu</label>
+                        <select name="tinh_trang" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11">
+                            <option value="available">Sẵn sàng đón khách (Available)</option>
+                            <option value="maintenance">Đang bảo trì (Maintenance)</option>
+                            <option value="cleaning">Đang dọn dẹp (Cleaning)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+                    <a href="{{ route('admin.phong') }}" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-all">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-900 text-brand-gold rounded-lg font-bold hover:bg-gray-800 shadow-md transition-all flex items-center">
+                        <i class="fa-solid fa-save mr-2"></i> Lưu Phòng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection
-

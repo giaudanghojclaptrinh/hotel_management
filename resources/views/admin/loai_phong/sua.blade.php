@@ -1,136 +1,126 @@
 @extends('admin.layouts.dashboard')
+@section('title', 'Sửa Hạng phòng')
+@section('header', 'Cập nhật hạng phòng')
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="card-common p-6 bg-white rounded-lg shadow">
-        
-        <div class="toolbar mb-6 flex justify-between items-center border-b pb-4">
-            <h2 class="text-xl font-bold text-gray-800">Cập nhật loại phòng</h2>
-            <a href="{{ route('admin.loai-phong') }}" class="text-sm text-gray-600 hover:text-gray-900 flex items-center transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
-            </a>
-        </div>
+<div class="max-w-5xl mx-auto">
+    
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-serif font-bold text-gray-900">Cập nhật: {{ $loaiPhong->ten_loai_phong }}</h1>
+        <a href="{{ route('admin.loai-phong') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:border-brand-gold hover:text-brand-gold transition-all shadow-sm">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+        </a>
+    </div>
 
-        <form action="{{ route('admin.loai-phong.update', ['id' => $loaiPhong->id]) }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="p-8">
+            <form action="{{ route('admin.loai-phong.update', ['id' => $loaiPhong->id]) }}" method="POST" enctype="multipart/form-data">
+                @csrf
                 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1" for="ten_loai_phong">
-                            Tên loại phòng <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" 
-                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold sm:text-sm" 
-                               id="ten_loai_phong" name="ten_loai_phong" 
-                               value="{{ old('ten_loai_phong', $loaiPhong->ten_loai_phong) }}" 
-                               required />
-                        @error('ten_loai_phong') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <div class="lg:col-span-2 space-y-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" for="gia">
-                                Giá (VNĐ) <span class="text-red-500">*</span>
-                            </label>
-                            <input type="number" id="gia" name="gia" 
-                                   value="{{ old('gia', $loaiPhong->gia) }}" 
-                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold sm:text-sm" required />
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Tên hạng phòng <span class="text-red-500">*</span></label>
+                            <input type="text" name="ten_loai_phong" required value="{{ old('ten_loai_phong', $loaiPhong->ten_loai_phong) }}"
+                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all h-11">
+                            @error('ten_loai_phong') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" for="so_nguoi">
-                                Sức chứa <span class="text-red-500">*</span>
-                            </label>
-                            <input type="number" id="so_nguoi" name="so_nguoi" 
-                                   value="{{ old('so_nguoi', $loaiPhong->so_nguoi) }}" 
-                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold sm:text-sm" min="1" required />
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Giá niêm yết (1 đêm) <span class="text-red-500">*</span></label>
+                            <div class="relative rounded-md shadow-sm">
+                                    <input type="number" name="gia" required value="{{ old('gia', $loaiPhong->gia) }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold pr-12 transition-all h-11 font-medium text-brand-900">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm font-serif font-bold">VNĐ</span>
+                                </div>
+                            </div>
+                            @error('gia') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
-                    </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1" for="dien_tich">
-                            Diện tích (m²)
-                        </label>
-                        <input type="number" id="dien_tich" name="dien_tich" 
-                               value="{{ old('dien_tich', $loaiPhong->dien_tich) }}" 
-                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold sm:text-sm" />
-                    </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Mô tả chi tiết</label>
+                            <textarea name="mo_ta" rows="6"
+                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-brand-gold focus:ring-brand-gold transition-all">{{ old('mo_ta', $loaiPhong->mo_ta ?? '') }}</textarea>
+                            @error('mo_ta') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tiện nghi phòng</label>
-                        @if(isset($tienNghis) && count($tienNghis) > 0)
-                            <div class="grid grid-cols-2 gap-3 p-4 border border-gray-200 rounded-md bg-gray-50 max-h-60 overflow-y-auto">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Tiện nghi (Chọn nhiều)</label>
+                            <div class="grid grid-cols-2 gap-2">
                                 @foreach($tienNghis as $tn)
-                                    <label class="inline-flex items-center space-x-2 cursor-pointer group">
-                                        <input type="checkbox" 
-                                               name="tien_nghi[]" 
-                                               value="{{ $tn->id }}" 
-                                               {{-- Kiểm tra: Nếu ID này có trong danh sách đã lưu -> Checked --}}
-                                               {{ in_array($tn->id, $selectedTienNghis ?? []) ? 'checked' : '' }}
-                                               class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                                        <span class="text-sm text-gray-700 group-hover:text-blue-600 transition-colors">
-                                            @if($tn->icon) <i class="{{ $tn->icon }} mr-1 text-gray-400"></i> @endif
-                                            {{ $tn->ten_tien_nghi }}
-                                        </span>
+                                    @php $checked = in_array($tn->id, old('tien_nghi', $selectedTienNghis ?? [])); @endphp
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="checkbox" name="tien_nghi[]" value="{{ $tn->id }}" class="form-checkbox" {{ $checked ? 'checked' : '' }}>
+                                        <span>{{ $tn->ten_tien_nghi }} <small class="text-xs text-gray-400">({{ $tn->ma_tien_nghi }})</small></span>
                                     </label>
                                 @endforeach
                             </div>
-                        @else
-                            <div class="p-4 bg-yellow-50 text-yellow-700 text-sm rounded-md border border-yellow-200">
-                                Chưa có tiện nghi nào trong hệ thống.
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Hình ảnh hiện tại</label>
-                        
-                        <div class="mb-2 h-48 w-full rounded-md border border-gray-200 bg-gray-100 flex items-center justify-center overflow-hidden relative group">
-                            @if($loaiPhong->hinh_anh)
-                                <img src="{{ asset($loaiPhong->hinh_anh) }}" alt="Current Image" class="h-full w-full object-cover">
-                            @else
-                                <span class="text-gray-400 text-sm">Chưa có ảnh</span>
-                            @endif
-                            
-                            <img id="preview-img" src="#" class="absolute inset-0 h-full w-full object-cover hidden z-10">
+                            @error('tien_nghi') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
-
-                        <label class="block text-sm font-medium text-gray-700 mb-1" for="hinh_anh">
-                            Thay đổi ảnh mới (Nếu cần)
-                        </label>
-                        <input class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
-                               id="hinh_anh" name="hinh_anh" type="file" accept="image/*" onchange="previewImage(event)">
-                        @error('hinh_anh') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
-                </div>
-            </div>
+                    <div class="lg:col-span-1 space-y-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Hình ảnh đại diện</label>
+                        
+                        <div class="w-full aspect-[4/3] bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl hover:bg-gray-100 hover:border-brand-gold transition-all relative overflow-hidden group">
+                            
+                            <input id="hinh_anh" name="hinh_anh" type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept="image/*" onchange="previewImage(event)">
+                            
+                            <div id="upload-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-10 pointer-events-none {{ $loaiPhong->hinh_anh ? 'hidden' : '' }}">
+                                <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-3">
+                                    <i class="fa-regular fa-image text-xl text-brand-gold"></i>
+                                </div>
+                                <p class="text-sm font-bold text-gray-600">Thay đổi ảnh</p>
+                                <p class="text-xs text-gray-400 mt-1">PNG, JPG tối đa 2MB</p>
+                            </div>
 
-            <div class="flex items-center justify-end pt-6 mt-6 border-t border-gray-200 gap-3">
-                <a href="{{ route('admin.loai-phong') }}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-sm font-medium transition-colors">
-                    Hủy bỏ
-                </a>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium shadow-sm transition-colors flex items-center gap-2">
-                    <i class="fa fa-save"></i> Cập nhật
-                </button>
-            </div>
-        </form>
+                               <img id="preview-img" 
+                                   src="{{ $loaiPhong->hinh_anh ? asset($loaiPhong->hinh_anh) : '#' }}" 
+                                   class="{{ $loaiPhong->hinh_anh ? '' : 'hidden' }} absolute inset-0 w-full h-full object-cover z-0">
+                            
+                            <div class="absolute inset-0 bg-black/50 items-center justify-center hidden group-hover:flex z-10 pointer-events-none transition-all">
+                                <span class="text-white font-bold text-sm"><i class="fa-solid fa-pen mr-1"></i> Đổi ảnh</span>
+                            </div>
+                        </div>
+                        @error('hinh_anh') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <h4 class="text-xs font-bold text-blue-800 uppercase mb-1"><i class="fa-solid fa-circle-info mr-1"></i> Lưu ý</h4>
+                            <p class="text-xs text-blue-600 leading-relaxed">Nếu không chọn ảnh mới, hệ thống sẽ giữ lại ảnh cũ.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+                    <a href="{{ route('admin.loai-phong') }}" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-all">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-900 text-brand-gold rounded-lg font-bold hover:bg-gray-800 shadow-md transition-all flex items-center">
+                        <i class="fa-solid fa-save mr-2"></i> Lưu Thay Đổi
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+@push('scripts')
 <script>
     function previewImage(event) {
         const reader = new FileReader();
         reader.onload = function(){
             const output = document.getElementById('preview-img');
+            const placeholder = document.getElementById('upload-placeholder');
             output.src = reader.result;
-            output.classList.remove('hidden'); // Hiện ảnh preview
+            output.classList.remove('hidden');
+            if(placeholder) placeholder.classList.add('hidden');
         };
-        reader.readAsDataURL(event.target.files[0]);
+        if(event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
     }
 </script>
+@endpush
 @endsection

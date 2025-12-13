@@ -10,7 +10,13 @@ class KhuyenMaiController extends Controller
 {
     public function getDanhSach()
     {
-        $khuyenMais = KhuyenMai::all();
+        $q = request()->query('q');
+        $query = KhuyenMai::query();
+        if ($q) {
+            $query->where('ten_khuyen_mai', 'like', "%{$q}%")
+                  ->orWhere('ma_khuyen_mai', 'like', "%{$q}%");
+        }
+        $khuyenMais = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         return view('admin.khuyen_mai.danh_sach', compact('khuyenMais'));
     }
 
@@ -23,20 +29,32 @@ class KhuyenMaiController extends Controller
     {
         $data = $request->validate([
             'ten_khuyen_mai' => 'required|string|max:150',
-            'ma_khuyen_mai' => 'required|string|max:50',
+            'ma_khuyen_mai' => 'required|string|max:50|unique:khuyen_mais,ma_khuyen_mai',
             'chiet_khau_phan_tram' => 'nullable|numeric',
             'so_tien_giam_gia' => 'nullable|numeric',
-            'ngay_bat_dau' => 'nullable|date',
-            'ngay_ket_thuc' => 'nullable|date',
+            'ngay_bat_dau' => 'required|date',
+            'ngay_ket_thuc' => 'required|date',
         ]);
 
         $orm = new KhuyenMai();
         $orm->ten_khuyen_mai = $data['ten_khuyen_mai'];
         $orm->ma_khuyen_mai = $data['ma_khuyen_mai'];
-        $orm->chiet_khau_phan_tram = $data['chiet_khau_phan_tram'] ?? null;
-        $orm->so_tien_giam_gia = $data['so_tien_giam_gia'] ?? null;
-        $orm->ngay_bat_dau = $data['ngay_bat_dau'] ?? null;
-        $orm->ngay_ket_thuc = $data['ngay_ket_thuc'] ?? null;
+        // Normalize values: DB columns are NOT NULL (per migration), so ensure defaults
+        $percent = isset($data['chiet_khau_phan_tram']) ? (float)$data['chiet_khau_phan_tram'] : 0.0;
+        $fixed = isset($data['so_tien_giam_gia']) ? (float)$data['so_tien_giam_gia'] : 0.0;
+
+        // If percent provided (non-zero), prioritize it and set fixed to 0
+        if ($percent > 0) {
+            $orm->chiet_khau_phan_tram = $percent;
+            $orm->so_tien_giam_gia = 0.0;
+        } else {
+            // use fixed amount (could be 0)
+            $orm->chiet_khau_phan_tram = 0.0;
+            $orm->so_tien_giam_gia = $fixed;
+        }
+
+        $orm->ngay_bat_dau = $data['ngay_bat_dau'];
+        $orm->ngay_ket_thuc = $data['ngay_ket_thuc'];
         $orm->save();
         return redirect()->route('admin.khuyen-mai');
     }
@@ -51,20 +69,29 @@ class KhuyenMaiController extends Controller
     {
         $data = $request->validate([
             'ten_khuyen_mai' => 'required|string|max:150',
-            'ma_khuyen_mai' => 'required|string|max:50',
+            'ma_khuyen_mai' => 'required|string|max:50|unique:khuyen_mais,ma_khuyen_mai,' . $id,
             'chiet_khau_phan_tram' => 'nullable|numeric',
             'so_tien_giam_gia' => 'nullable|numeric',
-            'ngay_bat_dau' => 'nullable|date',
-            'ngay_ket_thuc' => 'nullable|date',
+            'ngay_bat_dau' => 'required|date',
+            'ngay_ket_thuc' => 'required|date',
         ]);
 
         $orm = KhuyenMai::findOrFail($id);
         $orm->ten_khuyen_mai = $data['ten_khuyen_mai'];
         $orm->ma_khuyen_mai = $data['ma_khuyen_mai'];
-        $orm->chiet_khau_phan_tram = $data['chiet_khau_phan_tram'] ?? null;
-        $orm->so_tien_giam_gia = $data['so_tien_giam_gia'] ?? null;
-        $orm->ngay_bat_dau = $data['ngay_bat_dau'] ?? null;
-        $orm->ngay_ket_thuc = $data['ngay_ket_thuc'] ?? null;
+        $percent = isset($data['chiet_khau_phan_tram']) ? (float)$data['chiet_khau_phan_tram'] : 0.0;
+        $fixed = isset($data['so_tien_giam_gia']) ? (float)$data['so_tien_giam_gia'] : 0.0;
+
+        if ($percent > 0) {
+            $orm->chiet_khau_phan_tram = $percent;
+            $orm->so_tien_giam_gia = 0.0;
+        } else {
+            $orm->chiet_khau_phan_tram = 0.0;
+            $orm->so_tien_giam_gia = $fixed;
+        }
+
+        $orm->ngay_bat_dau = $data['ngay_bat_dau'];
+        $orm->ngay_ket_thuc = $data['ngay_ket_thuc'];
         $orm->save();
         return redirect()->route('admin.khuyen-mai');
     }
@@ -74,6 +101,17 @@ class KhuyenMaiController extends Controller
         $orm = KhuyenMai::findOrFail($id);
         $orm->delete();
         return redirect()->route('admin.khuyen-mai');
+    }
+
+    // Bulk delete
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:khuyen_mais,id',
+        ]);
+        KhuyenMai::whereIn('id', $request->ids)->delete();
+        return redirect()->route('admin.khuyen-mai')->with('success', 'Đã xóa các khuyến mãi được chọn.');
     }
 
     /**

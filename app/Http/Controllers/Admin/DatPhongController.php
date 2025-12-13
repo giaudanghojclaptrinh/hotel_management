@@ -72,26 +72,79 @@ class DatPhongController extends Controller
     public function getThem()
     {
         $users = User::all();
-        return view('admin.dat_phong.them', compact('users'));
+        // Lấy các phòng có trạng thái available để chọn
+        $phongs = Phong::with('loaiPhong')->where('tinh_trang', 'available')->get();
+        return view('admin.dat_phong.them', compact('users', 'phongs'));
     }
 
     public function postThem(Request $request)
     {
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
+            'phong_id' => 'required|exists:phongs,id',
             'ngay_den' => 'required|date',
             'ngay_di' => 'required|date|after_or_equal:ngay_den',
-            'trang_thai' => 'nullable|string|max:50',
+            'payment_method' => 'nullable|string',
+            'note' => 'nullable|string',
         ]);
 
-        $orm = new DatPhong();
-        $orm->user_id = $data['user_id'];
-        $orm->ngay_den = $data['ngay_den'];
-        $orm->ngay_di = $data['ngay_di'];
-        $orm->trang_thai = $data['trang_thai'] ?? 'pending'; 
-        $orm->save();
-        
-        return redirect()->route('admin.dat-phong')->with('success', 'Thêm đơn đặt phòng thành công!');
+        DB::beginTransaction();
+        try {
+            // Create with temporary tong_tien=0 to satisfy non-null DB column, we'll update later
+            $datPhong = DatPhong::create([
+                'user_id' => $data['user_id'],
+                'ngay_den' => $data['ngay_den'],
+                'ngay_di' => $data['ngay_di'],
+                'trang_thai' => 'pending',
+                'payment_method' => $data['payment_method'] ?? 'cash',
+                'ghi_chu' => $data['note'] ?? null,
+                'tong_tien' => 0,
+            ]);
+
+            // Tạo chi tiết đặt phòng cho phòng đã chọn
+            $phong = Phong::with('loaiPhong')->findOrFail($data['phong_id']);
+            $donGia = $phong->loaiPhong->gia ?? 0;
+
+            // Tính số đêm
+            $start = \Carbon\Carbon::parse($data['ngay_den']);
+            $end = \Carbon\Carbon::parse($data['ngay_di']);
+            $nights = max(1, $end->diffInDays($start));
+
+            $thanhTien = $donGia * $nights;
+
+            $chiTiet = $datPhong->chiTietDatPhongs()->create([
+                'loai_phong_id' => $phong->loai_phong_id,
+                'phong_id' => $phong->id,
+                'so_luong' => 1,
+                'don_gia' => $donGia,
+                'thanh_tien' => $thanhTien,
+            ]);
+
+            // Cập nhật tổng tiền cho DatPhong
+            $datPhong->update(['tong_tien' => $thanhTien]);
+
+            // Tạo hóa đơn (mặc định unpaid)
+            HoaDon::create([
+                'dat_phong_id' => $datPhong->id,
+                'ma_hoa_don' => 'HD' . time() . rand(100,999),
+                'ngay_lap' => now(),
+                'tong_tien' => $thanhTien,
+                'trang_thai' => 'unpaid',
+                'phuong_thuc_thanh_toan' => $datPhong->payment_method,
+            ]);
+
+            // Đánh dấu phòng là booked
+            $phong->update(['tinh_trang' => 'booked']);
+
+            DB::commit();
+
+            return redirect()->route('admin.dat-phong')->with('success', 'Thêm đơn đặt phòng thành công!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Lỗi khi tạo đơn admin: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Lỗi khi tạo đơn: ' . $e->getMessage());
+        }
     }
     
     public function getSua($id)
@@ -154,12 +207,58 @@ class DatPhongController extends Controller
 
             DB::commit();
             
-            // [YÊU CẦU]: Duyệt xong chuyển qua view lịch sử
-            return redirect()->route('admin.dat-phong.history')
-                ->with('success', 'Đã duyệt đơn thành công! Đơn hàng đã chuyển sang danh sách hoạt động.');
+            // Sau khi duyệt — trở về trang hiện tại (không bắt buộc điều hướng sang Lịch sử)
+            return redirect()->back()->with('success', 'Đã duyệt đơn thành công! Đơn hàng đã được cập nhật.');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            return back()->with('error', 'Lỗi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX/POST endpoint to approve a booking (preferred for modal/AJAX actions)
+     */
+    public function postDuyet(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $datPhong = DatPhong::with('chiTietDatPhongs.loaiPhong', 'user')->findOrFail($id);
+
+            if ($datPhong->trang_thai !== 'pending') {
+                if ($request->ajax()) return response()->json(['status' => 'error', 'message' => 'Đơn đã được xử lý'], 422);
+                return back()->with('error', 'Đơn này đã được xử lý rồi!');
+            }
+
+            $chiTiet = $datPhong->chiTietDatPhongs->first();
+            if ($chiTiet && $chiTiet->phong_id) {
+                $phong = Phong::find($chiTiet->phong_id);
+                if ($phong) $phong->update(['tinh_trang' => 'booked']);
+            }
+
+            $datPhong->update([
+                'trang_thai' => 'confirmed',
+                'payment_status' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : $datPhong->payment_status,
+            ]);
+
+            if ($datPhong->user) {
+                $roomName = $chiTiet->loaiPhong->ten_loai_phong ?? 'Phòng';
+                $message = "Đơn #{$datPhong->id} ({$roomName}) đã được xác nhận.";
+                $datPhong->user->notify(new BookingStatusUpdated($datPhong, 'Đã xác nhận', $message));
+            }
+
+            DB::commit();
+
+            if ($request->ajax()) {
+                return response()->json(['status' => 'success', 'message' => 'Đã duyệt đơn thành công']);
+            }
+
+            // Nếu không phải AJAX, quay về trang trước (ví dụ: chi tiết phòng)
+            return redirect()->back()->with('success', 'Đã duyệt đơn thành công!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($request->ajax()) return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
             return back()->with('error', 'Lỗi: ' . $e->getMessage());
         }
     }
@@ -196,6 +295,42 @@ class DatPhongController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            return back()->with('error', 'Lỗi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX/POST endpoint to cancel a booking (preferred for modal/AJAX actions)
+     */
+    public function postHuy(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $datPhong = DatPhong::with('chiTietDatPhongs', 'user')->findOrFail($id);
+
+            $chiTiet = $datPhong->chiTietDatPhongs->first();
+            if ($chiTiet && $chiTiet->phong_id) {
+                $phong = Phong::find($chiTiet->phong_id);
+                if ($phong && $phong->tinh_trang === 'booked') {
+                    $phong->update(['tinh_trang' => 'available']);
+                }
+            }
+
+            $datPhong->update(['trang_thai' => 'cancelled']);
+
+            if ($datPhong->user) {
+                $datPhong->user->notify(new BookingStatusUpdated($datPhong, 'Đã hủy', "Đơn #{$datPhong->id} đã bị hủy."));
+            }
+
+            DB::commit();
+
+            if ($request->ajax()) return response()->json(['status' => 'success', 'message' => 'Đã hủy đơn thành công']);
+
+            return redirect()->route('admin.dat-phong.trash')->with('success', 'Đã từ chối đơn hàng! Đơn đã được chuyển vào thùng rác.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($request->ajax()) return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
             return back()->with('error', 'Lỗi: ' . $e->getMessage());
         }
     }
@@ -327,19 +462,145 @@ class DatPhongController extends Controller
     }
 
     /**
+     * Move multiple bookings from history to trash (bulk)
+     */
+    public function bulkMoveToTrash(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:dat_phongs,id',
+        ]);
+
+        $ids = $request->ids;
+        DB::beginTransaction();
+        try {
+            $datPhongs = DatPhong::with('chiTietDatPhongs')->whereIn('id', $ids)->get();
+            foreach ($datPhongs as $dat) {
+                // release room if booked
+                $chiTiet = $dat->chiTietDatPhongs->first();
+                if ($chiTiet && $chiTiet->phong_id) {
+                    $phong = Phong::find($chiTiet->phong_id);
+                    if ($phong && $phong->tinh_trang === 'booked') {
+                        $phong->update(['tinh_trang' => 'available']);
+                    }
+                }
+                $dat->update(['trang_thai' => 'cancelled']);
+            }
+            DB::commit();
+            return redirect()->route('admin.dat-phong.history')->with('success', 'Đã chuyển các đơn được chọn vào thùng rác.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Lỗi khi chuyển: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Permanently delete multiple bookings from trash (bulk)
+     */
+    public function bulkDeletePermanent(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:dat_phongs,id',
+        ]);
+
+        $ids = $request->ids;
+        DB::beginTransaction();
+        try {
+            $datPhongs = DatPhong::with('chiTietDatPhongs', 'hoaDon')->whereIn('id', $ids)->get();
+            foreach ($datPhongs as $dat) {
+                $chiTiet = $dat->chiTietDatPhongs->first();
+                if ($chiTiet && $chiTiet->phong_id) {
+                    $phong = Phong::find($chiTiet->phong_id);
+                    if ($phong && $phong->tinh_trang === 'booked') {
+                        $phong->update(['tinh_trang' => 'available']);
+                    }
+                }
+                $dat->hoaDon()->delete();
+                $dat->chiTietDatPhongs()->delete();
+                $dat->delete();
+            }
+            DB::commit();
+            return redirect()->route('admin.dat-phong.trash')->with('success', 'Đã xóa vĩnh viễn các đơn được chọn.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Lỗi khi xóa: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Hiển thị trang chi tiết một phòng: liệt kê tất cả các đơn đặt phòng liên quan
      */
-    public function getRoomDetail($phong_id)
+    public function getRoomDetail(Request $request, $phong_id)
     {
         $phong = Phong::findOrFail($phong_id);
 
-        // Lấy tất cả các DatPhong liên quan đến phòng này thông qua chiTietDatPhongs
-        $datPhongs = DatPhong::whereHas('chiTietDatPhongs', function($q) use ($phong_id) {
+        // Build query with filters: q (user name/email or booking id), status, date range
+        $query = DatPhong::whereHas('chiTietDatPhongs', function($q) use ($phong_id) {
             $q->where('phong_id', $phong_id);
-        })->with(['user', 'chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong'])
-          ->orderBy('created_at', 'desc')
-          ->paginate(10);
+        });
+
+        if ($request->filled('q')) {
+            $q = $request->get('q');
+            $query->where(function($sub) use ($q) {
+                $sub->where('id', $q)
+                    ->orWhereHas('user', function($u) use ($q) {
+                        $u->where('name', 'like', "%{$q}%")->orWhere('email', 'like', "%{$q}%");
+                    });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('trang_thai', $request->get('status'));
+        }
+
+        if ($request->filled('from_date')) {
+            $from = $request->get('from_date');
+            $query->whereDate('created_at', '>=', $from);
+        }
+
+        if ($request->filled('to_date')) {
+            $to = $request->get('to_date');
+            $query->whereDate('created_at', '<=', $to);
+        }
+
+        $datPhongs = $query->with(['user', 'chiTietDatPhongs.loaiPhong', 'chiTietDatPhongs.phong'])
+                           ->orderBy('created_at', 'desc')
+                           ->paginate(10)
+                           ->withQueryString();
 
         return view('admin.dat_phong.room_detail', compact('phong', 'datPhongs'));
+    }
+
+    /**
+     * Báo cáo doanh thu đơn giản: lọc theo khoảng ngày và phòng
+     */
+    public function revenueReport(Request $request)
+    {
+        $from = $request->get('from_date');
+        $to = $request->get('to_date');
+        $room_id = $request->get('room_id');
+
+        $query = DatPhong::query();
+
+        // Chỉ tính các đơn đã được thanh toán/hoàn thành
+        $query->where('payment_status', 'paid');
+
+        if ($from) $query->whereDate('updated_at', '>=', $from);
+        if ($to) $query->whereDate('updated_at', '<=', $to);
+
+        if ($room_id) {
+            $query->whereHas('chiTietDatPhongs', function($q) use ($room_id) {
+                $q->where('phong_id', $room_id);
+            });
+        }
+
+        $totalRevenue = (float) $query->sum('tong_tien');
+
+        $bookings = $query->with(['user', 'chiTietDatPhongs.phong'])->orderBy('updated_at', 'desc')->paginate(20)->withQueryString();
+
+        $rooms = Phong::orderBy('so_phong')->get();
+
+        return view('admin.reports.revenue', compact('bookings', 'totalRevenue', 'rooms'));
     }
 }
