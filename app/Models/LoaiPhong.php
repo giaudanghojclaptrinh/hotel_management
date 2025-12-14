@@ -12,7 +12,7 @@ class LoaiPhong extends Model
 	protected $fillable = [
         'ten_loai_phong', 
         'gia', 
-        'suc_chua', 
+        'so_nguoi',  // Fixed: Database column is 'so_nguoi' not 'suc_chua'
         'dien_tich',
 		'hinh_anh',
     ];

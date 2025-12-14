@@ -111,6 +111,11 @@ class DatPhongController extends Controller
             $nights = max(1, $end->diffInDays($start));
 
             $thanhTien = $donGia * $nights;
+            
+            // Tính VAT 8%
+            $subtotal = $thanhTien;
+            $vatAmount = $subtotal * 0.08;
+            $totalWithVat = $subtotal + $vatAmount;
 
             $chiTiet = $datPhong->chiTietDatPhongs()->create([
                 'loai_phong_id' => $phong->loai_phong_id,
@@ -120,21 +125,27 @@ class DatPhongController extends Controller
                 'thanh_tien' => $thanhTien,
             ]);
 
-            // Cập nhật tổng tiền cho DatPhong
-            $datPhong->update(['tong_tien' => $thanhTien]);
+            // Cập nhật tổng tiền cho DatPhong (bao gồm VAT)
+            $datPhong->update([
+                'subtotal' => $subtotal,
+                'vat_amount' => $vatAmount,
+                'tong_tien' => $totalWithVat
+            ]);
 
             // Tạo hóa đơn (mặc định unpaid)
             HoaDon::create([
                 'dat_phong_id' => $datPhong->id,
                 'ma_hoa_don' => 'HD' . time() . rand(100,999),
                 'ngay_lap' => now(),
-                'tong_tien' => $thanhTien,
+                'subtotal' => $subtotal,
+                'vat_amount' => $vatAmount,
+                'tong_tien' => $totalWithVat,
                 'trang_thai' => 'unpaid',
                 'phuong_thuc_thanh_toan' => $datPhong->payment_method,
             ]);
 
             // Đánh dấu phòng là booked
-            $phong->update(['tinh_trang' => 'booked']);
+            $phong->update(['tinh_trang' => 'occupied']);
 
             DB::commit();
 
@@ -188,15 +199,31 @@ class DatPhongController extends Controller
             $chiTiet = $datPhong->chiTietDatPhongs->first();
             if ($chiTiet && $chiTiet->phong_id) {
                 $phong = Phong::find($chiTiet->phong_id);
-                if ($phong) $phong->update(['tinh_trang' => 'booked']);
+                if ($phong) $phong->update(['tinh_trang' => 'occupied']);
             }
 
             // Cập nhật trạng thái
             $datPhong->update([
                 'trang_thai' => 'confirmed',
-                // Giữ nguyên logic payment status
-                'payment_status' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : $datPhong->payment_status, 
+                // Pay at hotel: vẫn chưa thanh toán -> unpaid; Online: awaiting_payment đến khi gateway callback xác nhận
+                'payment_status' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : 'unpaid', 
             ]);
+
+            // Bảo đảm tạo hóa đơn tương ứng sau khi duyệt đơn
+            $existingInvoice = HoaDon::where('dat_phong_id', $datPhong->id)->first();
+            if (!$existingInvoice) {
+                HoaDon::create([
+                    'dat_phong_id' => $datPhong->id,
+                    'ma_hoa_don' => 'HD' . time() . rand(100,999),
+                    'ngay_lap' => now(),
+                    'subtotal' => $datPhong->subtotal ?? ($datPhong->chiTietDatPhongs->sum('thanh_tien') ?? 0),
+                    'vat_amount' => $datPhong->vat_amount ?? (($datPhong->subtotal ?? 0) * 0.08),
+                    'tong_tien' => $datPhong->tong_tien,
+                    'phuong_thuc_thanh_toan' => $datPhong->payment_method ?? 'pay_at_hotel',
+                    // Pay at hotel -> unpaid, Online -> awaiting_payment (sẽ chuyển paid khi confirm)
+                    'trang_thai' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : 'unpaid',
+                ]);
+            }
 
             // Gửi thông báo (như cũ)
             if ($datPhong->user) {
@@ -238,9 +265,25 @@ class DatPhongController extends Controller
 
             $datPhong->update([
                 'trang_thai' => 'confirmed',
-                'payment_status' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : $datPhong->payment_status,
+                'payment_status' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : 'unpaid',
             ]);
 
+            // Bảo đảm tạo hóa đơn tương ứng sau khi duyệt đơn
+            $existingInvoice = HoaDon::where('dat_phong_id', $datPhong->id)->first();
+            if (!$existingInvoice) {
+                HoaDon::create([
+                    'dat_phong_id' => $datPhong->id,
+                    'ma_hoa_don' => 'HD' . time() . rand(100,999),
+                    'ngay_lap' => now(),
+                    'subtotal' => $datPhong->subtotal ?? ($datPhong->chiTietDatPhongs->sum('thanh_tien') ?? 0),
+                    'vat_amount' => $datPhong->vat_amount ?? (($datPhong->subtotal ?? 0) * 0.08),
+                    'tong_tien' => $datPhong->tong_tien,
+                    'phuong_thuc_thanh_toan' => $datPhong->payment_method ?? 'pay_at_hotel',
+                    'trang_thai' => ($datPhong->payment_method === 'online') ? 'awaiting_payment' : 'unpaid',
+                ]);
+            }
+
+            // Gửi thông báo
             if ($datPhong->user) {
                 $roomName = $chiTiet->loaiPhong->ten_loai_phong ?? 'Phòng';
                 $message = "Đơn #{$datPhong->id} ({$roomName}) đã được xác nhận.";
@@ -250,16 +293,102 @@ class DatPhongController extends Controller
             DB::commit();
 
             if ($request->ajax()) {
-                return response()->json(['status' => 'success', 'message' => 'Đã duyệt đơn thành công']);
+                return response()->json(['status' => 'success', 'message' => 'Duyệt đơn thành công!']);
             }
-
-            // Nếu không phải AJAX, quay về trang trước (ví dụ: chi tiết phòng)
-            return redirect()->back()->with('success', 'Đã duyệt đơn thành công!');
-
+            return back()->with('success', 'Duyệt đơn thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
             if ($request->ajax()) return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
             return back()->with('error', 'Lỗi: ' . $e->getMessage());
+        }
+    }
+
+    // Xóa đơn đặt phòng với ràng buộc an toàn
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+        try {
+            $datPhong = DatPhong::with(['hoaDon', 'chiTietDatPhongs'])->findOrFail($id);
+
+            // Chỉ cho phép xóa khi chưa thanh toán và chưa nhận phòng
+            if (in_array($datPhong->payment_status, ['paid'])) {
+                throw new \RuntimeException('Không thể xóa đơn đã thanh toán.');
+            }
+            if (in_array($datPhong->trang_thai, ['checked_in', 'completed'])) {
+                throw new \RuntimeException('Không thể xóa đơn đã nhận/trả phòng.');
+            }
+
+            // Xử lý hóa đơn liên quan: chỉ xóa khi chưa thanh toán
+            if ($datPhong->hoaDon) {
+                if ($datPhong->hoaDon->trang_thai === 'paid') {
+                    throw new \RuntimeException('Không thể xóa vì hóa đơn đã thanh toán.');
+                }
+                $datPhong->hoaDon->delete();
+            }
+
+            // Xóa chi tiết đặt phòng
+            foreach ($datPhong->chiTietDatPhongs as $ct) {
+                $ct->delete();
+            }
+
+            // Xóa đơn đặt phòng
+            $datPhong->delete();
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Đã xóa đơn đặt phòng.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Không thể xóa: ' . $e->getMessage());
+        }
+    }
+
+    // Xóa nhiều đơn đặt phòng (hàng loạt)
+    public function destroyMany(Request $request)
+    {
+        $ids = (array) $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Không có mục nào được chọn để xóa.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $deleted = 0;
+            foreach ($ids as $id) {
+                $datPhong = DatPhong::with(['hoaDon', 'chiTietDatPhongs'])->find($id);
+                if (!$datPhong) {
+                    continue;
+                }
+
+                if (in_array($datPhong->payment_status, ['paid'])) {
+                    continue; // bỏ qua đơn đã thanh toán
+                }
+                if (in_array($datPhong->trang_thai, ['checked_in', 'completed'])) {
+                    continue; // bỏ qua đơn đã nhận/trả phòng
+                }
+
+                if ($datPhong->hoaDon) {
+                    if ($datPhong->hoaDon->trang_thai === 'paid') {
+                        continue; // bỏ qua nếu hóa đơn đã thanh toán
+                    }
+                    $datPhong->hoaDon->delete();
+                }
+
+                foreach ($datPhong->chiTietDatPhongs as $ct) {
+                    $ct->delete();
+                }
+
+                $datPhong->delete();
+                $deleted++;
+            }
+
+            DB::commit();
+            if ($deleted === 0) {
+                return redirect()->back()->with('warning', 'Không có đơn nào phù hợp để xóa.');
+            }
+            return redirect()->back()->with('success', "Đã xóa {$deleted} đơn đặt phòng.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Không thể xóa hàng loạt: ' . $e->getMessage());
         }
     }
 
@@ -274,7 +403,7 @@ class DatPhongController extends Controller
             $chiTiet = $datPhong->chiTietDatPhongs->first();
             if ($chiTiet && $chiTiet->phong_id) {
                 $phong = Phong::find($chiTiet->phong_id);
-                if ($phong && $phong->tinh_trang === 'booked') {
+                if ($phong && $phong->tinh_trang === 'occupied') {
                     $phong->update(['tinh_trang' => 'available']);
                 }
             }
@@ -347,6 +476,8 @@ class DatPhongController extends Controller
             [
                 'ma_hoa_don' => 'HD' . time() . rand(100, 999), 
                 'ngay_lap' => now(),
+                'subtotal' => $datPhong->subtotal ?? 0,
+                'vat_amount' => $datPhong->vat_amount ?? 0,
                 'tong_tien' => $datPhong->tong_tien, 
                 'phuong_thuc_thanh_toan' => $datPhong->payment_method ?? 'cash',
                 'trang_thai' => $datPhong->payment_status,
@@ -405,7 +536,7 @@ class DatPhongController extends Controller
             $chiTiet = $datPhong->chiTietDatPhongs->first();
             if ($chiTiet && $chiTiet->phong_id) {
                 $phong = Phong::find($chiTiet->phong_id);
-                if ($phong && $phong->tinh_trang === 'booked') {
+                if ($phong && $phong->tinh_trang === 'occupied') {
                     $phong->update(['tinh_trang' => 'available']);
                 }
             }
@@ -441,7 +572,7 @@ class DatPhongController extends Controller
                 $chiTiet = $datPhong->chiTietDatPhongs->first();
                 if ($chiTiet && $chiTiet->phong_id) {
                     $phong = Phong::find($chiTiet->phong_id);
-                    if ($phong && $phong->tinh_trang === 'booked') {
+                    if ($phong && $phong->tinh_trang === 'occupied') {
                         $phong->update(['tinh_trang' => 'available']);
                     }
                 }
@@ -480,7 +611,7 @@ class DatPhongController extends Controller
                 $chiTiet = $dat->chiTietDatPhongs->first();
                 if ($chiTiet && $chiTiet->phong_id) {
                     $phong = Phong::find($chiTiet->phong_id);
-                    if ($phong && $phong->tinh_trang === 'booked') {
+                    if ($phong && $phong->tinh_trang === 'occupied') {
                         $phong->update(['tinh_trang' => 'available']);
                     }
                 }
@@ -512,7 +643,7 @@ class DatPhongController extends Controller
                 $chiTiet = $dat->chiTietDatPhongs->first();
                 if ($chiTiet && $chiTiet->phong_id) {
                     $phong = Phong::find($chiTiet->phong_id);
-                    if ($phong && $phong->tinh_trang === 'booked') {
+                    if ($phong && $phong->tinh_trang === 'occupied') {
                         $phong->update(['tinh_trang' => 'available']);
                     }
                 }
@@ -581,26 +712,50 @@ class DatPhongController extends Controller
         $to = $request->get('to_date');
         $room_id = $request->get('room_id');
 
-        $query = DatPhong::query();
+        // Booking query (để hiển thị bảng chi tiết)
+        $bookingQuery = DatPhong::query()->where('payment_status', 'paid');
 
-        // Chỉ tính các đơn đã được thanh toán/hoàn thành
-        $query->where('payment_status', 'paid');
-
-        if ($from) $query->whereDate('updated_at', '>=', $from);
-        if ($to) $query->whereDate('updated_at', '<=', $to);
+        if ($from) $bookingQuery->whereDate('updated_at', '>=', $from);
+        if ($to) $bookingQuery->whereDate('updated_at', '<=', $to);
 
         if ($room_id) {
-            $query->whereHas('chiTietDatPhongs', function($q) use ($room_id) {
+            $bookingQuery->whereHas('chiTietDatPhongs', function($q) use ($room_id) {
                 $q->where('phong_id', $room_id);
             });
         }
 
-        $totalRevenue = (float) $query->sum('tong_tien');
+        // Invoice query (để lấy thống kê và điều hướng quản lý hóa đơn)
+        $invoiceQuery = HoaDon::with(['datPhong.chiTietDatPhongs']);
 
-        $bookings = $query->with(['user', 'chiTietDatPhongs.phong'])->orderBy('updated_at', 'desc')->paginate(20)->withQueryString();
+        if ($from) $invoiceQuery->whereDate('ngay_lap', '>=', $from);
+        if ($to) $invoiceQuery->whereDate('ngay_lap', '<=', $to);
+
+        if ($room_id) {
+            $invoiceQuery->whereHas('datPhong.chiTietDatPhongs', function($q) use ($room_id) {
+                $q->where('phong_id', $room_id);
+            });
+        }
+
+        // Thống kê doanh thu
+        $paidSum = (float) (clone $invoiceQuery)->where('trang_thai', 'paid')->sum('tong_tien');
+        $unpaidSum = (float) (clone $invoiceQuery)->where('trang_thai', 'unpaid')->sum('tong_tien');
+        $paidCount = (clone $invoiceQuery)->where('trang_thai', 'paid')->count();
+        $unpaidCount = (clone $invoiceQuery)->where('trang_thai', 'unpaid')->count();
+        $totalRevenue = $paidSum;
+
+        // Dữ liệu bảng chi tiết booking (kèm hóa đơn để hiển thị trạng thái)
+        $bookings = $bookingQuery
+            ->with(['user', 'chiTietDatPhongs.phong', 'hoaDon'])
+            ->orderBy('updated_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
 
         $rooms = Phong::orderBy('so_phong')->get();
 
-        return view('admin.reports.revenue', compact('bookings', 'totalRevenue', 'rooms'));
+        return view('admin.reports.revenue', compact(
+            'bookings', 'totalRevenue', 'rooms',
+            'paidSum', 'unpaidSum', 'paidCount', 'unpaidCount',
+            'from', 'to', 'room_id'
+        ));
     }
 }

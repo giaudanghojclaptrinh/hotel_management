@@ -1,7 +1,13 @@
-@extends($layout ?? 'layouts.app')
+@extends('layouts.invoice')
 @section('title', 'Chi tiết hóa đơn')
 
-@Vite(['resources/css/client/invoice.css', 'resources/js/client/invoice.js'])
+@push('styles')
+    @vite(['resources/css/client/invoice.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/client/invoice.js'])
+@endpush
 
 @section('content')
 <div class="invoice-page-wrapper">
@@ -108,7 +114,7 @@
                     <div class="summary-box">
                         
                         <div class="summary-row">
-                            <span>Tạm tính</span>
+                            <span>Tạm tính (trước giảm giá)</span>
                             <span class="font-medium">{{ number_format($booking->chiTietDatPhongs->sum('thanh_tien'), 0, ',', '.') }}đ</span>
                         </div>
                         
@@ -118,6 +124,16 @@
                             <span>-{{ number_format($booking->discount_amount, 0, ',', '.') }}đ</span>
                         </div>
                         @endif
+                        
+                        <div class="summary-row">
+                            <span>Tạm tính (sau giảm giá)</span>
+                            <span class="font-medium">{{ number_format($booking->subtotal ?? ($booking->chiTietDatPhongs->sum('thanh_tien') - $booking->discount_amount), 0, ',', '.') }}đ</span>
+                        </div>
+                        
+                        <div class="summary-row" style="color: #10b981;">
+                            <span>Thuế VAT (8%)</span>
+                            <span class="font-medium">{{ number_format($booking->vat_amount ?? 0, 0, ',', '.') }}đ</span>
+                        </div>
                         
                         <div class="summary-separator"></div>
                         

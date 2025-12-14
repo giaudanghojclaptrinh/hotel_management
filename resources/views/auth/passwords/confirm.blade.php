@@ -1,9 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Xác nhận bảo mật')
 
-<!-- Cập nhật: Sử dụng CSS và JS riêng cho các trang Password -->
-{{-- @vite(['resources/css/password.css', 'resources/js/password.js']) --}}
-{{-- Ghi chú: Bao gồm chung trong `layouts.app`. Comment để tránh tải thừa. --}}
+@vite(['resources/css/login.css', 'resources/js/login.js'])
 
 @section('content')
 <div class="login-wrapper">

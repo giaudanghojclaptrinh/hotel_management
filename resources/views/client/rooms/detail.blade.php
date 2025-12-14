@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title', $room->ten_loai_phong)
 
+@vite(['resources/css/client/rooms.css', 'resources/js/client/rooms.js'])
+
 @section('content')
 
 <div class="room-detail-container">
@@ -148,7 +150,16 @@
                                         <span class="text-xs">Từ {{ \Carbon\Carbon::parse(request('checkin'))->format('d/m') }} đến {{ \Carbon\Carbon::parse(request('checkout'))->format('d/m') }}.</span>
                                     </div>
                                 </div>
+                                
+                                <div class="booking-form-group" style="margin-top: 15px;">
+                                    <label class="flex items-center gap-2" style="cursor: pointer; font-size: 14px;">
+                                        <input type="checkbox" id="accepted_terms_detail" style="cursor: pointer; width: 18px; height: 18px;">
+                                        <span>Tôi đồng ý với <a href="#" style="color: #2563eb; text-decoration: underline;">điều khoản & điều kiện</a></span>
+                                    </label>
+                                </div>
+                                
                                 <button type="submit" 
+                                    id="btn-submit-booking"
                                     formaction="{{ route('booking.create') }}"
                                     formmethod="GET"
                                     class="btn-book-now">
@@ -189,6 +200,42 @@
                             * Bạn sẽ được yêu cầu đăng nhập để hoàn tất đặt phòng.
                         </p>
                     </form>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const checkbox = document.getElementById('accepted_terms_detail');
+                            const bookingBtn = document.getElementById('btn-submit-booking');
+                            
+                            if (checkbox && bookingBtn) {
+                                // Disable button initially
+                                bookingBtn.classList.add('btn-disabled');
+                                bookingBtn.style.opacity = '0.5';
+                                bookingBtn.style.cursor = 'not-allowed';
+                                
+                                // Enable/disable button based on checkbox
+                                checkbox.addEventListener('change', function() {
+                                    if (this.checked) {
+                                        bookingBtn.classList.remove('btn-disabled');
+                                        bookingBtn.style.opacity = '1';
+                                        bookingBtn.style.cursor = 'pointer';
+                                    } else {
+                                        bookingBtn.classList.add('btn-disabled');
+                                        bookingBtn.style.opacity = '0.5';
+                                        bookingBtn.style.cursor = 'not-allowed';
+                                    }
+                                });
+                                
+                                // Prevent form submission if not checked
+                                bookingBtn.addEventListener('click', function(e) {
+                                    if (!checkbox.checked) {
+                                        e.preventDefault();
+                                        alert('Vui lòng đồng ý với điều khoản & điều kiện để tiếp tục đặt phòng.');
+                                        return false;
+                                    }
+                                });
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>
@@ -203,9 +250,9 @@
             {{-- Đã xóa phần tổng hợp sao (Aggregate rating banner) ở đây vì đã đưa lên top --}}
 
             @auth
-                @if($errors->has('review'))
-                    <div class="flash-error" style="margin-bottom:0.75rem;color:#f87171">{{ $errors->first('review') }}</div>
-                @endif
+                @error('review')
+                    <div class="flash-error" style="margin-bottom:0.75rem;color:#f87171">{{ $message }}</div>
+                @enderror
                 {{-- Rating form (one-time) --}}
                 @php
                     $userHasRated = false;

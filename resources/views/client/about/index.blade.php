@@ -1,6 +1,8 @@
     @extends('layouts.app')
     @section('title', 'Về chúng tôi - Luxury Stay')
 
+    @vite(['resources/css/client/about.css', 'resources/js/client/about.js'])
+
     @section('content')
 
     <!-- 1. HERO SECTION -->
@@ -40,7 +42,7 @@
                         Mỗi góc nhỏ tại Luxury Stay đều được chăm chút tỉ mỉ, từ kiến trúc Art Deco cổ điển đến những tiện nghi công nghệ hiện đại nhất. Chúng tôi tin rằng, sự sang trọng không chỉ nằm ở vẻ bề ngoài lộng lẫy, mà còn ở sự tận tâm phục vụ từ trái tim.
                     </p>
                     <div class="mt-8">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Signature_sample.svg" alt="Signature" style="height: 50px; filter: invert(1);">
+                        
                         <p class="text-sm text-gray-400 mt-2 font-bold">Trương Phước Giàu - Sinh viên, Đại học An Giang (Khóa 23DH)</p>
                         <p class="text-xs text-gray-400">Ngành: Công nghệ thông tin</p>
                     </div>

@@ -1,116 +1,43 @@
 /* =======================================================
-   LUXURY STAY HOTEL & RESORT - UNIFIED CLIENT STYLES
-   Phiên bản: Đồng bộ hóa toàn bộ biến và utility.
+   INVOICE PAGE SPECIFIC STYLES
    ======================================================= */
 
 
-/* --- 1. UNIVERSAL THEME VARIABLES --- */
+/* Reset and Base */
 
-:root {
-    --color-brand-900: #0b3d68;
-    /* Màu xanh đậm chủ đạo (Navy/Dark Blue) */
-    --color-brand-gold: #c5a47e;
-    /* Màu vàng gold nhấn (Accent Gold) */
-    --color-bg-primary: #f9fafb;
-    /* Background nền chính (Gray 50/100) */
-    --color-text-main: #1f2937;
-    /* Text chính (Gray 900) */
-    --color-text-muted: #6b7280;
-    /* Text mờ (Gray 600) */
-    --color-border: #e5e7eb;
-    /* Border/Separator (Gray 200) */
-    --color-shadow-light: rgba(0, 0, 0, 0.05);
-    /* Shadow nhẹ */
-    /* Buttons & Form */
-    --color-btn-primary-bg: var(--color-brand-gold);
-    --color-btn-primary-text: #000000;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-
-
-/* --- 2. BASE AND COMMON UTILITIES --- */
 
 body {
-    font-family: 'Inter', sans-serif;
-    color: var(--color-text-main);
-    background-color: var(--color-bg-primary);
-}
-
-.container {
-    max-width: 1280px;
-    /* max-w-7xl */
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 
-/* Primary Button Style (btn-primary) */
+/* CSS Variables */
 
-.btn-primary {
-    background: var(--color-btn-primary-bg);
-    color: var(--color-btn-primary-text);
-    padding: .6rem 1rem;
-    border-radius: .5rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    /* Bổ sung để đồng bộ với theme */
-    border: 1px solid transparent;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-}
-
-.btn-primary:hover {
-    filter: none;
-    /* Bỏ filter, dùng hover style rõ ràng hơn */
-    background: var(--color-brand-900);
-    color: #ffffff;
-    border-color: var(--color-brand-900);
-    box-shadow: 0 4px 6px -1px var(--color-shadow-light), 0 2px 4px -2px var(--color-shadow-light);
-}
-
-.btn-primary:disabled {
-    opacity: .6;
-    cursor: not-allowed;
-    background: var(--color-btn-primary-bg);
-    color: var(--color-btn-primary-text);
-    box-shadow: none;
-}
-
-
-/* Common Form Input Style (form-input) */
-
-.form-input {
-    width: 100%;
-    padding: .6rem .75rem;
-    border: 1px solid var(--color-border);
-    border-radius: .5rem;
-    color: var(--color-text-main);
-    transition: border-color 0.2s, box-shadow 0.2s;
-    background-color: #ffffff;
-    /* Đảm bảo nền trắng */
-}
-
-.form-input:focus {
-    border-color: var(--color-brand-gold);
-    /* Chuyển sang màu gold khi focus */
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(197, 164, 126, 0.5);
-    /* Vòng sáng gold */
+:root {
+    --primary-gold: #cda45e;
+    --bg-body: #1a1a1a;
+    --bg-card: #252525;
+    --white: #ffffff;
+    --text-muted: #9ca3af;
+    --border-light: rgba(255, 255, 255, 0.1);
+    --font-serif: 'Playfair Display', Georgia, serif;
 }
 
 
 /* =======================================================
-   3. INVOICE PAGE STYLES
+   INVOICE PAGE STYLES
    ======================================================= */
 
 
 /* --- Base Layout --- */
 
 .invoice-page-wrapper {
-    background-color: var(--color-bg-primary);
+    background-color: var(--bg-body);
     min-height: 100vh;
     padding-top: 3rem;
     padding-bottom: 3rem;
@@ -118,7 +45,6 @@ body {
 
 .invoice-container {
     max-width: 768px;
-    /* max-w-3xl */
     margin-left: auto;
     margin-right: auto;
     padding-left: 1rem;
@@ -130,50 +56,43 @@ body {
 
 .back-link {
     font-size: 0.875rem;
-    color: var(--color-text-muted);
-    display: flex;
+    color: var(--text-muted);
+    display: inline-flex;
     align-items: center;
-    transition: color 0.2s;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-light);
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
     margin-bottom: 1.5rem;
 }
 
 .back-link:hover {
-    color: var(--color-brand-900);
+    color: var(--primary-gold);
+    border-color: var(--primary-gold);
+    background: rgba(205, 164, 94, 0.1);
+    transform: translateX(-3px);
 }
 
 
 /* --- Invoice Card --- */
 
 .invoice-card {
-    background-color: #ffffff;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-light);
     border-radius: 1.5rem;
-    /* rounded-3xl */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    /* Dùng class riêng cho animation để không xung đột */
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in-up {
-    animation: fadeInUp 0.5s ease-out;
 }
 
 
 /* --- Header Section --- */
 
 .invoice-header {
-    background-color: var(--color-brand-900);
-    color: white;
+    background: linear-gradient(135deg, rgba(205, 164, 94, 0.9) 0%, rgba(205, 164, 94, 0.7) 100%);
+    color: var(--white);
     padding: 2rem;
     text-align: center;
     position: relative;
@@ -193,18 +112,19 @@ body {
 }
 
 .header-title {
-    font-family: 'Georgia', serif;
+    font-family: var(--font-serif);
     font-size: 1.875rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     position: relative;
     z-index: 10;
+    margin: 0;
 }
 
 .header-subtitle {
-    opacity: 0.8;
+    opacity: 0.9;
     font-size: 0.875rem;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
     position: relative;
     z-index: 10;
     text-transform: uppercase;
@@ -214,22 +134,23 @@ body {
 .invoice-code {
     margin-top: 1rem;
     display: inline-block;
-    padding: 0.25rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 9999px;
-    font-size: 0.875rem;
+    padding: 0.5rem 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    font-size: 1rem;
     font-family: monospace;
+    font-weight: 700;
     position: relative;
     z-index: 10;
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(2px);
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
 }
 
 
 /* --- Body Section (Details) --- */
 
 .invoice-body {
-    padding: 3rem;
+    padding: 2.5rem;
 }
 
 
@@ -241,7 +162,7 @@ body {
     gap: 2rem;
     margin-bottom: 2rem;
     padding-bottom: 2rem;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--border-light);
 }
 
 @media (min-width: 768px) {
@@ -253,7 +174,7 @@ body {
 .detail-heading {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #9ca3af;
+    color: var(--primary-gold);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.75rem;
@@ -262,13 +183,14 @@ body {
 .customer-name {
     font-size: 1.125rem;
     font-weight: 700;
-    color: var(--color-text-main);
+    color: var(--white);
+    margin-bottom: 0.5rem;
 }
 
 .info-item {
-    color: var(--color-text-muted);
+    color: var(--text-muted);
     font-size: 0.875rem;
-    margin-top: 0.25rem;
+    margin-top: 0.5rem;
     display: flex;
     align-items: center;
 }
@@ -276,6 +198,7 @@ body {
 .info-item i {
     width: 1rem;
     margin-right: 0.5rem;
+    color: var(--primary-gold);
 }
 
 .booking-info {
@@ -290,26 +213,27 @@ body {
 
 .booking-info p {
     font-size: 0.875rem;
-    margin-bottom: 0.25rem;
-    color: var(--color-text-main);
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
 }
 
 .booking-info strong {
     font-weight: 700;
-    color: #9ca3af;
+    color: var(--white);
     margin-right: 0.5rem;
 }
 
 .payment-method-tag {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
     font-size: 0.75rem;
-    font-weight: 500;
-    background-color: #f3f4f6;
-    color: #374151;
+    font-weight: 600;
+    background: rgba(205, 164, 94, 0.15);
+    color: var(--primary-gold);
+    border: 1px solid rgba(205, 164, 94, 0.3);
 }
 
 
@@ -321,8 +245,8 @@ body {
 
 .table-responsive {
     overflow-x: auto;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
+    border: 1px solid var(--border-light);
+    border-radius: 0.75rem;
 }
 
 .invoice-table {
@@ -333,39 +257,48 @@ body {
 }
 
 .invoice-table thead {
-    background-color: #f9fafb;
-    color: #6b7280;
+    background: rgba(205, 164, 94, 0.1);
+    color: var(--primary-gold);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.75rem;
+    letter-spacing: 0.05em;
 }
 
 .invoice-table th,
 .invoice-table td {
-    padding: 0.75rem 1rem;
-    white-space: nowrap;
+    padding: 1rem;
 }
 
 .invoice-table tbody tr {
-    border-top: 1px solid #f3f4f6;
+    border-top: 1px solid var(--border-light);
     transition: background-color 0.2s;
 }
 
 .invoice-table tbody tr:hover {
-    background-color: rgba(249, 250, 251, 0.5);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.invoice-table tbody td {
+    color: var(--text-muted);
+}
+
+.invoice-table tbody td.font-medium {
+    color: var(--white);
+    font-weight: 600;
 }
 
 .room-detail-info {
-    color: #10b981;
+    color: #34d399;
     font-size: 0.75rem;
     margin-top: 0.25rem;
     display: flex;
     align-items: center;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .room-detail-pending {
-    color: #f97316;
+    color: #fbbf24;
     font-size: 0.75rem;
     margin-top: 0.25rem;
     display: flex;
@@ -375,7 +308,15 @@ body {
 
 .table-amount {
     font-weight: 700;
-    color: var(--color-text-main);
+    color: var(--white);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
 }
 
 
@@ -384,51 +325,65 @@ body {
 .summary-container {
     display: flex;
     justify-content: flex-end;
+    margin-top: 2rem;
 }
 
 .summary-box {
     width: 100%;
-    max-width: 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    padding: 1.5rem;
 }
 
 .summary-row {
     display: flex;
     justify-content: space-between;
+    padding: 0.5rem 0;
     font-size: 0.875rem;
-    color: var(--color-text-muted);
+    color: var(--text-muted);
 }
 
-.summary-discount {
-    color: #ef4444;
-    font-weight: 500;
+.summary-row span:last-child {
+    font-weight: 600;
+    color: var(--white);
+}
+
+.summary-row.summary-discount {
+    color: #34d399;
+}
+
+.summary-row.summary-discount span:last-child {
+    color: #34d399;
 }
 
 .summary-separator {
-    border-top: 1px dashed var(--color-border);
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+    border-top: 1px dashed var(--border-light);
+    margin: 0.75rem 0;
 }
 
 .summary-total {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1rem;
+    background: rgba(205, 164, 94, 0.1);
+    border-radius: 0.75rem;
+    margin-top: 0.75rem;
 }
 
 .total-label {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--color-text-main);
+    color: var(--white);
 }
 
 .total-amount {
-    font-size: 1.5rem;
-    font-family: 'Georgia', serif;
+    font-size: 1.75rem;
+    font-family: var(--font-serif);
     font-weight: 700;
-    color: var(--color-brand-gold);
+    color: var(--primary-gold);
 }
 
 
@@ -448,32 +403,26 @@ body {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     transform: rotate(-6deg);
-    opacity: 0.8;
+    opacity: 0.9;
     border-radius: 8px;
 }
 
-
-/* Paid Status */
-
 .status-paid {
-    border-color: #10b981;
-    color: #059669;
+    border-color: #34d399;
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
 }
-
-
-/* Awaiting Status */
 
 .status-awaiting {
-    border-color: #fb923c;
-    color: #f97316;
+    border-color: #fbbf24;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
 }
 
-
-/* Unpaid Status */
-
 .status-unpaid {
-    border-color: #d1d5db;
+    border-color: #6b7280;
     color: #9ca3af;
+    background: rgba(107, 114, 128, 0.1);
 }
 
 
@@ -482,72 +431,278 @@ body {
 .invoice-footer {
     margin-top: 3rem;
     padding-top: 2rem;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid var(--border-light);
     text-align: center;
-    font-size: 0.75rem;
-    color: #9ca3af;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.6;
 }
 
 .invoice-footer p {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.footer-highlight {
+    color: var(--primary-gold);
+    font-weight: 600;
+}
+
+.footer-brand {
+    color: var(--white);
+    font-weight: 600;
+}
+
+.footer-italic {
+    font-style: italic;
+    font-size: 0.75rem;
+    opacity: 0.7;
 }
 
 
-/* --- Nút In Hóa đơn (MỚI) --- */
+/* --- Print Button --- */
 
-.btn-invoice-print {
-    padding: 0.75rem 1.5rem;
-    background-color: #ffffff;
-    border: 1px solid #d1d5db;
-    /* gray-300 */
+.print-button-container {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.print-button {
+    padding: 0.75rem 2rem;
+    background: var(--primary-gold);
+    color: #000;
+    border: none;
     border-radius: 0.75rem;
-    /* rounded-xl */
-    color: #374151;
-    /* gray-700 */
-    font-weight: 600;
-    transition: all 0.2s;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    cursor: pointer;
 }
 
-.btn-invoice-print:hover {
-    background-color: var(--color-bg-primary);
-    color: var(--color-brand-900);
-    border-color: var(--color-brand-900);
-    box-shadow: 0 4px 6px -1px var(--color-shadow-light);
+.print-button:hover {
+    background: #d4b887;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(205, 164, 94, 0.4);
+}
+
+.print-button i {
+    font-size: 1.1rem;
 }
 
 
-/* =========================================
-   4. PRINT MEDIA QUERY (Cho Hóa đơn)
-   ========================================= */
+/* =======================================================
+   PRINT MEDIA QUERY (OPTIMIZED FOR A4)
+   ======================================================= */
 
 @media print {
-    /* Ẩn các phần tử không cần thiết khi in */
+    /* Reset page background */
+    body {
+        background: white !important;
+    }
     .invoice-page-wrapper {
         background-color: white !important;
         padding: 0 !important;
+        min-height: auto !important;
     }
     .invoice-container {
         margin: 0 auto !important;
         padding: 0 !important;
         max-width: 100% !important;
     }
+    /* Hide non-print elements */
     .back-link,
-    .print-button-container,
-    .btn-invoice-print {
-        /* Ẩn nút In khi in */
+    .print-button-container {
         display: none !important;
     }
     .invoice-card {
         box-shadow: none !important;
         border-radius: 0 !important;
+        border: none !important;
+        page-break-inside: avoid;
+        background: white !important;
     }
-    .invoice-header,
+    /* Header section - compact for print */
+    .invoice-header {
+        background: linear-gradient(135deg, rgba(205, 164, 94, 0.95) 0%, rgba(205, 164, 94, 0.85) 100%) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding: 1rem 1.5rem !important;
+        page-break-inside: avoid;
+    }
+    .header-title {
+        font-size: 1.25rem !important;
+    }
+    .header-subtitle {
+        font-size: 0.7rem !important;
+        margin-top: 0.25rem !important;
+    }
+    .invoice-code {
+        font-size: 0.8rem !important;
+        padding: 0.3rem 1rem !important;
+        margin-top: 0.5rem !important;
+    }
+    /* Body section - compact */
     .invoice-body {
-        padding: 1rem !important;
+        padding: 1rem 1.5rem !important;
+        page-break-inside: avoid;
+    }
+    /* Detail grid - tighter spacing */
+    .detail-grid {
+        gap: 0.75rem !important;
+        margin-bottom: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    .detail-heading {
+        font-size: 0.65rem !important;
+        margin-bottom: 0.35rem !important;
+    }
+    .customer-name {
+        font-size: 0.9rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+    .info-item {
+        font-size: 0.7rem !important;
+        margin-top: 0.2rem !important;
+    }
+    .booking-info p {
+        font-size: 0.7rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    .payment-method-tag {
+        font-size: 0.65rem !important;
+        padding: 0.25rem 0.65rem !important;
+        margin-top: 0.35rem !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* Service table - compact */
+    .service-table-wrapper {
+        margin-bottom: 0.75rem !important;
+        page-break-inside: avoid;
+    }
+    .table-responsive {
+        border-radius: 0 !important;
+    }
+    .invoice-table {
+        font-size: 0.7rem !important;
+    }
+    .invoice-table thead {
+        font-size: 0.65rem !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: rgba(205, 164, 94, 0.15) !important;
+    }
+    .invoice-table th,
+    .invoice-table td {
+        padding: 0.5rem 0.6rem !important;
+    }
+    .room-name {
+        font-size: 0.8rem !important;
+    }
+    .room-detail-info,
+    .room-detail-pending {
+        font-size: 0.6rem !important;
+        margin-top: 0.15rem !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* Financial summary - compact */
+    .summary-container {
+        margin-top: 0.75rem !important;
+        page-break-inside: avoid;
+    }
+    .summary-box {
+        padding: 0.75rem 1rem !important;
+        max-width: 350px !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .summary-row {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0 !important;
+    }
+    .summary-separator {
+        margin: 0.35rem 0 !important;
+    }
+    .summary-total {
+        padding: 0.6rem 0.75rem !important;
+        margin-top: 0.4rem !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: rgba(205, 164, 94, 0.15) !important;
+    }
+    .total-label {
+        font-size: 0.85rem !important;
+    }
+    .total-amount {
+        font-size: 1.25rem !important;
+    }
+    /* Status stamp - compact */
+    .status-stamp-wrapper {
+        margin-top: 0.6rem !important;
+        page-break-inside: avoid;
+    }
+    .status-stamp {
+        font-size: 0.7rem !important;
+        padding: 0.3rem 1rem !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* Footer - compact */
+    .invoice-footer {
+        margin-top: 1rem !important;
+        padding-top: 0.75rem !important;
+        font-size: 0.65rem !important;
+        line-height: 1.4 !important;
+        page-break-inside: avoid;
+    }
+    .invoice-footer p {
+        margin-bottom: 0.2rem !important;
+    }
+    .footer-italic {
+        font-size: 0.6rem !important;
+    }
+    /* Ensure colors print properly */
+    .summary-row.summary-discount,
+    .summary-row.summary-discount span:last-child,
+    .footer-highlight,
+    .detail-heading {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* Prevent page breaks in critical sections */
+    .detail-grid,
+    .service-table-wrapper,
+    .summary-container,
+    .status-stamp-wrapper,
+    .invoice-footer {
+        page-break-inside: avoid;
+    }
+}
+
+
+/* =======================================================
+   RESPONSIVE
+   ======================================================= */
+
+@media (max-width: 767px) {
+    .invoice-body {
+        padding: 1.5rem;
+    }
+    .summary-box {
+        max-width: 100%;
+    }
+    .invoice-table th,
+    .invoice-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    .header-title {
+        font-size: 1.5rem;
+    }
+    .total-amount {
+        font-size: 1.5rem;
     }
 }

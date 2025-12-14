@@ -2,7 +2,32 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Rooms Logic Loaded');
 
     // ==========================================
-    // 1. XỬ LÝ BỘ LỌC MOBILE (Sidebar Filter Toggle)
+    // 1. XỬ LÝ BỘ LỌC - Prevent reload và build URL manually
+    // ==========================================
+    const filterForm = document.getElementById('filter-form');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+
+            // Build query string from form data
+            for (let [key, value] of formData.entries()) {
+                if (value && value.trim() !== '') {
+                    params.append(key, value);
+                }
+            }
+
+            // Redirect to same page with query string
+            const queryString = params.toString();
+            const baseUrl = this.action || window.location.pathname;
+            window.location.href = baseUrl + (queryString ? '?' + queryString : '');
+        });
+    }
+
+    // ==========================================
+    // 2. XỬ LÝ BỘ LỌC MOBILE (Sidebar Filter Toggle)
     // ==========================================
     // Logic này hỗ trợ nút "Bộ lọc tìm kiếm" trên mobile để hiện sidebar
     const mobileFilterBtn = document.querySelector('.mobile-filter-btn');
@@ -20,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // 2. LOGIC DATEPICKER (Trang Chi tiết phòng)
+    // 3. LOGIC DATEPICKER (Trang Chi tiết phòng)
     // ==========================================
     // Tự động cập nhật min-date của ngày trả phòng dựa trên ngày nhận phòng
     const checkinInput = document.getElementById('checkin_date');

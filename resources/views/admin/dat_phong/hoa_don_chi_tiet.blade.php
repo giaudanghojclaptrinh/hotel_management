@@ -80,11 +80,15 @@
             <div class="flex justify-end pt-4 border-t border-gray-800">
                 <div class="w-full md:w-1/2">
                     <div class="flex justify-between py-3 border-b border-gray-800">
-                        <span class="text-gray-400">Tổng tiền phòng</span>
-                        <span class="font-medium text-white">{{ number_format($hoaDon->tong_tien, 0, ',', '.') }} đ</span>
+                        <span class="text-gray-400">Tạm tính (trước VAT)</span>
+                        <span class="font-medium text-white">{{ number_format($hoaDon->subtotal ?? $hoaDon->tong_tien, 0, ',', '.') }} đ</span>
+                    </div>
+                    <div class="flex justify-between py-3 border-b border-gray-800" style="color: #10b981;">
+                        <span class="text-gray-400">Thuế VAT (8%)</span>
+                        <span class="font-medium">{{ number_format($hoaDon->vat_amount ?? 0, 0, ',', '.') }} đ</span>
                     </div>
                     <div class="flex justify-between py-4 items-center">
-                        <span class="text-lg font-bold text-white">THÀNH TIỀN</span>
+                        <span class="text-lg font-bold text-white">TỔNG THANH TOÁN</span>
                         <span class="text-3xl font-serif font-bold text-brand-gold">{{ number_format($hoaDon->tong_tien, 0, ',', '.') }} đ</span>
                     </div>
                 </div>

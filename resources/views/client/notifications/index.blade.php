@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Thông báo của tôi')
 
+@vite(['resources/css/client/notifications.css', 'resources/js/client/notifications.js'])
 
 @section('content')
 <div class="notify-page-wrapper">
@@ -96,7 +97,7 @@
                                     <span>Xem</span> <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                             @elseif(isset($data['booking_id']))
-                                <a href="{{ route('bookings.invoice', $data['booking_id']) }}" class="btn-view-detail">
+                                <a href="{{ route('bookings.detail', $data['booking_id']) }}" class="btn-view-detail">
                                     <span>Xem chi tiết</span> <i class="fa-solid fa-arrow-right"></i>
                                 </a>
                             @endif

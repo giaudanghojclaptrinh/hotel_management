@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Danh sách phòng nghỉ')
 
+@vite(['resources/css/client/rooms.css', 'resources/js/client/rooms.js'])
+
 @section('content')
 
 <!-- HEADER BANNER -->
