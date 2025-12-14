@@ -26,23 +26,40 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang gửi...';
 
-            // 4. Giả lập gửi (hoặc gọi API thật nếu có backend)
-            // Ở đây dùng mailto như yêu cầu cũ
-            setTimeout(() => {
-                const subject = encodeURIComponent(`Liên hệ mới từ ${name}`);
-                const body = encodeURIComponent(`Họ tên: ${name}\nEmail: ${email}\n\nNội dung:\n${message}`);
+            // 4. Gửi request đến backend (POST) với CSRF token
+            const formData = new FormData(contactForm);
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrf = csrfMeta ? csrfMeta.getAttribute('content') : (formData.get('_token') || '');
 
-                // Mở trình gửi mail mặc định
-                window.location.href = `mailto:booking@luxurystay.com?subject=${subject}&body=${body}`;
-
-                // Reset form
-                contactForm.reset();
-                alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất.');
-
-                // Khôi phục nút
+            fetch(contactForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                },
+                body: formData,
+            }).then(async(res) => {
+                if (res.ok) {
+                    // Try to parse json message
+                    let msg = 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất.';
+                    try { const j = await res.json(); if (j.message) msg = j.message; } catch (e) {}
+                    contactForm.reset();
+                    alert(msg);
+                } else if (res.status === 422) {
+                    // validation errors
+                    const j = await res.json();
+                    const errs = j.errors ? Object.values(j.errors).flat().join('\n') : 'Có lỗi xác thực.';
+                    alert(errs);
+                } else {
+                    alert('Lỗi khi gửi phản hồi. Vui lòng thử lại sau.');
+                }
+            }).catch((err) => {
+                console.error('Contact submit error', err);
+                alert('Lỗi khi gửi phản hồi. Vui lòng thử lại sau.');
+            }).finally(() => {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
-            }, 1500);
+            });
         });
     }
 });

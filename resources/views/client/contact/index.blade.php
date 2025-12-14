@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Liên hệ - Luxury Stay')
+@section('title', 'Liên hệ và Phản hồi - Luxury Stay')
 
 
 @section('content')
@@ -37,7 +37,7 @@
                         </li>
                         <li>
                             <i class="fa-solid fa-envelope"></i>
-                            <a href="mailto:booking@luxurystay.com">booking@luxurystay.com</a>
+                            <a href="mailto:giaudeptrainhat@gmail.com">giaudeptrainhat@gmail.com</a>
                         </li>
                         <li>
                             <i class="fa-solid fa-clock"></i>
@@ -78,24 +78,25 @@
                     <p>Chúng tôi luôn sẵn sàng lắng nghe ý kiến của bạn. Vui lòng điền vào biểu mẫu dưới đây.</p>
                 </div>
 
-                <form id="contact-form">
+                <form id="contact-form" method="POST" action="{{ route('contact.submit') }}">
+                    @csrf
                     <div class="form-group">
                         <label for="contact-name" class="form-label">Họ và tên</label>
-                        <input type="text" id="contact-name" class="form-input" placeholder="Nhập họ tên của bạn..." required>
+                        <input type="text" id="contact-name" name="name" class="form-input" placeholder="Nhập họ tên của bạn..." required>
                     </div>
 
                     <div class="form-group">
                         <label for="contact-email" class="form-label">Email</label>
-                        <input type="email" id="contact-email" class="form-input" placeholder="example@email.com" required>
+                        <input type="email" id="contact-email" name="email" class="form-input" placeholder="example@email.com" required>
                     </div>
 
                     <div class="form-group">
                         <label for="contact-message" class="form-label">Nội dung tin nhắn</label>
-                        <textarea id="contact-message" rows="5" class="form-textarea" placeholder="Bạn cần hỗ trợ gì?..." required></textarea>
+                        <textarea id="contact-message" name="message" rows="5" class="form-textarea" placeholder="Bạn cần hỗ trợ gì?..." required></textarea>
                     </div>
 
                     <button type="submit" id="contact-submit" class="btn-submit">
-                        Gửi liên hệ <i class="fa-solid fa-paper-plane"></i>
+                        Gửi phản hồi <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </form>
             </div>

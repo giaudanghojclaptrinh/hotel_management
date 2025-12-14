@@ -20,6 +20,7 @@ use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Client\NotificationController; // Import Notification Controller
 use App\Http\Controllers\Client\ReviewController;
+use App\Http\Controllers\ContactController;
 
 Auth::routes();
 
@@ -59,10 +60,32 @@ Route::get('/lien-he', function () {
     return view('client.contact.index');
 })->name('contact');
 
+// Contact form submit
+Route::post('/lien-he', [ContactController::class, 'submit'])->name('contact.submit');
+
 // Legal pages: privacy & terms (simple static views)
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::view('/terms', 'terms')->name('terms');
 
+// Hiển thị view lỗi tương ứng (response code đúng)
+Route::get('/error/{code}', function ($code) {
+    $allowed = ['400','401','403','404','419','422','429','500','503'];
+    if (!in_array($code, $allowed)) abort(404);
+    return response()->view('errors.' . $code, [], (int) $code);
+});
+
+// Dev-only: send test feedback email (only in local environment)
+if (config('app.debug')) {
+    Route::get('/dev/test-feedback-mail', function () {
+        $feedback = App\Models\Feedback::create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'message' => 'Đây là email kiểm tra gửi từ hệ thống.'
+        ]);
+        \Illuminate\Support\Facades\Mail::to(config('mail.admin_address'))->send(new App\Mail\FeedbackReceived($feedback));
+        return 'OK - test mail queued/sent';
+    });
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -122,6 +145,10 @@ Route::prefix('admin')
     ->group(function () {
     
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+
+    // Admin profile
+    Route::get('/profile', [\App\Http\Controllers\Admin\AdminProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::post('/profile', [\App\Http\Controllers\Admin\AdminProfileController::class, 'update'])->name('admin.profile.update');
 
     // Quản lý Loại phòng
     Route::prefix('loai-phong')->group(function() {
@@ -220,5 +247,13 @@ Route::prefix('admin')
         Route::post('/sua/{id}', [TienNghiController::class, 'postSua'])->name('admin.tien-nghi.update');
         Route::get('/xoa/{id}', [TienNghiController::class, 'getXoa'])->name('admin.tien-nghi.xoa');
         Route::post('/bulk-delete', [TienNghiController::class, 'bulkDelete'])->name('admin.tien-nghi.bulk-delete');
+    });
+
+    // Quản lý phản hồi khách hàng (Feedbacks)
+    Route::prefix('feedbacks')->group(function() {
+        Route::get('/', [ContactController::class, 'index'])->name('admin.feedbacks.index');
+        Route::post('/bulk-delete', [ContactController::class, 'bulkDelete'])->name('admin.feedbacks.bulk-delete');
+        Route::get('/{feedback}', [ContactController::class, 'show'])->name('admin.feedbacks.show');
+        Route::post('/{feedback}/handled', [ContactController::class, 'markHandled'])->name('admin.feedbacks.handle');
     });
 });

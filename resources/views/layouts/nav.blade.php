@@ -15,6 +15,6 @@
     </a>
     
     <a href="{{ route('contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">
-        Liên hệ
+        Liên hệ & Phản hồi
     </a>
 </nav>

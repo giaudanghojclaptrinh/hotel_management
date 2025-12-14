@@ -112,8 +112,8 @@
                                 <p class="text-gray-500 text-xs truncate">{{ Auth::user()->email ?? '' }}</p>
                             </div>
                             
-                            <a href="#" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                                <i class="fa-solid fa-user-gear mr-2 text-gray-500"></i> Hồ sơ
+                            <a href="{{ route('admin.profile.edit') }}" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                                <i class="fa-solid fa-user-gear mr-2 text-gray-500"></i> Hồ sơ quản trị
                             </a>
                             
                             <form method="POST" action="{{ route('logout') }}">

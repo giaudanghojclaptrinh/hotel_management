@@ -108,7 +108,7 @@
             <a href="{{ route('phong.danh-sach') }}" class="mobile-link">Phòng & Suites</a>
             <a href="{{ route('khuyen-mai') }}" class="mobile-link">Ưu đãi</a>
             
-            @auth
+                    @auth
                 <div class="mobile-user-section">
                     <p class="mobile-greeting">Xin chào, <strong>{{ Auth::user()->name }}</strong></p>
                     <a href="{{ route('profile.edit') }}" class="mobile-user-link">Hồ sơ</a>
