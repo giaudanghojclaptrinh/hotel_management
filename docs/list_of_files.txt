@@ -1,0 +1,7 @@
+﻿
+FullName                                                           
+--------                                                           
+D:\wamp64\www\project\CNWEB\hotel_management\docs\asset_cleanup.md 
+D:\wamp64\www\project\CNWEB\hotel_management\docs\list_of_files.txt
+
+

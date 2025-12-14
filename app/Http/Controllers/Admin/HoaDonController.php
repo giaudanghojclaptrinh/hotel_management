@@ -27,7 +27,12 @@ class HoaDonController extends Controller
         }
 
         if ($request->status) {
-            $query->where('trang_thai', $request->status);
+            // Hỗ trợ trạng thái chờ thanh toán cả 'unpaid' và 'awaiting_payment'
+            if ($request->status === 'unpaid') {
+                $query->whereIn('trang_thai', ['unpaid', 'awaiting_payment']);
+            } else {
+                $query->where('trang_thai', $request->status);
+            }
         }
 
         if ($request->from_date) {
@@ -42,7 +47,7 @@ class HoaDonController extends Controller
         $statsQuery = clone $query;
         $totalRevenue = (clone $statsQuery)->where('trang_thai', 'paid')->sum('tong_tien');
         $countPaid = (clone $query)->where('trang_thai', 'paid')->count();
-        $countUnpaid = (clone $query)->where('trang_thai', 'unpaid')->count();
+        $countUnpaid = (clone $query)->whereIn('trang_thai', ['unpaid', 'awaiting_payment'])->count();
 
         // 4. Lấy dữ liệu phân trang, sắp xếp mới nhất trước
         $hoaDons = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();

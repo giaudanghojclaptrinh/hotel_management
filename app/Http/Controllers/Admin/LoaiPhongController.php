@@ -135,7 +135,23 @@ class LoaiPhongController extends Controller
     // --- CHỨC NĂNG XÓA ---
     public function getXoa($id)
     {
-        $orm = LoaiPhong::findOrFail($id);
+        $orm = LoaiPhong::with(['chiTietDatPhongs.datPhong', 'phongs'])->findOrFail($id);
+        
+        // Kiểm tra xem loại phòng có đơn đặt đang active không
+        $activeBookings = $orm->chiTietDatPhongs()->whereHas('datPhong', function($q) {
+            $q->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment']);
+        })->count();
+        
+        if ($activeBookings > 0) {
+            return redirect()->route('admin.loai-phong')
+                ->with('error', 'Không thể xóa loại phòng đang có đơn đặt phòng hoạt động!');
+        }
+        
+        // Kiểm tra xem có phòng vật lý nào thuộc loại này không
+        if ($orm->phongs()->count() > 0) {
+            return redirect()->route('admin.loai-phong')
+                ->with('error', 'Không thể xóa loại phòng đang có phòng vật lý! Vui lòng xóa các phòng vật lý trước.');
+        }
         
         // Xóa liên kết tiện nghi trong bảng trung gian
         $orm->tienNghis()->detach(); 
@@ -147,6 +163,6 @@ class LoaiPhongController extends Controller
 
         $orm->delete();
         
-        return redirect()->route('admin.loai-phong')->with('success', 'Xóa thành công!');
+        return redirect()->route('admin.loai-phong')->with('success', 'Xóa loại phòng thành công!');
     }
 }

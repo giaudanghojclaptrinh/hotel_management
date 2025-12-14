@@ -41,6 +41,16 @@ class PageController extends Controller
      */
     public function rooms(Request $request)
     {
+        // Validate dates if search parameters present
+        if ($request->has('checkin') || $request->has('checkout')) {
+            $request->validate([
+                'checkin' => 'required|date|after_or_equal:today',
+                'checkout' => 'required|date|after:checkin',
+                'loai_phong_id' => 'nullable|exists:loai_phongs,id',
+                'so_khach' => 'nullable|integer|min:1'
+            ]);
+        }
+
         $query = LoaiPhong::query();
 
         // =========================================================================

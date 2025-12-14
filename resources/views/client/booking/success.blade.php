@@ -1,6 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Đặt phòng thành công')
 
+@push('styles')
+    @vite(['resources/css/client/booking.css'])
+@endpush
+
 @section('content')
 <div class="success-wrapper">
     <div class="success-card">

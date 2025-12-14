@@ -58,6 +58,10 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'terms' => ['required', 'accepted'], // ✅ Thêm validation cho checkbox
+        ], [
+            'terms.required' => 'Bạn phải đồng ý với điều khoản dịch vụ.',
+            'terms.accepted' => 'Bạn phải đồng ý với điều khoản dịch vụ.',
         ]);
     }
 

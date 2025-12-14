@@ -87,6 +87,7 @@ class UserController extends Controller
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($id)],
             'phone' => ['required', 'string', 'max:15', Rule::unique('users', 'phone')->ignore($id)],
             'cccd' => ['required', 'string', 'max:20', Rule::unique('users', 'cccd')->ignore($id)],
+            'role' => 'required|in:user,admin',
             'password' => 'nullable|string|min:6',
         ]);
 
@@ -95,6 +96,7 @@ class UserController extends Controller
         $orm->email = $data['email'];
         $orm->phone = $data['phone'];
         $orm->cccd = $data['cccd'];
+        $orm->role = $data['role']; // ✅ Cập nhật role
         
         if (!empty($data['password'])) {
             $orm->password = Hash::make($data['password']);

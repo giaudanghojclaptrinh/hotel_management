@@ -14,6 +14,8 @@ class HoaDon extends Model
         'dat_phong_id',
         'ma_hoa_don',
         'ngay_lap',
+        'subtotal',       // Tạm tính trước thuế
+        'vat_amount',     // Thuế VAT 8%
         'tong_tien',
         'trang_thai',
         'phuong_thuc_thanh_toan', 

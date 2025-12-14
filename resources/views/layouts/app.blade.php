@@ -19,40 +19,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- GỌI ASSETS QUA VITE -->
-    <!-- Đã bao gồm config màu, css tùy chỉnh và js logic -->
+    <!-- Load global: variables, layout (header/footer), và tailwind config -->
     @vite([
+        'resources/css/client/variables.css',
+        'resources/css/client/layout.css',
+        'resources/js/client/layout.js',
         'resources/js/tailwind-config.js',
-
-        // Centralized client assets (single manifest files)
-        //client
-                //css
-                'resources/css/login.css',
-                'resources/css/register.css',
-                'resources/css/password.css',
-                'resources/css/client/home.css',
-                'resources/css/client/rooms.css',
-                'resources/css/client/profile.css',
-                'resources/css/client/booking.css',
-                'resources/css/client/about.css',
-                'resources/css/client/contact.css',
-                'resources/css/client/promo.css',
-                'resources/css/client/notifications.css',
-                
-
-                //js
-                'resources/js/login.js',
-                'resources/js/register.js',
-                'resources/js/password.js',
-                'resources/js/client/home.js',
-                'resources/js/client/rooms.js',
-                'resources/js/client/profile.js',
-                'resources/js/client/booking.js',
-                'resources/js/client/about.js',
-                'resources/js/client/contact.js',
-                'resources/js/client/promo.js',
-                'resources/js/client/notifications.js',
-        
     ])
+
+    <!-- Các trang sẽ tự load CSS riêng của mình -->
+    @stack('styles')
 
     <!-- Alpine.js -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

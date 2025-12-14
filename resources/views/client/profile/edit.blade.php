@@ -1,8 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Hồ sơ cá nhân')
 
-<!-- Thêm dòng này để gọi đúng file CSS cho trang Profile -->
-
+@vite(['resources/css/client/profile.css', 'resources/js/client/profile.js'])
 
 @section('content')
 <div class="profile-page-wrapper">

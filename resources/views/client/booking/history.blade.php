@@ -1,11 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Lịch sử đặt phòng')
 
-<!-- Gọi CSS -->
-{{-- Ghi chú: `home.css` đã được include trong `layouts.app` để tránh lặp lại;
-    trước đây chúng ta gọi cả `home.css` và `history.css` tại đây dẫn tới tải thừa.
-    Dòng dưới đây là bản cũ (đã comment) để bạn dễ khôi phục nếu cần: --}}
-{{-- @vite(['resources/css/client/home.css', 'resources/css/client/history.css']) --}}
 @vite(['resources/css/client/history.css'])
 
 @section('content')
@@ -130,9 +125,14 @@
                                     <span class="price-label">Tổng thanh toán</span>
                                     <span class="total-price">{{ number_format($booking->tong_tien, 0, ',', '.') }}đ</span>
                                 </div>
-                                <a href="{{ route('bookings.invoice', $booking->id) }}" class="btn-view-detail">
-                                    Xem chi tiết <i class="fa-solid fa-arrow-right"></i>
-                                </a>
+                                <div class="action-buttons">
+                                    <a href="{{ route('bookings.detail', $booking->id) }}" class="btn-action btn-detail" title="Xem chi tiết đặt phòng">
+                                        <i class="fa-solid fa-file-lines"></i> Chi tiết
+                                    </a>
+                                    <a href="{{ route('bookings.invoice', $booking->id) }}" class="btn-action btn-invoice" title="Xem hóa đơn">
+                                        <i class="fa-solid fa-receipt"></i> Hóa đơn
+                                    </a>
+                                </div>
                             </div>
                         </div>
 

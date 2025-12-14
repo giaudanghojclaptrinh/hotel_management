@@ -24,6 +24,11 @@ use App\Http\Controllers\ContactController;
 
 Auth::routes();
 
+// Handle GET logout (redirect to login page with message)
+Route::get('/logout', function () {
+    return redirect()->route('login')->with('info', 'Vui lòng sử dụng nút đăng xuất.');
+})->name('logout.get');
+
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ROUTES (KHÁCH HÀNG)
@@ -100,8 +105,10 @@ Route::middleware('auth')->group(function () {
 
     // 2. Lịch sử đặt phòng
     Route::get('/lich-su-dat-phong', [BookingController::class, 'history'])->name('bookings.history');
+    // Chi tiết đặt phòng
+    Route::get('/dat-phong/chi-tiet/{id}', [BookingController::class, 'detail'])->name('bookings.detail');
     // Hủy đơn đặt phòng (khách hàng)
-    Route::post('/huy-dat-phong/{id}', [BookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::post('/dat-phong/huy/{id}', [BookingController::class, 'cancel'])->name('bookings.cancel');
     
     // Route xem chi tiết hóa đơn của user
     Route::get('/hoa-don-cua-toi/{id}', [BookingController::class, 'invoice'])->name('bookings.invoice');
@@ -196,7 +203,8 @@ Route::prefix('admin')
         Route::post('/huy/{id}', [DatPhongController::class, 'postHuy'])->name('admin.dat-phong.huy.post');
         // Bulk actions: move history items to trash, and permanently delete from trash
         Route::post('/bulk-trash', [DatPhongController::class, 'bulkMoveToTrash'])->name('admin.dat-phong.bulk-trash');
-        Route::post('/bulk-delete', [DatPhongController::class, 'bulkDeletePermanent'])->name('admin.dat-phong.bulk-delete');
+        // Bulk delete bookings safely (history view)
+        Route::post('/bulk-delete', [DatPhongController::class, 'destroyMany'])->name('admin.dat-phong.bulk-delete');
         Route::get('/history', [DatPhongController::class, 'getHistory'])->name('admin.dat-phong.history'); 
         Route::get('/trash', [DatPhongController::class, 'getTrash'])->name('admin.dat-phong.trash'); 
         Route::get('/sua/{id}', [DatPhongController::class, 'getSua'])->name('admin.dat-phong.sua');

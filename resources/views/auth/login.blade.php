@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Đăng nhập hệ thống')
 
+@vite(['resources/css/login.css', 'resources/js/login.js'])
+
 @section('content')
 <div class="login-wrapper">
     <!-- Background (Hình nền & Lớp phủ) -->

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Ưu đãi & Khuyến mãi - Luxury Stay')
 
+@vite(['resources/css/client/promo.css', 'resources/js/client/promo.js'])
 
 @section('content')
 

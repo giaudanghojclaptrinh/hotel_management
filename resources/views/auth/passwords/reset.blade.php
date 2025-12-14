@@ -1,10 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Cập nhật mật khẩu')
 
-<!-- Cập nhật: Sử dụng CSS và JS riêng cho các trang Password -->
-{{-- @vite(['resources/css/password.css', 'resources/js/password.js']) --}}
-{{-- Ghi chú: `password.css` và `password.js` đã được include chung trong `layouts.app`.
-    Đã comment để tránh tải trùng trên trang. Nếu cần riêng, bỏ comment này. --}}
+@vite(['resources/css/login.css', 'resources/js/login.js'])
 
 @section('content')
 <style>

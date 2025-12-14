@@ -8,10 +8,15 @@ export default defineConfig({
                 'resources/sass/app.scss',
                 'resources/js/app.js',
 
+                // Global Client Assets (used in app.blade.php)
+                'resources/css/client/variables.css',
+                'resources/css/client/layout.css',
+                'resources/js/client/layout.js',
+                'resources/js/tailwind-config.js',
+
                 // Client Assets
                 'resources/css/login.css',
                 'resources/css/register.css',
-                'resources/css/password.css',
                 'resources/css/client/home.css',
                 'resources/css/client/rooms.css',
                 'resources/css/client/profile.css',
@@ -24,7 +29,6 @@ export default defineConfig({
 
                 'resources/js/login.js',
                 'resources/js/register.js',
-                'resources/js/password.js',
                 'resources/js/client/home.js',
                 'resources/js/client/rooms.js',
                 'resources/js/client/profile.js',

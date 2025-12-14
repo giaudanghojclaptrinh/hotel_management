@@ -1,11 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Đăng ký thành viên')
 
-
-{{-- @vite(['resources/css/register.css']) --}}
-{{-- Ghi chú: `register.css` đã được include chung trong `layouts.app` (Vite manifest).
-    Đã comment lại để tránh tải nhiều lần trên cùng một trang. Nếu muốn tách riêng,
-    bỏ comment để kích hoạt lại. --}}
+@vite(['resources/css/register.css', 'resources/js/register.js'])
 
 @section('content')
 <div class="register-wrapper">

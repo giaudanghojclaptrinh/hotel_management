@@ -49,7 +49,7 @@ class PhongController extends Controller
         $data = $request->validate([
             'so_phong' => 'required|string|max:150',
             'loai_phong_id' => 'required|exists:loai_phongs,id',
-            'tinh_trang' => 'nullable|string|max:50',
+            'tinh_trang' => 'nullable|in:available,occupied,cleaning,maintenance',
         ]);
 
         $orm = new Phong();
@@ -73,7 +73,7 @@ class PhongController extends Controller
         $data = $request->validate([
             'so_phong' => 'required|string|max:150',
             'loai_phong_id' => 'required|exists:loai_phongs,id',
-            'tinh_trang' => 'nullable|string|max:50',
+            'tinh_trang' => 'nullable|in:available,occupied,cleaning,maintenance',
         ]);
 
         $orm = Phong::findOrFail($id);
@@ -86,9 +86,20 @@ class PhongController extends Controller
 
     public function getXoa($id)
     {
-        $orm = Phong::findOrFail($id);
+        $orm = Phong::with('chiTietDatPhongs.datPhong')->findOrFail($id);
+        
+        // Kiểm tra xem phòng có đơn đặt đang active không
+        $activeBookings = $orm->chiTietDatPhongs()->whereHas('datPhong', function($q) {
+            $q->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment']);
+        })->count();
+        
+        if ($activeBookings > 0) {
+            return redirect()->route('admin.phong')
+                ->with('error', 'Không thể xóa phòng đang có đơn đặt phòng hoạt động!');
+        }
+        
         $orm->delete();
-        return redirect()->route('admin.phong');
+        return redirect()->route('admin.phong')->with('success', 'Xóa phòng thành công!');
     }
 
     public function bulkDelete(Request $request)
@@ -97,8 +108,34 @@ class PhongController extends Controller
             'ids' => 'required|array',
             'ids.*' => 'exists:phongs,id'
         ]);
-        Phong::whereIn('id', $request->ids)->delete();
-        return redirect()->route('admin.phong')->with('success', 'Đã xóa các phòng được chọn.');
+        
+        // Kiểm tra từng phòng có booking active không
+        $phongs = Phong::whereIn('id', $request->ids)->get();
+        $cannotDelete = [];
+        $canDelete = [];
+        
+        foreach ($phongs as $phong) {
+            $activeBookings = $phong->chiTietDatPhongs()->whereHas('datPhong', function($q) {
+                $q->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment']);
+            })->count();
+            
+            if ($activeBookings > 0) {
+                $cannotDelete[] = $phong->so_phong;
+            } else {
+                $canDelete[] = $phong->id;
+            }
+        }
+        
+        if (!empty($canDelete)) {
+            Phong::whereIn('id', $canDelete)->delete();
+        }
+        
+        if (!empty($cannotDelete)) {
+            return redirect()->route('admin.phong')
+                ->with('warning', 'Đã xóa ' . count($canDelete) . ' phòng. Không thể xóa phòng: ' . implode(', ', $cannotDelete) . ' (đang có booking hoạt động)');
+        }
+        
+        return redirect()->route('admin.phong')->with('success', 'Đã xóa ' . count($canDelete) . ' phòng thành công.');
     }
     /**
      * Display the specified resource.

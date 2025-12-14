@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Trang chủ - Trải nghiệm nghỉ dưỡng đẳng cấp')
 
+@vite(['resources/css/client/home.css', 'resources/js/client/home.js'])
+
 @section('content')
 
 <div class="hero">

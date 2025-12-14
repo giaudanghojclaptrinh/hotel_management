@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="bg-gray-900 rounded-2xl p-6 shadow-md border border-gray-800 flex items-center justify-between group hover:border-green-900/50 transition-all">
+        <a href="{{ route('admin.hoa-don', ['status' => 'paid']) }}" class="block bg-gray-900 rounded-2xl p-6 shadow-md border border-gray-800 flex items-center justify-between group hover:border-green-900/50 transition-all">
             <div>
                 <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Đã thanh toán</p>
                 <h2 class="text-3xl font-serif font-bold text-white">{{ $countPaid ?? 0 }} <span class="text-sm text-gray-500 font-sans font-normal">đơn</span></h2>
@@ -29,9 +29,9 @@
             <div class="w-12 h-12 rounded-xl bg-green-900/20 flex items-center justify-center text-green-500 border border-green-900/30 group-hover:bg-green-600 group-hover:text-white transition-all">
                 <i class="fa-solid fa-check-double text-xl"></i>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-gray-900 rounded-2xl p-6 shadow-md border border-gray-800 flex items-center justify-between group hover:border-red-900/50 transition-all">
+        <a href="{{ route('admin.hoa-don', ['status' => 'unpaid']) }}" class="block bg-gray-900 rounded-2xl p-6 shadow-md border border-gray-800 flex items-center justify-between group hover:border-red-900/50 transition-all">
             <div>
                 <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Chờ thanh toán</p>
                 <h2 class="text-3xl font-serif font-bold text-white">{{ $countUnpaid ?? 0 }} <span class="text-sm text-gray-500 font-sans font-normal">đơn</span></h2>
@@ -39,7 +39,7 @@
             <div class="w-12 h-12 rounded-xl bg-red-900/20 flex items-center justify-center text-red-500 border border-red-900/30 group-hover:bg-red-600 group-hover:text-white transition-all">
                 <i class="fa-solid fa-hourglass-half text-xl"></i>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-800 mb-6">
@@ -109,8 +109,8 @@
                                 #{{ $hd->ma_hoa_don }}
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm font-bold text-white">{{ $hd->user->name ?? 'Guest' }}</div>
-                                <div class="text-xs text-gray-500">{{ $hd->user->phone ?? '' }}</div>
+                                <div class="text-sm font-bold text-white">{{ $hd->datPhong->user->name ?? 'Guest' }}</div>
+                                <div class="text-xs text-gray-500">{{ $hd->datPhong->user->phone ?? '' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                 {{ $hd->created_at->format('d/m/Y H:i') }}
@@ -125,6 +125,10 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-900/30 text-green-400 border border-green-800">
                                         <i class="fa-solid fa-check mr-1"></i> Đã thanh toán
                                     </span>
+                                @elseif($hd->trang_thai == 'awaiting_payment')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-900/30 text-amber-300 border border-amber-800">
+                                        <i class="fa-solid fa-clock mr-1"></i> Chờ thanh toán
+                                    </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-900/30 text-brand-gold border border-yellow-800">
                                         <i class="fa-solid fa-clock mr-1"></i> Chờ xử lý
@@ -133,7 +137,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <span class="font-serif font-bold text-lg {{ $hd->trang_thai == 'paid' ? 'text-white' : 'text-gray-500' }}">
-                                    {{ number_format($hd->so_tien, 0, ',', '.') }} đ
+                                    {{ number_format($hd->tong_tien, 0, ',', '.') }} đ
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
