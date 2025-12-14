@@ -78,6 +78,17 @@
             <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-800 pb-2">Hệ thống</p>
         </div>
 
+        <a href="{{ route('admin.feedbacks.index') }}"
+           class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group
+           {{ request()->routeIs('admin.feedbacks.*') ? 'bg-gray-800 text-brand-gold shadow-md border-l-4 border-brand-gold' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">
+            <i class="fa-solid fa-inbox w-6 text-center text-lg {{ request()->routeIs('admin.feedbacks.*') ? 'text-brand-gold' : 'text-gray-500 group-hover:text-brand-gold' }}"></i>
+            <span class="ml-3 tracking-wide">Phản hồi</span>
+            {{-- THÊM HIỂN THỊ SỐ LƯỢNG PHẢN HỒI CHƯA XỬ LÝ TẠI ĐÂY --}}
+            @if(isset($pendingFeedbacksCount) && $pendingFeedbacksCount > 0)
+                <span class="ml-auto bg-red-600 text-white py-0.5 px-2 rounded-md text-[10px] font-bold shadow-sm animate-pulse">{{ $pendingFeedbacksCount }}</span>
+            @endif
+        </a>
+
         <a href="{{ route('admin.users') }}" 
            class="flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 group
            {{ request()->routeIs('admin.users.*') ? 'bg-gray-800 text-brand-gold shadow-md border-l-4 border-brand-gold' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}">

@@ -112,6 +112,24 @@ body {
 }
 
 
+/* Notification icon states (header) */
+
+.notification-icon {
+    color: var(--text-muted);
+    transition: color 0.18s ease, transform 0.18s ease, text-shadow 0.18s ease;
+}
+
+.notification-active {
+    color: var(--primary-gold) !important;
+    transform: translateY(-1px);
+    text-shadow: 0 6px 18px rgba(205, 164, 94, 0.18);
+}
+
+.notification-inactive {
+    color: var(--text-muted) !important;
+}
+
+
 /* =========================================
    2. HEADER & NAVIGATION (Dark Style)
    ========================================= */

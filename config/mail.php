@@ -117,4 +117,7 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /* Admin email used for feedback notifications */
+    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'niemvui2233@gmail.com'),
+
 ];
