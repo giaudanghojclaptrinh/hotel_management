@@ -20,14 +20,71 @@ class DatPhongController extends Controller
      */
     public function getDanhSach(Request $request)
     {
+        // Lấy filter từ request
+        $statusFilter = $request->query('status');
+        
         // 1. Lấy tất cả các phòng
         // Eager load các đơn đặt phòng ĐANG HOẠT ĐỘNG (pending, confirmed, paid, awaiting_payment)
         // Chúng ta lấy đơn mới nhất để hiển thị trạng thái
-        $phongs = Phong::with(['chiTietDatPhongs.datPhong' => function($q) {
+        $query = Phong::with(['chiTietDatPhongs.datPhong' => function($q) {
             $q->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment'])
               ->with('user') // Lấy thông tin khách
               ->orderBy('created_at', 'desc'); // Lấy đơn mới nhất
+        }, 'loaiPhong']);
+        
+        // Áp dụng filter nếu có
+        if ($statusFilter === 'maintenance') {
+            $query->where('tinh_trang', 'maintenance');
+        }
+        
+        $phongs = $query->get();
+
+        // Tính số lượng cho mỗi trạng thái (trước khi filter)
+        $allPhongs = Phong::with(['chiTietDatPhongs.datPhong' => function($q) {
+            $q->whereIn('trang_thai', ['pending', 'confirmed', 'paid', 'awaiting_payment'])
+              ->orderBy('created_at', 'desc');
         }])->get();
+        
+        $countPending = 0;
+        $countOccupied = 0;
+        $countAvailable = 0;
+        $countMaintenance = Phong::where('tinh_trang', 'maintenance')->count();
+        
+        foreach ($allPhongs as $phong) {
+            $chiTiet = $phong->chiTietDatPhongs->first(function($detail) {
+                return $detail->datPhong !== null;
+            });
+            
+            if ($chiTiet && $chiTiet->datPhong) {
+                if ($chiTiet->datPhong->trang_thai == 'pending') {
+                    $countPending++;
+                } elseif (in_array($chiTiet->datPhong->trang_thai, ['confirmed', 'paid', 'awaiting_payment'])) {
+                    $countOccupied++;
+                }
+            } elseif ($phong->tinh_trang !== 'maintenance') {
+                $countAvailable++;
+            }
+        }
+        
+        // Filter phòng theo trạng thái
+        if ($statusFilter) {
+            $phongs = $phongs->filter(function($phong) use ($statusFilter) {
+                $chiTiet = $phong->chiTietDatPhongs->first(function($detail) {
+                    return $detail->datPhong !== null;
+                });
+                
+                if ($statusFilter === 'pending') {
+                    return $chiTiet && $chiTiet->datPhong && $chiTiet->datPhong->trang_thai == 'pending';
+                } elseif ($statusFilter === 'occupied') {
+                    return $chiTiet && $chiTiet->datPhong && in_array($chiTiet->datPhong->trang_thai, ['confirmed', 'paid', 'awaiting_payment']);
+                } elseif ($statusFilter === 'available') {
+                    return !$chiTiet && $phong->tinh_trang !== 'maintenance';
+                } elseif ($statusFilter === 'maintenance') {
+                    return $phong->tinh_trang === 'maintenance';
+                }
+                return true;
+            });
+        }
 
         // 2. Sắp xếp phòng từ nhỏ đến lớn (Natural Sort: 101, 102, 201...)
         $phongs = $phongs->sortBy('so_phong', SORT_NATURAL);
@@ -39,11 +96,19 @@ class DatPhongController extends Controller
         
         $paginatedPhongs = new LengthAwarePaginator($currentItems, count($phongs), $perPage);
         $paginatedPhongs->setPath($request->url());
+        $paginatedPhongs->appends($request->except('page'));
 
         // Pass paginator to view under both variable names to remain compatible
         return view('admin.dat_phong.danh_sach', [
             'phongs' => $paginatedPhongs,
             'paginatedPhongs' => $paginatedPhongs,
+            'statusCounts' => [
+                'all' => $allPhongs->count(),
+                'pending' => $countPending,
+                'occupied' => $countOccupied,
+                'available' => $countAvailable,
+                'maintenance' => $countMaintenance,
+            ],
         ]);
     }
 

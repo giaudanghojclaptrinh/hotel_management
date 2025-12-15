@@ -172,24 +172,6 @@
                         </div>
                     </div>
 
-                    {{-- CHECKBOX TERMS & CONDITIONS --}}
-                    <div style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                        <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer; color: var(--white); font-size: 0.9rem;">
-                            <input type="checkbox" name="accepted_terms" id="accepted_terms" required 
-                                   style="margin-top: 0.25rem; accent-color: var(--brand-gold);">
-                            <span>
-                                Tôi đồng ý với 
-                                <a href="{{ route('terms') }}" target="_blank" style="color: var(--brand-gold); text-decoration: underline;">Điều khoản & Điều kiện</a> 
-                                và 
-                                <a href="{{ route('privacy') }}" target="_blank" style="color: var(--brand-gold); text-decoration: underline;">Chính sách bảo mật</a> 
-                                của Luxury Stay.
-                            </span>
-                        </label>
-                        @error('accepted_terms')
-                            <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">{{ $message }}</p>
-                        @enderror
-                    </div>
-
                     {{-- NÚT SUBMIT --}}
                     <button type="submit" 
                             x-on:click.prevent="if (onlinePaymentSelected) { showVnpayModal = true; } else { document.getElementById('booking-form').submit(); }"

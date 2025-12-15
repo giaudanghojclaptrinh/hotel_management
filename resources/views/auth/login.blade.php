@@ -65,8 +65,8 @@
                 <!-- Options (Remember me & Forgot pass) -->
                 <div class="form-options">
                     <div class="checkbox-wrapper">
-                        <input id="remember" name="remember" type="checkbox" {{ old('remember') ? 'checked' : '' }} class="checkbox-custom">
-                        <label for="remember" class="checkbox-label">Ghi nhớ đăng nhập</label>
+                        <input id="remember" name="remember" type="checkbox" {{ old('remember') ? 'checked' : '' }} class="checkbox-custom" title="Giữ bạn đăng nhập trong 30 ngày">
+                        <label for="remember" class="checkbox-label" title="Giữ bạn đăng nhập trong 30 ngày">Ghi nhớ đăng nhập </label>
                     </div>
 
                     @if (Route::has('password.request'))

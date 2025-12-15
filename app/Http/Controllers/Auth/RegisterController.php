@@ -58,10 +58,29 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'terms' => ['required', 'accepted'], // ✅ Thêm validation cho checkbox
+            'terms' => ['required', 'accepted'],
         ], [
-            'terms.required' => 'Bạn phải đồng ý với điều khoản dịch vụ.',
-            'terms.accepted' => 'Bạn phải đồng ý với điều khoản dịch vụ.',
+            // Tên
+            'name.required' => 'Vui lòng nhập họ và tên của bạn.',
+            'name.string' => 'Họ và tên không hợp lệ.',
+            'name.max' => 'Họ và tên không được vượt quá 255 ký tự.',
+            
+            // Email
+            'email.required' => 'Vui lòng nhập địa chỉ email của bạn.',
+            'email.string' => 'Địa chỉ email không hợp lệ.',
+            'email.email' => 'Bạn đã nhập sai định dạng email. Vui lòng kiểm tra lại.',
+            'email.max' => 'Email không được vượt quá 255 ký tự.',
+            'email.unique' => 'Email này đã được sử dụng. Vui lòng sử dụng email khác hoặc đăng nhập.',
+            
+            // Mật khẩu
+            'password.required' => 'Vui lòng nhập mật khẩu của bạn.',
+            'password.string' => 'Mật khẩu không hợp lệ.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp. Vui lòng kiểm tra lại.',
+            
+            // Điều khoản
+            'terms.required' => 'Bạn phải đồng ý với điều khoản dịch vụ để tiếp tục.',
+            'terms.accepted' => 'Bạn phải chấp nhận điều khoản dịch vụ và chính sách bảo mật.',
         ]);
     }
 

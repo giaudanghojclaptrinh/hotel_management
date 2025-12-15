@@ -35,7 +35,16 @@ class PhongController extends Controller
         // provide room types for filter select
         $loaiPhongs = LoaiPhong::select('id', 'ten_loai_phong')->orderBy('ten_loai_phong')->get();
 
-        return view('admin.phong.danh_sach', compact('phongs', 'loaiPhongs'));
+        // Thống kê số lượng phòng theo trạng thái
+        $statusCounts = [
+            'all' => Phong::count(),
+            'available' => Phong::where('tinh_trang', 'available')->count(),
+            'occupied' => Phong::where('tinh_trang', 'occupied')->count(),
+            'cleaning' => Phong::where('tinh_trang', 'cleaning')->count(),
+            'maintenance' => Phong::where('tinh_trang', 'maintenance')->count(),
+        ];
+
+        return view('admin.phong.danh_sach', compact('phongs', 'loaiPhongs', 'statusCounts'));
     }
 
     public function getThem()

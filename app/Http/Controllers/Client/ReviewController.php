@@ -30,10 +30,16 @@ class ReviewController extends Controller
 
         if ($isReply) {
             if (empty($data['comment'])) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Vui lòng nhập nội dung trả lời.'], 422);
+                }
                 return back()->withErrors(['review' => 'Vui lòng nhập nội dung trả lời.'])->withInput();
             }
         } else {
             if (empty($data['rating']) && empty($data['comment'])) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Vui lòng cung cấp đánh giá (số sao) hoặc viết bình luận.'], 422);
+                }
                 return back()->withErrors(['review' => 'Vui lòng cung cấp đánh giá (số sao) hoặc viết bình luận.'])->withInput();
             }
         }
@@ -60,6 +66,9 @@ class ReviewController extends Controller
             try {
                 $reply = Review::create($create);
             } catch (\Illuminate\Database\QueryException $e) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Không thể lưu trả lời, vui lòng thử lại.'], 500);
+                }
                 return back()->with('error', 'Không thể lưu trả lời, vui lòng thử lại.')->withInput();
             }
 
@@ -73,6 +82,9 @@ class ReviewController extends Controller
                 // swallow notification errors
             }
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Đã gửi trả lời.']);
+            }
             return back()->with('success', 'Đã gửi trả lời.');
         }
 
@@ -95,6 +107,9 @@ class ReviewController extends Controller
                         'parent_id' => null,
                     ]);
                 } catch (\Illuminate\Database\QueryException $e) {
+                    if ($request->wantsJson() || $request->ajax()) {
+                        return response()->json(['success' => false, 'message' => 'Không thể lưu đánh giá, vui lòng thử lại.'], 500);
+                    }
                     return back()->with('error', 'Không thể lưu đánh giá, vui lòng thử lại.')->withInput();
                 }
             }
@@ -114,6 +129,9 @@ class ReviewController extends Controller
                 }
             }
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Cảm ơn bạn đã gửi đánh giá.']);
+            }
             return back()->with('success', 'Cảm ơn bạn đã gửi đánh giá.');
         }
 
@@ -128,12 +146,21 @@ class ReviewController extends Controller
                     'parent_id' => null,
                 ]);
             } catch (\Illuminate\Database\QueryException $e) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Không thể lưu bình luận, vui lòng thử lại.'], 500);
+                }
                 return back()->with('error', 'Không thể lưu bình luận, vui lòng thử lại.')->withInput();
             }
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Cảm ơn bạn đã gửi bình luận.']);
+            }
             return back()->with('success', 'Cảm ơn bạn đã gửi bình luận.');
         }
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'Không có dữ liệu để lưu.'], 422);
+        }
         return back();
     }
 }
