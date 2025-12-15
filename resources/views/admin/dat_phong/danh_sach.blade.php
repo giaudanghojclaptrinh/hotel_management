@@ -5,23 +5,12 @@
 @section('content')
 <div class="max-w-7xl mx-auto">
 
-    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
-        
-        <div class="flex flex-wrap items-center gap-3 text-xs font-medium bg-gray-900 px-5 py-3 rounded-xl shadow-sm border border-gray-800">
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 border border-gray-700">
-                <span class="w-2.5 h-2.5 rounded-full bg-gray-500"></span> Trống
-            </div>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-900/30 text-red-400 border border-red-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span> Chờ duyệt
-            </div>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-900/30 text-green-400 border border-green-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Có khách
-            </div>
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-900/30 text-yellow-500 border border-yellow-800">
-                <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Bảo trì
-            </div>
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-6">
+        <div>
+            <h1 class="text-2xl font-serif font-bold text-white">Sơ đồ Phòng</h1>
+            <p class="text-sm text-gray-400 mt-1">Quản lý trạng thái đặt phòng theo thời gian thực</p>
         </div>
-
+        
         <div class="flex flex-wrap gap-3">
             <a href="{{ route('admin.dat-phong.history') }}" class="flex items-center px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm font-medium text-gray-300 hover:text-brand-gold hover:border-brand-gold transition-all shadow-sm">
                 <i class="fa-solid fa-clock-rotate-left mr-2"></i> Lịch sử
@@ -32,6 +21,86 @@
             <a href="{{ route('admin.dat-phong.them') }}" class="flex items-center px-5 py-2 bg-brand-gold text-gray-900 rounded-lg text-sm font-bold hover:bg-white transition-all shadow-md">
                 <i class="fa-solid fa-plus mr-2"></i> Tạo đơn mới
             </a>
+        </div>
+    </div>
+
+    {{-- Filter buttons với badges --}}
+    <div class="mb-6 flex flex-wrap gap-3">
+        <a href="{{ route('admin.dat-phong') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ !request('status') ? 'bg-brand-gold text-gray-900 shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white' }}">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Tất cả phòng</span>
+            @if(isset($statusCounts['all']) && $statusCounts['all'] > 0)
+                <span class="ml-1 {{ !request('status') ? 'bg-gray-900 text-brand-gold' : 'bg-gray-700 text-white' }} py-0.5 px-2 rounded-md text-[10px] font-bold">
+                    {{ $statusCounts['all'] }}
+                </span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.dat-phong', ['status' => 'pending']) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('status') == 'pending' ? 'bg-red-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-red-400' }}">
+            <i class="fa-solid fa-clock"></i>
+            <span>Chờ duyệt</span>
+            @if(isset($statusCounts['pending']) && $statusCounts['pending'] > 0)
+                <span class="ml-1 {{ request('status') == 'pending' ? 'bg-red-800 text-white' : 'bg-gray-700 text-red-400' }} py-0.5 px-2 rounded-md text-[10px] font-bold animate-pulse">
+                    {{ $statusCounts['pending'] }}
+                </span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.dat-phong', ['status' => 'occupied']) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('status') == 'occupied' ? 'bg-green-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-green-400' }}">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Đang có khách</span>
+            @if(isset($statusCounts['occupied']) && $statusCounts['occupied'] > 0)
+                <span class="ml-1 {{ request('status') == 'occupied' ? 'bg-green-800 text-white' : 'bg-gray-700 text-green-400' }} py-0.5 px-2 rounded-md text-[10px] font-bold animate-pulse">
+                    {{ $statusCounts['occupied'] }}
+                </span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.dat-phong', ['status' => 'available']) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('status') == 'available' ? 'bg-gray-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-300' }}">
+            <i class="fa-solid fa-door-open"></i>
+            <span>Phòng trống</span>
+            @if(isset($statusCounts['available']) && $statusCounts['available'] > 0)
+                <span class="ml-1 {{ request('status') == 'available' ? 'bg-gray-800 text-white' : 'bg-gray-700 text-gray-300' }} py-0.5 px-2 rounded-md text-[10px] font-bold">
+                    {{ $statusCounts['available'] }}
+                </span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.dat-phong', ['status' => 'maintenance']) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('status') == 'maintenance' ? 'bg-yellow-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-yellow-400' }}">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <span>Bảo trì</span>
+            @if(isset($statusCounts['maintenance']) && $statusCounts['maintenance'] > 0)
+                <span class="ml-1 {{ request('status') == 'maintenance' ? 'bg-yellow-800 text-white' : 'bg-gray-700 text-yellow-400' }} py-0.5 px-2 rounded-md text-[10px] font-bold animate-pulse">
+                    {{ $statusCounts['maintenance'] }}
+                </span>
+            @endif
+        </a>
+    </div>
+
+    {{-- Chú thích màu sắc --}}
+    <div class="mb-6 flex flex-wrap items-center gap-3 text-xs font-medium bg-gray-900 px-5 py-3 rounded-xl shadow-sm border border-gray-800">
+        <span class="text-gray-400 font-semibold">Chú thích:</span>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 border border-gray-700">
+            <span class="w-2.5 h-2.5 rounded-full bg-gray-500"></span> Trống
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-900/30 text-red-400 border border-red-800">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span> Chờ duyệt
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-900/30 text-green-400 border border-green-800">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span> Có khách
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-900/30 text-yellow-500 border border-yellow-800">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span> Bảo trì
         </div>
     </div>
 

@@ -152,11 +152,17 @@ class BookingController extends Controller
             'checkout' => 'required|date|after:checkin',
             'payment_method' => 'required|in:pay_at_hotel',
             'ghi_chu' => 'nullable|string',
-            'accepted_terms' => 'required|accepted'
         ], [
+            'room_id.required' => 'Vui lòng chọn loại phòng.',
+            'room_id.exists' => 'Loại phòng không tồn tại trong hệ thống.',
+            'checkin.required' => 'Vui lòng chọn ngày nhận phòng.',
+            'checkin.date' => 'Ngày nhận phòng không hợp lệ.',
             'checkin.after_or_equal' => 'Ngày nhận phòng phải từ hôm nay trở đi.',
+            'checkout.required' => 'Vui lòng chọn ngày trả phòng.',
+            'checkout.date' => 'Ngày trả phòng không hợp lệ.',
             'checkout.after' => 'Ngày trả phòng phải sau ngày nhận phòng.',
-            'accepted_terms.accepted' => 'Bạn phải đồng ý với điều khoản để tiếp tục.',
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+            'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
         ]);
 
         DB::beginTransaction();
@@ -225,12 +231,20 @@ class BookingController extends Controller
             'checkout' => 'required|date|after:checkin',
             'payment_method' => 'required|in:online',
             'vnp_BankCode' => 'required|string',
-            'accepted_terms' => 'required|accepted',
             // Các trường khác như promotion_code, discount_amount tự động được xử lý
         ], [
+            'room_id.required' => 'Vui lòng chọn loại phòng.',
+            'room_id.exists' => 'Loại phòng không tồn tại trong hệ thống.',
+            'checkin.required' => 'Vui lòng chọn ngày nhận phòng.',
+            'checkin.date' => 'Ngày nhận phòng không hợp lệ.',
             'checkin.after_or_equal' => 'Ngày nhận phòng phải từ hôm nay trở đi.',
+            'checkout.required' => 'Vui lòng chọn ngày trả phòng.',
+            'checkout.date' => 'Ngày trả phòng không hợp lệ.',
             'checkout.after' => 'Ngày trả phòng phải sau ngày nhận phòng.',
-            'accepted_terms.accepted' => 'Bạn phải đồng ý với điều khoản để tiếp tục.',
+            'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
+            'payment_method.in' => 'Phương thức thanh toán không hợp lệ.',
+            'vnp_BankCode.required' => 'Vui lòng chọn ngân hàng để thanh toán.',
+            'vnp_BankCode.string' => 'Mã ngân hàng không hợp lệ.',
         ]);
 
         DB::beginTransaction();

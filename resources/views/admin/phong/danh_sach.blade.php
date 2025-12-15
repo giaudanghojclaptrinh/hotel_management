@@ -12,51 +12,97 @@
         </div>
         
         <div class="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
-            <form method="GET" action="{{ route('admin.phong') }}" class="flex flex-col md:flex-row gap-3 flex-1">
-                
-                <div class="relative min-w-[200px]">
-                    <select name="loai_phong_id" class="w-full h-10 pl-3 pr-8 rounded-lg bg-gray-800 border-gray-700 text-white text-sm focus:border-brand-gold focus:ring-brand-gold cursor-pointer transition-all">
-                        <option value="">-- Tất cả hạng phòng --</option>
-                        @foreach($loaiPhongs as $lp)
-                            <option value="{{ $lp->id }}" {{ request('loai_phong_id') == $lp->id ? 'selected' : '' }}>
-                                {{ $lp->ten_loai_phong }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="relative min-w-[160px]">
-                    <select name="tinh_trang" class="w-full h-10 pl-3 pr-8 rounded-lg bg-gray-800 border-gray-700 text-white text-sm focus:border-brand-gold focus:ring-brand-gold cursor-pointer transition-all">
-                        <option value="">-- Trạng thái --</option>
-                        <option value="available" {{ request('tinh_trang') == 'available' ? 'selected' : '' }}>Trống (Available)</option>
-                        <option value="occupied" {{ request('tinh_trang') == 'occupied' ? 'selected' : '' }}>Đang ở (Occupied)</option>
-                        <option value="maintenance" {{ request('tinh_trang') == 'maintenance' ? 'selected' : '' }}>Bảo trì (Maintenance)</option>
-                        <option value="cleaning" {{ request('tinh_trang') == 'cleaning' ? 'selected' : '' }}>Dọn dẹp (Cleaning)</option>
-                    </select>
-                </div>
-
-                <div class="relative flex-1 min-w-[200px]">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fa-solid fa-search text-gray-500"></i>
-                    </div>
-                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Tìm số phòng..." 
-                           class="w-full h-10 pl-10 rounded-lg bg-gray-800 border-gray-700 text-white text-sm focus:border-brand-gold focus:ring-brand-gold placeholder-gray-500 transition-all">
-                </div>
-
-                <button type="submit" class="h-10 px-4 bg-gray-800 border border-gray-700 text-gray-300 font-bold rounded-lg hover:text-brand-gold hover:border-brand-gold transition-all flex items-center justify-center">
-                    Lọc
-                </button>
-
-                <a href="{{ route('admin.phong') }}" class="h-10 px-4 bg-gray-800 border border-gray-700 text-red-400 font-bold rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center" title="Đặt lại bộ lọc">
-                    <i class="fa-solid fa-rotate-left"></i>
-                </a>
-            </form>
-
             <a href="{{ route('admin.phong.them') }}" class="h-10 px-5 bg-brand-gold text-gray-900 rounded-lg text-sm font-bold hover:bg-white shadow-md transition-all flex items-center justify-center whitespace-nowrap">
                 <i class="fa-solid fa-plus mr-2"></i> Thêm phòng
             </a>
         </div>
     </div>
+
+    {{-- Filter buttons với badges --}}
+    <div class="mb-6 flex flex-wrap gap-3">
+        <a href="{{ route('admin.phong') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ !request('tinh_trang') ? 'bg-brand-gold text-gray-900 shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white' }}">
+            <i class="fa-solid fa-border-all"></i>
+            <span>Tất cả</span>
+            @if(isset($statusCounts['all']) && $statusCounts['all'] > 0)
+                <span class="ml-1 {{ !request('tinh_trang') ? 'bg-gray-900 text-brand-gold' : 'bg-gray-700 text-white' }} py-0.5 px-2 rounded-md text-[10px] font-bold">
+                    {{ $statusCounts['all'] }}
+                </span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.phong', ['tinh_trang' => 'available'] + request()->except('tinh_trang')) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('tinh_trang') == 'available' ? 'bg-green-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-green-400' }}">
+            <i class="fa-solid fa-door-open"></i>
+            <span>Phòng trống</span>
+            @if(isset($statusCounts['available']) && $statusCounts['available'] > 0)
+                <span class="ml-1 {{ request('tinh_trang') == 'available' ? 'bg-green-800 text-white' : 'bg-gray-700 text-green-400' }} py-0.5 px-2 rounded-md text-[10px] font-bold animate-pulse">
+                    {{ $statusCounts['available'] }}
+                </span>
+            @endif
+        </a>
+
+
+
+        <a href="{{ route('admin.phong', ['tinh_trang' => 'cleaning'] + request()->except('tinh_trang')) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('tinh_trang') == 'cleaning' ? 'bg-amber-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-amber-400' }}">
+            <i class="fa-solid fa-broom"></i>
+            <span>Đang dọn dẹp</span>
+            @if(isset($statusCounts['cleaning']) && $statusCounts['cleaning'] > 0)
+                <span class="ml-1 {{ request('tinh_trang') == 'cleaning' ? 'bg-amber-800 text-white' : 'bg-gray-700 text-amber-400' }} py-0.5 px-2 rounded-md text-[10px] font-bold animate-pulse">
+                    {{ $statusCounts['cleaning'] }}
+                </span>
+            @endif
+        </a>
+
+        <a href="{{ route('admin.phong', ['tinh_trang' => 'maintenance'] + request()->except('tinh_trang')) }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  {{ request('tinh_trang') == 'maintenance' ? 'bg-red-600 text-white shadow-md' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-red-400' }}">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <span>Bảo trì / Sửa chữa</span>
+            @if(isset($statusCounts['maintenance']) && $statusCounts['maintenance'] > 0)
+                <span class="ml-1 {{ request('tinh_trang') == 'maintenance' ? 'bg-red-800 text-white' : 'bg-gray-700 text-red-400' }} py-0.5 px-2 rounded-md text-[10px] font-bold animate-pulse">
+                    {{ $statusCounts['maintenance'] }}
+                </span>
+            @endif
+        </a>
+    </div>
+
+    {{-- Search và filter form --}}
+    <form method="GET" action="{{ route('admin.phong') }}" class="mb-6">
+        <input type="hidden" name="tinh_trang" value="{{ request('tinh_trang') }}">
+        <div class="flex flex-col md:flex-row gap-3">
+            <div class="relative min-w-[200px]">
+                <select name="loai_phong_id" class="w-full h-10 pl-3 pr-8 rounded-lg bg-gray-800 border-gray-700 text-white text-sm focus:border-brand-gold focus:ring-brand-gold cursor-pointer transition-all">
+                    <option value="">-- Tất cả hạng phòng --</option>
+                    @foreach($loaiPhongs as $lp)
+                        <option value="{{ $lp->id }}" {{ request('loai_phong_id') == $lp->id ? 'selected' : '' }}>
+                            {{ $lp->ten_loai_phong }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="relative flex-1 min-w-[200px]">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-500"></i>
+                </div>
+                <input type="search" name="q" value="{{ request('q') }}" placeholder="Tìm số phòng..." 
+                       class="w-full h-10 pl-10 rounded-lg bg-gray-800 border-gray-700 text-white text-sm focus:border-brand-gold focus:ring-brand-gold placeholder-gray-500 transition-all">
+            </div>
+
+            <button type="submit" class="h-10 px-4 bg-gray-800 border border-gray-700 text-gray-300 font-bold rounded-lg hover:text-brand-gold hover:border-brand-gold transition-all flex items-center justify-center">
+                <i class="fa-solid fa-filter mr-2"></i> Lọc
+            </button>
+
+            <a href="{{ route('admin.phong') }}" class="h-10 px-4 bg-gray-800 border border-gray-700 text-red-400 font-bold rounded-lg hover:bg-gray-700 transition-all flex items-center justify-center" title="Đặt lại bộ lọc">
+                <i class="fa-solid fa-rotate-left"></i>
+            </a>
+        </div>
+    </form>
 
     @if(session('success'))
         <div class="mb-6 p-4 rounded-lg bg-green-900/30 border border-green-600 text-green-400 flex items-center shadow-sm">

@@ -121,7 +121,6 @@
                                     id="checkin_date" 
                                     name="checkin" 
                                     value="{{ request('checkin') }}" 
-                                    onchange="document.getElementById('booking-date-form').submit()"
                                     required 
                                     min="{{ date('Y-m-d') }}">
                             </div>
@@ -135,7 +134,6 @@
                                     id="checkout_date" 
                                     name="checkout" 
                                     value="{{ request('checkout') }}" 
-                                    onchange="document.getElementById('booking-date-form').submit()"
                                     required 
                                     min="{{ date('Y-m-d', strtotime('+1 day')) }}">
                             </div>
@@ -149,13 +147,6 @@
                                         <span class="font-bold block">Còn {{ $phongTrong }} phòng trống!</span>
                                         <span class="text-xs">Từ {{ \Carbon\Carbon::parse(request('checkin'))->format('d/m') }} đến {{ \Carbon\Carbon::parse(request('checkout'))->format('d/m') }}.</span>
                                     </div>
-                                </div>
-                                
-                                <div class="booking-form-group" style="margin-top: 15px;">
-                                    <label class="flex items-center gap-2" style="cursor: pointer; font-size: 14px;">
-                                        <input type="checkbox" id="accepted_terms_detail" style="cursor: pointer; width: 18px; height: 18px;">
-                                        <span>Tôi đồng ý với <a href="#" style="color: #2563eb; text-decoration: underline;">điều khoản & điều kiện</a></span>
-                                    </label>
                                 </div>
                                 
                                 <button type="submit" 
@@ -200,42 +191,6 @@
                             * Bạn sẽ được yêu cầu đăng nhập để hoàn tất đặt phòng.
                         </p>
                     </form>
-                    
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const checkbox = document.getElementById('accepted_terms_detail');
-                            const bookingBtn = document.getElementById('btn-submit-booking');
-                            
-                            if (checkbox && bookingBtn) {
-                                // Disable button initially
-                                bookingBtn.classList.add('btn-disabled');
-                                bookingBtn.style.opacity = '0.5';
-                                bookingBtn.style.cursor = 'not-allowed';
-                                
-                                // Enable/disable button based on checkbox
-                                checkbox.addEventListener('change', function() {
-                                    if (this.checked) {
-                                        bookingBtn.classList.remove('btn-disabled');
-                                        bookingBtn.style.opacity = '1';
-                                        bookingBtn.style.cursor = 'pointer';
-                                    } else {
-                                        bookingBtn.classList.add('btn-disabled');
-                                        bookingBtn.style.opacity = '0.5';
-                                        bookingBtn.style.cursor = 'not-allowed';
-                                    }
-                                });
-                                
-                                // Prevent form submission if not checked
-                                bookingBtn.addEventListener('click', function(e) {
-                                    if (!checkbox.checked) {
-                                        e.preventDefault();
-                                        alert('Vui lòng đồng ý với điều khoản & điều kiện để tiếp tục đặt phòng.');
-                                        return false;
-                                    }
-                                });
-                            }
-                        });
-                    </script>
                 </div>
             </div>
         </div>
@@ -420,7 +375,197 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
+    // ==========================================
+    // DATE PICKER - Update URL without reload
+    // ==========================================
+    const checkinInput = document.getElementById('checkin_date');
+    const checkoutInput = document.getElementById('checkout_date');
+
+    function updateRoomAvailability() {
+        const checkin = checkinInput?.value;
+        const checkout = checkoutInput?.value;
+        
+        if (checkin && checkout) {
+            // Update URL without reload using History API
+            const url = new URL(window.location);
+            url.searchParams.set('checkin', checkin);
+            url.searchParams.set('checkout', checkout);
+            window.history.pushState({}, '', url);
+            
+            // Reload only this page to get new availability
+            window.location.reload();
+        }
+    }
+
+    if (checkinInput) {
+        checkinInput.addEventListener('change', function() {
+            if (this.value && checkoutInput.value) {
+                updateRoomAvailability();
+            }
+        });
+    }
+
+    if (checkoutInput) {
+        checkoutInput.addEventListener('change', function() {
+            if (this.value && checkinInput.value) {
+                updateRoomAvailability();
+            }
+        });
+    }
+
+    // ==========================================
+    // REVIEWS - AJAX Submit (No Reload)
+    // ==========================================
+    // Rating form
+    const ratingForm = document.getElementById('rating-form');
+    if (ratingForm) {
+        ratingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang gửi...';
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'flash-success';
+                    successMsg.style.marginBottom = '0.75rem';
+                    successMsg.style.color = '#10b981';
+                    successMsg.textContent = data.message || 'Đánh giá của bạn đã được gửi!';
+                    ratingForm.parentNode.insertBefore(successMsg, ratingForm);
+                    
+                    // Hide form and show note
+                    ratingForm.style.display = 'none';
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+    }
+
+    // Comment form
+    const commentForm = document.getElementById('comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const textarea = this.querySelector('textarea[name="comment"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang gửi...';
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'flash-success';
+                    successMsg.style.marginBottom = '0.75rem';
+                    successMsg.style.color = '#10b981';
+                    successMsg.textContent = data.message || 'Bình luận của bạn đã được đăng!';
+                    commentForm.parentNode.insertBefore(successMsg, commentForm);
+                    
+                    // Clear textarea
+                    textarea.value = '';
+                    
+                    // Reload after short delay to show new comment
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        });
+    }
+
+    // Reply forms - AJAX
+    document.addEventListener('submit', function(e) {
+        if (e.target.matches('.reply-form-wrapper form')) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const textarea = form.querySelector('textarea[name="comment"]');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang gửi...';
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    textarea.value = '';
+                    // Reload to show new reply
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+                }
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            });
+        }
+    });
+
+    // ==========================================
     // Star rating interaction
+    // ==========================================
     const stars = document.querySelectorAll('#star-rating .star');
     const ratingInput = document.getElementById('rating-input');
 

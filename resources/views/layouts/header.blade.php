@@ -1,4 +1,20 @@
-<header x-data="{ mobileMenuOpen: false, userDropdownOpen: false, unreadCount: 0 }" class="header-wrapper">
+<header x-data="{ 
+        mobileMenuOpen: false, 
+        userDropdownOpen: false, 
+        unreadCount: 0,
+        fetchCount() {
+            axios.get('{{ route('notifications.count') }}')
+                .then(response => {
+                    this.unreadCount = response.data.count;
+                })
+                .catch(error => {
+                    console.error('Error fetching unread count:', error);
+                    this.unreadCount = 0;
+                });
+        }
+    }" 
+    x-init="@auth fetchCount(); setInterval(() => fetchCount(), 60000); @endauth" 
+    class="header-wrapper">
     <div class="header-container">
         <div class="header-inner">
             
@@ -19,30 +35,11 @@
             <div class="header-actions">
                 @auth
                     <!-- [MỚI] Notification Bell -->
-                    <div x-data="{
-                            fetchCount() {
-                                // Gọi API để lấy số lượng thông báo chưa đọc
-                                axios.get('{{ route('notifications.count') }}')
-                                    .then(response => {
-                                        this.unreadCount = response.data.count;
-                                    })
-                                    .catch(error => {
-                                        console.error('Error fetching unread count:', error);
-                                        this.unreadCount = 0;
-                                    });
-                            }
-                        }"
-                        x-init="fetchCount(); setInterval(() => fetchCount(), 60000); window.fetchUnreadCount = function() { const el = document.querySelector('[x-data]'); if (el && el.__x) { try { el.__x.$data.fetchCount(); } catch(e) { /* ignore */ } } }" {{-- Tải lại mỗi 60 giây --}}
-                        class="relative mr-4 lg:mr-6"
-                    >
-                        <a href="{{ route('notifications.index') }}" class="notification-icon-wrapper">
+                    <div class="relative mr-4 lg:mr-6">
+                        <a href="{{ route('notifications.index') }}" class="notification-icon-wrapper relative">
                             <i class="fa-solid fa-bell text-xl transition-colors"
                                :class="unreadCount > 0 ? 'notification-active' : 'notification-inactive'"></i>
-                            <template x-if="unreadCount > 0">
-                                <!-- Show number when small, otherwise show a subtle dot to avoid large numbers -->
-                                <span x-show="unreadCount <= 9" class="notification-badge" x-text="unreadCount"></span>
-                                <span x-show="unreadCount > 9" class="notification-dot" title="Bạn có thông báo mới"></span>
-                            </template>
+                            <span x-show="unreadCount > 0" class="absolute -top-1 -right-1 bg-red-600 text-white py-0.5 px-2 rounded-md text-[10px] font-bold shadow-sm animate-pulse" x-text="unreadCount"></span>
                         </a>
                     </div>
                     <!-- Kết thúc Notification Bell -->
@@ -76,7 +73,7 @@
                             {{-- [MỚI] Link tới trang thông báo trong dropdown --}}
                             <a href="{{ route('notifications.index') }}" class="dropdown-item flex justify-between items-center">
                                 <span><i class="fa-solid fa-bell"></i> Thông báo</span>
-                                <span x-show="unreadCount > 0" class="inline-block bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full" x-text="unreadCount"></span>
+                                <span x-show="unreadCount > 0" class="bg-red-600 text-white py-0.5 px-2 rounded-md text-[10px] font-bold shadow-sm animate-pulse" x-text="unreadCount"></span>
                             </a>
                             
                             <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-100 mt-1">
@@ -115,7 +112,7 @@
                     <a href="{{ route('bookings.history') }}" class="mobile-user-link">Lịch sử</a>
                     <a href="{{ route('notifications.index') }}" class="mobile-user-link flex items-center justify-between">
                         Thông báo
-                        <span x-show="unreadCount > 0" class="inline-block bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full" x-text="unreadCount"></span>
+                        <span x-show="unreadCount > 0" class="bg-red-600 text-white py-0.5 px-2 rounded-md text-[10px] font-bold shadow-sm animate-pulse" x-text="unreadCount"></span>
                     </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

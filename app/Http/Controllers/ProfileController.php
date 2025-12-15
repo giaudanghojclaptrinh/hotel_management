@@ -31,8 +31,27 @@ class ProfileController extends Controller
             'phone' => ['required', 'string', 'max:15', Rule::unique('users')->ignore($user->id)],
             'cccd' => ['required', 'string', 'max:20', Rule::unique('users')->ignore($user->id)],
         ], [
-            'phone.required' => 'Số điện thoại là bắt buộc để đặt phòng.',
-            'cccd.required' => 'CCCD/CMND là bắt buộc để làm thủ tục lưu trú.',
+            // Tên
+            'name.required' => 'Vui lòng nhập họ và tên của bạn.',
+            'name.string' => 'Họ và tên không hợp lệ.',
+            'name.max' => 'Họ và tên không được vượt quá 255 ký tự.',
+            
+            // Email
+            'email.required' => 'Vui lòng nhập địa chỉ email của bạn.',
+            'email.email' => 'Bạn đã nhập sai định dạng email. Vui lòng kiểm tra lại.',
+            'email.unique' => 'Email này đã được sử dụng bởi tài khoản khác.',
+            
+            // Số điện thoại
+            'phone.required' => 'Số điện thoại là bắt buộc để đặt phòng. Vui lòng cập nhật.',
+            'phone.string' => 'Số điện thoại không hợp lệ.',
+            'phone.max' => 'Số điện thoại không được vượt quá 15 ký tự.',
+            'phone.unique' => 'Số điện thoại này đã được sử dụng bởi tài khoản khác.',
+            
+            // CCCD/CMND
+            'cccd.required' => 'CCCD/CMND là bắt buộc để làm thủ tục lưu trú. Vui lòng cập nhật.',
+            'cccd.string' => 'CCCD/CMND không hợp lệ.',
+            'cccd.max' => 'CCCD/CMND không được vượt quá 20 ký tự.',
+            'cccd.unique' => 'CCCD/CMND này đã được sử dụng bởi tài khoản khác.',
         ]);
 
         // Cập nhật
